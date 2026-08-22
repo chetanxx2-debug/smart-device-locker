@@ -130,6 +130,10 @@ class SellerPortal {
             return;
         }
 
+        // ── Instantly hide modal if token already exists (no blink) ──────
+        const modal = document.getElementById('auth-modal-container');
+        if (modal) modal.style.display = 'none';
+
         fetch('/api/auth/me', {
             headers: this.getAuthHeaders()
         })
@@ -145,8 +149,7 @@ class SellerPortal {
             }
         })
         .catch(() => {
-            // Offline or server start: prompt login
-            this.showLoginModal();
+            // Network/server error — keep modal hidden, retry on next load
         });
     }
 
