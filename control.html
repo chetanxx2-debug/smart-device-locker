@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0b1120">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Smart Device Locker — Device Control Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/seller.css">
+    <style>
+        .control-container {
+            max-width: 1100px;
+            margin: 25px auto;
+            padding: 0 20px;
+        }
+
+        .back-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateX(-3px);
+        }
+
+        .device-hero-card {
+            background: linear-gradient(135deg, #151c2c 0%, #1e293d 100%);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 25px 30px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .hero-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .device-avatar-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .hero-title h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .hero-title .device-sub {
+            color: var(--text-muted);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hero-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pill-active {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .status-pill-locked {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Telemetry Grid */
+        .telemetry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .telemetry-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .telemetry-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--primary);
+        }
+
+        .telemetry-data label {
+            display: block;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .telemetry-data strong {
+            font-size: 16px;
+            color: #fff;
+        }
+
+        /* Master Control Actions Grid */
+        .actions-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .actions-panel h2 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+        }
+
+        .control-buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .master-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 22px 18px;
+            border-radius: var(--radius-md);
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #fff;
+            text-align: center;
+        }
+
+        .master-btn i {
+            font-size: 28px;
+        }
+
+        .master-btn small {
+            font-size: 11px;
+            opacity: 0.85;
+            font-weight: 400;
+        }
+
+        .master-btn:hover {
+            transform: translateY(-3px);
+            filter: brightness(1.15);
+        }
+
+        .btn-action-lock {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-action-unlock {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-action-siren {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-action-siren-active {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+            animation: pulse 1s infinite;
+            box-shadow: 0 0 25px rgba(220, 38, 38, 0.8);
+        }
+
+        .btn-action-msg {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+        }
+
+        .btn-action-pay {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-action-wipe {
+            background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+            border: 1px solid #4b5563;
+        }
+
+        /* Toast container */
+        #toast-container {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.9; transform: scale(1.02); }
+        }
+
+        /* Premium Mobile Responsiveness for control.html */
+        @media (max-width: 768px) {
+            body {
+                background-color: #0b1120;
+            }
+
+            .control-container {
+                padding: 0 14px;
+                margin: 15px auto 30px auto;
+            }
+
+            .app-header {
+                padding: 15px 20px;
+                flex-direction: row;
+                align-items: center;
+                background: rgba(17, 24, 39, 0.85);
+                backdrop-filter: blur(12px);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+            }
+
+            .logo-icon {
+                width: 36px;
+                height: 36px;
+                font-size: 18px;
+                border-radius: 12px;
+            }
+
+            .brand-name {
+                font-size: 18px;
+            }
+            .brand-sub { display: none; }
+
+            .header-right {
+                width: auto;
+            }
+
+            .device-switcher-box {
+                width: auto;
+            }
+            .device-switcher-box label { display: none; } /* Hide label to save space */
+            
+            .device-switcher-box select {
+                padding: 8px 12px;
+                font-size: 13px;
+                border-radius: 10px;
+                background-color: #1e293b;
+                border: 1px solid rgba(255,255,255,0.1);
+            }
+
+            .device-hero-card {
+                padding: 24px 20px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+                border-radius: 20px;
+                background: linear-gradient(145deg, #1e293b, #0f172a);
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            }
+
+            .hero-left {
+                gap: 16px;
+            }
+
+            .device-avatar-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 26px;
+                border-radius: 16px;
+            }
+
+            .hero-title h1 {
+                font-size: 22px;
+                margin-bottom: 6px;
+            }
+
+            .hero-title .device-sub {
+                flex-wrap: wrap;
+                font-size: 13px;
+                gap: 8px;
+            }
+
+            .telemetry-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+                margin-bottom: 25px;
+            }
+
+            .telemetry-box {
+                padding: 16px;
+                gap: 12px;
+                border-radius: 16px;
+                background-color: #151e32;
+                border: 1px solid rgba(255, 255, 255, 0.05);
+            }
+
+            .telemetry-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+                border-radius: 12px;
+            }
+
+            .telemetry-data strong {
+                font-size: 16px;
+            }
+
+            .actions-panel {
+                padding: 20px;
+                border-radius: 20px;
+                background-color: #151e32;
+                border: 1px solid rgba(255, 255, 255, 0.05);
+            }
+
+            .control-buttons-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .master-btn {
+                padding: 18px 16px;
+                font-size: 15px;
+                border-radius: 16px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            }
+            
+            .btn-action-lock {
+                background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .telemetry-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="logo-area">
+            <div class="logo-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="logo-text">
+                <span class="brand-name">TIGER LOCKER</span>
+                <span class="brand-sub">Dedicated Device Master Control</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="device-switcher-box" style="display:flex; align-items:center; gap:8px;">
+                <label for="select-other-device" style="font-size:13px; color:var(--text-muted);">Switch Phone:</label>
+                <select id="select-other-device" class="form-control" style="max-width:250px; font-weight:600;">
+                    <!-- Auto-populated -->
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <div class="control-container">
+        <!-- Top Navigation -->
+        <div class="back-nav">
+            <a href="index.html" class="back-btn">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Back to Full Dashboard</span>
+            </a>
+            <div id="live-indicator" style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted);">
+                <span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:#10b981; animation:pulse 1.5s infinite;"></span>
+                <span>Live Telemetry Active (2s)</span>
+            </div>
+        </div>
+
+        <!-- Hero Card -->
+        <div class="device-hero-card">
+            <div class="hero-left">
+                <div class="device-avatar-icon">
+                    <i class="fa-solid fa-mobile-screen-button"></i>
+                </div>
+                <div class="hero-title">
+                    <h1 id="dev-customer-name">Loading Device...</h1>
+                    <div class="device-sub">
+                        <span id="dev-model"><i class="fa-solid fa-phone"></i> Android Smartphone</span>
+                        <span>•</span>
+                        <span>ID: <strong id="dev-id" style="color:var(--primary);">DEV-***</strong></span>
+                        <span>•</span>
+                        <span>Code: <strong id="dev-pair-code" style="color:var(--warning);">******</strong></span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-right">
+                <div id="dev-status-badge" class="hero-status-pill status-pill-active">
+                    <i class="fa-solid fa-circle-check"></i> <span id="dev-status-text">ACTIVE</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Telemetry Data Grid -->
+        <div class="telemetry-grid">
+            <div class="telemetry-box">
+                <div class="telemetry-icon"><i class="fa-solid fa-id-card"></i></div>
+                <div class="telemetry-data">
+                    <label>Customer Mobile</label>
+                    <strong id="dev-phone"><a href="#" id="dev-phone-link" style="color:#fff; text-decoration:none;">-</a></strong>
+                </div>
+            </div>
+            <div class="telemetry-box">
+                <div class="telemetry-icon"><i class="fa-solid fa-barcode"></i></div>
+                <div class="telemetry-data">
+                    <label>IMEI Number</label>
+                    <strong id="dev-imei" style="font-family:var(--font-mono); font-size:13px;">-</strong>
+                </div>
+            </div>
+            <div class="telemetry-box">
+                <div class="telemetry-icon"><i class="fa-solid fa-battery-half"></i></div>
+                <div class="telemetry-data">
+                    <label>Battery & Network</label>
+                    <strong id="dev-battery">-</strong>
+                </div>
+            </div>
+            <div class="telemetry-box">
+                <div class="telemetry-icon"><i class="fa-solid fa-clock"></i></div>
+                <div class="telemetry-data">
+                    <label>Last Device Ping</label>
+                    <strong id="dev-last-seen" style="font-size:13px;">-</strong>
+                </div>
+            </div>
+            <div class="telemetry-box">
+                <div class="telemetry-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                <div class="telemetry-data">
+                    <label>Monthly EMI</label>
+                    <strong id="dev-emi-amount" style="color:var(--success);">-</strong>
+                </div>
+            </div>
+            <div class="telemetry-box">
+                <div class="telemetry-icon"><i class="fa-solid fa-calendar-day"></i></div>
+                <div class="telemetry-data">
+                    <label>EMI Due Date</label>
+                    <strong id="dev-due-date">-</strong>
+                </div>
+            </div>
+            <div class="telemetry-box" style="border:1px solid #f59e0b; background: rgba(245, 158, 11, 0.08);">
+                <div class="telemetry-icon" style="background:#f59e0b; color:#000;"><i class="fa-solid fa-key"></i></div>
+                <div class="telemetry-data">
+                    <label style="color:#f59e0b; font-weight:700;">Offline Master PIN (No Internet)</label>
+                    <strong id="dev-offline-pin" style="font-family:var(--font-mono); font-size:16px; color:#f59e0b;">------</strong>
+                </div>
+            </div>
+            <div class="telemetry-box">
+                <div class="telemetry-icon"><i class="fa-solid fa-comment-sms"></i></div>
+                <div class="telemetry-data">
+                    <label>SMS Offline Control Command</label>
+                    <strong id="dev-sms-command" style="font-size:12px; font-family:var(--font-mono); color:#38bdf8;">TL#LOCK#...</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Master Command Actions -->
+        <div class="actions-panel">
+            <h2><i class="fa-solid fa-bolt" style="color:var(--primary);"></i> Master Command Center for this Device</h2>
+            <div class="control-buttons-grid">
+                <!-- 1. LOCK -->
+                <button id="btn-ctrl-lock" class="master-btn btn-action-lock" type="button">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>LOCK DEVICE</span>
+                    <small>Restrict phone & display lock screen</small>
+                </button>
+
+                <!-- 2. UNLOCK -->
+                <button id="btn-ctrl-unlock" class="master-btn btn-action-unlock" type="button">
+                    <i class="fa-solid fa-lock-open"></i>
+                    <span>UNLOCK DEVICE</span>
+                    <small>Restore full phone access immediately</small>
+                </button>
+
+                <!-- 3. SIREN ALARM -->
+                <button id="btn-ctrl-siren" class="master-btn btn-action-siren" type="button">
+                    <i class="fa-solid fa-volume-high"></i>
+                    <span id="siren-btn-text">ALARM SIREN</span>
+                    <small id="siren-btn-sub">Play loud security alarm</small>
+                </button>
+
+                <!-- 4. MESSAGE -->
+                <button id="btn-ctrl-msg" class="master-btn btn-action-msg" type="button">
+                    <i class="fa-solid fa-comment-dots"></i>
+                    <span>SEND WARNING MSG</span>
+                    <small>Push urgent text alert to phone</small>
+                </button>
+
+                <!-- 5. PAY EMI -->
+                <button id="btn-ctrl-pay" class="master-btn btn-action-pay" type="button">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>RECORD EMI PAYMENT</span>
+                    <small>Auto-unlocks & extends 30 days</small>
+                </button>
+
+                <!-- 6. REMOTE WIPE -->
+                <button id="btn-ctrl-wipe" class="master-btn btn-action-wipe" type="button">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>REMOTE WIPE</span>
+                    <small>Factory Reset device (Authorized)</small>
+                </button>
+
+                <!-- 7. DELETE DEVICE -->
+                <button id="btn-ctrl-delete" class="master-btn" style="background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%); box-shadow: 0 4px 15px rgba(185, 28, 28, 0.4); border: 1px solid #ef4444;" type="button">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>DELETE DEVICE</span>
+                    <small>Remove permanently from system</small>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script>
+        let currentDeviceId = '';
+        let currentDevice = null;
+        let allDevices = [];
+
+        function getDeviceIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id') || localStorage.getItem('tiger_active_device_id') || '';
+        }
+
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                padding: 14px 20px;
+                border-radius: 8px;
+                background: ${type === 'danger' ? '#dc2626' : type === 'success' ? '#059669' : type === 'warning' ? '#d97706' : '#4f46e5'};
+                color: #fff;
+                font-weight: 600;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            `;
+            toast.innerHTML = `<i class="fa-solid ${type === 'danger' ? 'fa-triangle-exclamation' : type === 'success' ? 'fa-circle-check' : 'fa-circle-info'}"></i> <span>${msg}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        function fetchDeviceData() {
+            fetch('/api/devices')
+                .then(r => r.json())
+                .then(devices => {
+                    const rawList = Array.isArray(devices) ? devices : [];
+                    allDevices = rawList.filter(d => d.isPaired);
+                    if (!allDevices.length) {
+                        const switcher = document.getElementById('select-other-device');
+                        if (switcher) switcher.innerHTML = '<option value="">No paired devices</option>';
+                        return;
+                    }
+
+                    const switcher = document.getElementById('select-other-device');
+                    if (switcher) {
+                        switcher.innerHTML = allDevices.map(d => 
+                            `<option value="${d.id}" ${d.id === currentDeviceId ? 'selected' : ''}>[${d.id}] ${d.customerName}</option>`
+                        ).join('');
+                    }
+
+                    if (!currentDeviceId || !allDevices.find(d => d.id === currentDeviceId)) {
+                        currentDeviceId = allDevices[0].id;
+                    }
+
+                    currentDevice = allDevices.find(d => d.id === currentDeviceId);
+                    if (currentDevice) {
+                        renderDeviceUI(currentDevice);
+                    }
+                })
+                .catch(e => console.error('Fetch error:', e));
+        }
+
+        function renderDeviceUI(d) {
+            document.title = `Control: ${d.customerName} [${d.id}] — Tiger Locker`;
+            document.getElementById('dev-customer-name').textContent = d.customerName || 'Unknown Customer';
+            document.getElementById('dev-model').innerHTML = `<i class="fa-solid fa-mobile-screen"></i> ${d.model || 'Android Smartphone'}`;
+            document.getElementById('dev-id').textContent = d.id;
+            document.getElementById('dev-pair-code').textContent = d.pairCode || '------';
+            
+            const phoneEl = document.getElementById('dev-phone-link');
+            phoneEl.textContent = d.customerPhone || 'N/A';
+            if (d.customerPhone) phoneEl.href = `tel:${d.customerPhone}`;
+
+            document.getElementById('dev-imei').textContent = d.imei || d.id;
+            document.getElementById('dev-battery').textContent = `${d.battery || 100}% • ${d.network || 'Wi-Fi'}`;
+            document.getElementById('dev-last-seen').textContent = d.lastSeen ? new Date(d.lastSeen).toLocaleTimeString() : 'N/A';
+            document.getElementById('dev-emi-amount').textContent = `₹${(d.monthlyEmi || 0).toLocaleString()} / month`;
+            document.getElementById('dev-due-date').textContent = d.dueDate || 'N/A';
+            document.getElementById('dev-offline-pin').textContent = d.offlineMasterCode || (d.pairCode ? (d.pairCode.split('').reverse().join('')) : '982341');
+            document.getElementById('dev-sms-command').textContent = `TL#LOCK#${d.id}`;
+
+            const badge = document.getElementById('dev-status-badge');
+            const text = document.getElementById('dev-status-text');
+            if (d.isLocked) {
+                badge.className = 'hero-status-pill status-pill-locked';
+                text.innerHTML = '<i class="fa-solid fa-lock"></i> LOCKED';
+            } else {
+                badge.className = 'hero-status-pill status-pill-active';
+                text.innerHTML = '<i class="fa-solid fa-circle-check"></i> ACTIVE & PROTECTED';
+            }
+
+            const sirenBtn = document.getElementById('btn-ctrl-siren');
+            const sirenText = document.getElementById('siren-btn-text');
+            const sirenSub = document.getElementById('siren-btn-sub');
+            if (d.sirenActive) {
+                sirenBtn.className = 'master-btn btn-action-siren btn-action-siren-active';
+                sirenText.textContent = 'STOP SIREN (ALARM ON)';
+                sirenSub.textContent = 'Click to turn alarm OFF';
+            } else {
+                sirenBtn.className = 'master-btn btn-action-siren';
+                sirenText.textContent = 'ALARM SIREN';
+                sirenSub.textContent = 'Play loud security alarm';
+            }
+        }
+
+        function sendCommand(action, message = '') {
+            if (!currentDeviceId) return;
+            fetch(`/api/devices/${encodeURIComponent(currentDeviceId)}/command`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, message })
+            })
+            .then(r => r.json())
+            .then(res => {
+                console.log(`[CMD ${action}]`, res);
+                fetchDeviceData();
+            })
+            .catch(e => showToast('Command failed: ' + e.message, 'danger'));
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            currentDeviceId = getDeviceIdFromUrl();
+            fetchDeviceData();
+            setInterval(fetchDeviceData, 2000);
+
+            document.getElementById('select-other-device').addEventListener('change', (e) => {
+                currentDeviceId = e.target.value;
+                localStorage.setItem('tiger_active_device_id', currentDeviceId);
+                window.history.replaceState({}, '', `control.html?id=${currentDeviceId}`);
+                fetchDeviceData();
+                showToast(`Switched to [${currentDeviceId}]`, 'info');
+            });
+
+            document.getElementById('btn-ctrl-lock').addEventListener('click', () => {
+                const msg = prompt(`Enter Lock Screen Message for ${currentDevice?.customerName || currentDeviceId}:`, 'Your monthly EMI is overdue. Please contact seller to unlock.');
+                if (msg !== null) {
+                    sendCommand('LOCK', msg);
+                    showToast(`🔒 Lock command dispatched to [${currentDeviceId}]!`, 'danger');
+                }
+            });
+
+            document.getElementById('btn-ctrl-unlock').addEventListener('click', () => {
+                sendCommand('UNLOCK');
+                showToast(`🔓 Unlock command dispatched to [${currentDeviceId}]!`, 'success');
+            });
+
+            document.getElementById('btn-ctrl-siren').addEventListener('click', () => {
+                if (currentDevice && currentDevice.sirenActive) {
+                    sendCommand('SIREN_OFF');
+                    showToast(`🔕 Siren stopped on [${currentDeviceId}]`, 'info');
+                } else {
+                    sendCommand('SIREN_ON');
+                    showToast(`🔊 Loud Alarm Siren triggered on [${currentDeviceId}]!`, 'warning');
+                }
+            });
+
+            document.getElementById('btn-ctrl-msg').addEventListener('click', () => {
+                const msg = prompt(`Type warning message to show on [${currentDeviceId}]:`, 'Reminder: Your EMI installment is due.');
+                if (msg) {
+                    sendCommand('MESSAGE', msg);
+                    showToast(`📢 Message sent to [${currentDeviceId}]!`, 'info');
+                }
+            });
+
+            document.getElementById('btn-ctrl-pay').addEventListener('click', () => {
+                if (confirm(`Confirm Recording EMI Payment for ${currentDevice?.customerName || currentDeviceId}?\nThis will automatically unlock the device and extend the due date by 30 days.`)) {
+                    fetch(`/api/devices/${encodeURIComponent(currentDeviceId)}/pay-emi`, { method: 'POST' })
+                        .then(r => r.json())
+                        .then(res => {
+                            showToast(`✅ Payment Recorded! Device unlocked & extended.`, 'success');
+                            fetchDeviceData();
+                        });
+                }
+            });
+
+            document.getElementById('btn-ctrl-wipe').addEventListener('click', () => {
+                if (confirm(`⚠️ CRITICAL WARNING!\nAre you sure you want to send REMOTE FACTORY RESET to [${currentDeviceId}]?`)) {
+                    sendCommand('WIPE');
+                    showToast(`⚠️ Remote Factory Reset Dispatched!`, 'danger');
+                }
+            });
+
+            document.getElementById('btn-ctrl-delete').addEventListener('click', () => {
+                const targetName = currentDevice?.customerName ? `${currentDevice.customerName} (${currentDeviceId})` : currentDeviceId;
+                if (confirm(`🗑️ DELETE DEVICE CONFIRMATION\n\nAre you sure you want to permanently delete [${targetName}] from Tiger Locker?\n\nThis will remove all its records from the system.`)) {
+                    fetch(`/api/devices/${encodeURIComponent(currentDeviceId)}`, { method: 'DELETE' })
+                        .then(r => r.json())
+                        .then(res => {
+                            if (res.success) {
+                                alert(`✅ Device [${currentDeviceId}] has been deleted successfully! Redirecting to Dashboard...`);
+                                localStorage.removeItem('tiger_active_device_id');
+                                window.location.href = 'index.html';
+                            } else {
+                                showToast(`Failed to delete: ${res.message || 'Error'}`, 'warning');
+                            }
+                        })
+                        .catch(e => showToast('Network error while deleting device.', 'danger'));
+                }
+            });
+        });
+    </script>
+</body>
+</html>

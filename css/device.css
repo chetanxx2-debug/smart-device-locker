@@ -1,0 +1,461 @@
+/* Tiger Locker - Customer Device Simulator CSS */
+
+.device-simulator-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.simulator-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 380px;
+    padding: 4px 8px;
+}
+
+.sim-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sim-tag {
+    font-size: 11px;
+    background: #334155;
+    color: #a7f3d0;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-family: var(--font-mono);
+}
+
+/* Smartphone Body Frame */
+.phone-frame {
+    width: 380px;
+    height: 740px;
+    background: #000000;
+    border: 10px solid #1e293b;
+    border-radius: 48px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 0 2px #334155;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Speaker & Camera Punch Hole */
+.phone-notch {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 24px;
+    background-color: #000000;
+    border-radius: 12px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.camera {
+    width: 10px;
+    height: 10px;
+    background: #0f172a;
+    border: 2px solid #1e293b;
+    border-radius: 50%;
+}
+
+.speaker {
+    width: 40px;
+    height: 4px;
+    background: #1e293b;
+    border-radius: 2px;
+}
+
+/* Phone Screen Inner */
+.phone-screen {
+    flex: 1;
+    background: linear-gradient(180deg, #090d16 0%, #0f172a 100%);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+}
+
+/* Phone Status Bar */
+.phone-status-bar {
+    padding: 8px 24px 4px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: #e2e8f0;
+    z-index: 100;
+}
+
+.phone-status-bar .icons {
+    display: flex;
+    gap: 6px;
+    font-size: 10px;
+}
+
+/* FCM Notification Popup Banner */
+.fcm-banner {
+    position: absolute;
+    top: 40px;
+    left: 12px;
+    right: 12px;
+    background: #1e293b;
+    border: 1px solid var(--primary);
+    border-radius: 16px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+    z-index: 900;
+    animation: bounceInDown 0.4s ease;
+}
+
+@keyframes bounceInDown {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.fcm-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--primary);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+}
+
+.fcm-content strong { display: block; font-size: 12px; color: #fff; }
+.fcm-content p { font-size: 11px; color: #cbd5e1; margin: 0; }
+
+/* Alarm Siren Visual Overlay */
+.alarm-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(239, 68, 68, 0.95);
+    z-index: 850;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: flashSiren 0.5s infinite alternate;
+}
+
+@keyframes flashSiren {
+    from { opacity: 0.95; }
+    to { opacity: 0.4; }
+}
+
+.alarm-box {
+    text-align: center;
+    color: white;
+    padding: 20px;
+}
+
+.siren-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    animation: vibrate 0.2s infinite;
+}
+
+@keyframes vibrate {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(-10deg); }
+    75% { transform: rotate(10deg); }
+    100% { transform: rotate(0deg); }
+}
+
+/* Phone Views */
+.phone-view {
+    flex: 1;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+}
+
+/* VIEW 1: ONBOARDING */
+.app-welcome {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.app-icon-large {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: white;
+    margin: 0 auto 12px auto;
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+}
+
+.app-welcome h2 { font-size: 20px; font-weight: 800; }
+.app-welcome p { font-size: 12px; color: var(--text-muted); }
+
+.onboarding-card {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.onboarding-card h3 { font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.onboarding-card p { font-size: 12px; color: var(--text-muted); }
+
+.otp-input-group input {
+    width: 100%;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 24px;
+    letter-spacing: 6px;
+    padding: 12px;
+    background: #090d16;
+    border: 1px solid var(--primary);
+    color: white;
+    border-radius: 12px;
+}
+
+.permission-notice {
+    font-size: 10px;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Phone Buttons */
+.phone-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.1s;
+}
+
+.phone-btn:active { transform: scale(0.98); }
+.phone-btn.primary { background: var(--primary); color: white; }
+.phone-btn.success { background: var(--success); color: white; }
+.phone-btn.outline { background: transparent; border: 1px solid #64748b; color: white; }
+
+/* VIEW 2: ACTIVE DEVICE HOME */
+.android-home-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-greeting span { font-size: 11px; color: var(--text-muted); }
+.user-greeting h3 { font-size: 16px; font-weight: 700; }
+
+.device-status-pill {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.device-status-pill.online {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+}
+
+.phone-card {
+    background: rgba(30, 41, 59, 0.8);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 14px;
+}
+
+.phone-card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.device-info-mini {
+    font-size: 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: #cbd5e1;
+}
+
+.emi-info-mini {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.emi-amount-large {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--success);
+}
+
+.emi-due-date { font-size: 11px; color: var(--text-muted); }
+
+.phone-apps-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.app-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: #cbd5e1;
+}
+
+.app-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: white;
+}
+
+.phone-icon { background: #3b82f6; }
+.msg-icon { background: #10b981; }
+.cam-icon { background: #f59e0b; }
+.map-icon { background: #ef4444; }
+
+/* VIEW 3: LOCKED OVERLAY STATE */
+.phone-view.locked-state {
+    background: #0f0515;
+    position: absolute;
+    top: 28px; left: 0; right: 0; bottom: 30px;
+    z-index: 800;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.lock-screen-header {
+    text-align: center;
+}
+
+.lock-icon-anim {
+    width: 64px;
+    height: 64px;
+    background: rgba(239, 68, 68, 0.2);
+    border: 2px solid var(--danger);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: var(--danger);
+    margin: 0 auto 12px auto;
+    animation: lockPulse 1.5s infinite alternate;
+}
+
+@keyframes lockPulse {
+    from { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    to { transform: scale(1.08); box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+}
+
+.lock-screen-header h2 { font-size: 18px; font-weight: 800; color: #fca5a5; }
+
+.lock-reason-badge {
+    font-size: 10px;
+    background: var(--danger);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+.lock-notice-box {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 12px;
+    color: #fecdd3;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.lock-amount-box {
+    text-align: center;
+    background: #1e1b4b;
+    border: 1px solid #4338ca;
+    padding: 12px;
+    border-radius: 12px;
+}
+
+.lock-amount-box span { font-size: 11px; color: #a5b4fc; }
+.lock-amount-box h3 { font-size: 24px; color: #67e8f9; font-weight: 800; }
+
+.lock-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.lock-footer {
+    text-align: center;
+    font-size: 10px;
+    color: #64748b;
+}
+
+/* Phone Bottom Nav */
+.phone-nav-bar {
+    height: 30px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    color: #64748b;
+    font-size: 12px;
+    background: #090d16;
+}

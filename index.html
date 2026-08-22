@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0b1120">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Smart Device Locker - Seller Dashboard</title>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/seller.css">
+    <link rel="stylesheet" href="css/device.css">
+</head>
+<body>
+    <div class="app-header">
+        <div class="logo-container">
+            <div class="logo-icon">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div class="logo-text">
+                <h1 data-i18n="app_title">SMART DEVICE LOCKER</h1>
+                <span data-i18n="app_subtitle">EMI & REMOTELY AUTHORIZED DEVICE MANAGEMENT SYSTEM</span>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <!-- Language Selector Dropdown -->
+            <div class="language-picker">
+                <i class="fa-solid fa-globe"></i>
+                <select id="lang-selector" class="form-control btn-sm">
+                    <option value="en" selected>🇬🇧 English</option>
+                    <option value="hi">🇮🇳 हिंदी (Hindi)</option>
+                    <option value="hinglish">🇮🇳 Hinglish (हिंदी-Eng)</option>
+                </select>
+            </div>
+
+            <div class="system-status">
+                <span class="status-dot pulsing"></span>
+                <span class="status-text" data-i18n="server_status">Backend Server: <strong>ONLINE (HTTPS Encrypted)</strong></span>
+            </div>
+            <button id="btn-reset-demo" class="btn btn-secondary btn-sm">
+                <i class="fa-solid fa-rotate-left"></i> <span data-i18n="reset_demo">Reset Demo Data</span>
+            </button>
+            <button id="btn-fast-forward" class="btn btn-warning btn-sm">
+                <i class="fa-solid fa-clock-forward"></i> <span data-i18n="fast_forward">Simulate +30 Days (EMI Missed)</span>
+            </button>
+        </div>
+    </div>
+
+    <main class="app-layout">
+        <!-- LEFT PANEL: SELLER / ADMIN PORTAL -->
+        <section class="seller-portal-container">
+            <!-- Navigation Tabs -->
+            <nav class="seller-nav">
+                <button class="nav-tab active" data-tab="tab-dashboard">
+                    <i class="fa-solid fa-chart-pie"></i> <span data-i18n="tab_dashboard">Dashboard</span>
+                </button>
+                <button class="nav-tab" data-tab="tab-add-device">
+                    <i class="fa-solid fa-plus-circle"></i> <span data-i18n="tab_add_device">Add Customer & Device</span>
+                </button>
+                <button class="nav-tab" data-tab="tab-devices-list">
+                    <i class="fa-solid fa-mobile-screen-button"></i> <span data-i18n="tab_devices_list">Managed Devices</span>
+                </button>
+                <button class="nav-tab" data-tab="tab-emi-payments">
+                    <i class="fa-solid fa-indian-rupee-sign"></i> <span data-i18n="tab_emi_payments">EMI & Payments</span>
+                </button>
+                <button class="nav-tab" data-tab="tab-audit-logs">
+                    <i class="fa-solid fa-list-check"></i> <span data-i18n="tab_audit_logs">Audit Security Logs</span>
+                </button>
+            </nav>
+
+            <!-- TAB 1: DASHBOARD -->
+            <div id="tab-dashboard" class="tab-content active">
+                <div class="metrics-grid">
+                    <div class="metric-card primary">
+                        <div class="metric-icon"><i class="fa-solid fa-mobile"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label" data-i18n="metric_total_devices">Total Managed Devices</span>
+                            <h3 id="stat-total-devices">0</h3>
+                            <span class="metric-sub">Registered Inventory</span>
+                        </div>
+                    </div>
+                    <div class="metric-card success">
+                        <div class="metric-icon"><i class="fa-solid fa-circle-check"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label" data-i18n="metric_active_devices">Active Devices</span>
+                            <h3 id="stat-active-devices">0</h3>
+                            <span class="metric-sub">Unlocked & Functional</span>
+                        </div>
+                    </div>
+                    <div class="metric-card danger">
+                        <div class="metric-icon"><i class="fa-solid fa-lock"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label" data-i18n="metric_locked_devices">Locked Devices</span>
+                            <h3 id="stat-locked-devices">0</h3>
+                            <span class="metric-sub">EMI Overdue / Locked</span>
+                        </div>
+                    </div>
+                    <div class="metric-card warning">
+                        <div class="metric-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label" data-i18n="metric_pending_emi">Pending Overdue EMI</span>
+                            <h3 id="stat-pending-emi">₹0</h3>
+                            <span class="metric-sub">Grace Period Active</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-columns">
+                    <!-- Recent Activity Stream -->
+                    <div class="card dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-bolt"></i> <span data-i18n="live_commands_header">Live Command Stream</span></h3>
+                            <span class="badge badge-success">FCM Live Sync</span>
+                        </div>
+                        <div class="card-body">
+                            <div id="live-command-feed" class="command-feed">
+                                <!-- Command feed items dynamically injected -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Command Console -->
+                    <div class="card dashboard-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-gamepad"></i> <span data-i18n="remote_console_header">Selected Device Remote Console</span></h3>
+                        </div>
+                        <div class="card-body">
+                            <!-- Live Device Search -->
+                            <div class="device-search-box" style="margin-bottom: 15px;">
+                                <label for="quick-search-device" style="font-weight: 600; display: block; margin-bottom: 6px;">
+                                    <i class="fa-solid fa-magnifying-glass" style="color: var(--primary);"></i> 
+                                    <span>Search & Select Device to Control:</span>
+                                </label>
+                                <div style="display: flex; gap: 8px;">
+                                    <input type="text" id="quick-search-device" class="form-control" placeholder="Type Name, Phone, IMEI, or ID (e.g. dipak, 8767..., DEV-189)..." style="flex: 1; border: 1px solid rgba(255,255,255,0.2);">
+                                    <button id="btn-clear-quick-search" class="btn btn-secondary btn-sm" type="button" title="Clear search" style="padding: 0 14px;">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="device-selector-box">
+                                <label for="active-device-select" data-i18n="select_device_label">Active Target Device:</label>
+                                <select id="active-device-select" class="form-control" style="font-weight: 600;">
+                                    <!-- Device options dynamically injected -->
+                                </select>
+                            </div>
+
+                            <div id="device-quick-info" class="device-quick-info">
+                                <div class="info-row">
+                                    <span data-i18n="cust_name_label">Customer Name:</span> <strong id="quick-cust-name">-</strong>
+                                </div>
+                                <div class="info-row">
+                                    <span data-i18n="imei_number_label">IMEI Number:</span> <code id="quick-cust-imei">-</code>
+                                </div>
+                                <div class="info-row">
+                                    <span data-i18n="device_status_label">Device Status:</span> <span id="quick-cust-status" class="badge">-</span>
+                                </div>
+                            </div>
+
+                            <div class="command-grid">
+                                <button id="cmd-lock" class="cmd-btn btn-danger">
+                                    <i class="fa-solid fa-lock"></i>
+                                    <span data-i18n="btn_cmd_lock">Lock Device</span>
+                                </button>
+                                <button id="cmd-unlock" class="cmd-btn btn-success">
+                                    <i class="fa-solid fa-lock-open"></i>
+                                    <span data-i18n="btn_cmd_unlock">Unlock Device</span>
+                                </button>
+                                <button id="cmd-message" class="cmd-btn btn-info">
+                                    <i class="fa-solid fa-comment-dots"></i>
+                                    <span data-i18n="btn_cmd_msg">Send Message</span>
+                                </button>
+                                <button id="cmd-sound" class="cmd-btn btn-warning">
+                                    <i class="fa-solid fa-volume-high"></i>
+                                    <span data-i18n="btn_cmd_sound">Alarm Siren</span>
+                                </button>
+                                <button id="cmd-info" class="cmd-btn btn-secondary">
+                                    <i class="fa-solid fa-circle-info"></i>
+                                    <span data-i18n="btn_cmd_info">SIM & Battery Status</span>
+                                </button>
+                                <button id="cmd-wipe" class="cmd-btn btn-dark">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                    <span data-i18n="btn_cmd_wipe">Remote Data Wipe</span>
+                                </button>
+                            </div>
+
+                            <a id="btn-open-dedicated-control" href="control.html" class="btn btn-primary btn-lg" style="display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; margin-top: 18px; text-decoration: none; font-weight: 700; font-size: 15px; border-radius: var(--radius-md); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);">
+                                <i class="fa-solid fa-up-right-from-square"></i>
+                                <span>Open Dedicated Control Page for this Phone</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: ADD DEVICE & CUSTOMER -->
+            <div id="tab-add-device" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-user-plus"></i> <span data-i18n="form_title">Register New Customer & Device</span></h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="add-device-form" class="form-grid">
+                            <div class="form-section-title">
+                                <i class="fa-solid fa-id-card"></i> <span data-i18n="form_sec_1">1. Customer Info & KYC Details</span>
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="cust_name_input_label">Customer Full Name *</label>
+                                <input type="text" id="input-cust-name" class="form-control" placeholder="e.g. Rahul Sharma" required>
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="cust_phone_input_label">Mobile Number *</label>
+                                <input type="tel" id="input-cust-phone" class="form-control" placeholder="9876543210" required>
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="cust_kyc_input_label">Aadhaar / PAN (KYC Number)</label>
+                                <input type="text" id="input-cust-kyc" class="form-control" placeholder="ABCD1234EF / 1234-5678-9012">
+                            </div>
+
+                            <div class="form-section-title">
+                                <i class="fa-solid fa-mobile-retro"></i> <span data-i18n="form_sec_2">2. Device Hardware Details</span>
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="dev_model_input_label">Device Model Name *</label>
+                                <input type="text" id="input-dev-model" class="form-control" placeholder="Samsung Galaxy M34 5G" required>
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="dev_imei_input_label">IMEI / Serial Number (15 Digits) *</label>
+                                <input type="text" id="input-dev-imei" class="form-control" placeholder="864521049281734" maxlength="15" required>
+                            </div>
+
+                            <div class="form-section-title">
+                                <i class="fa-solid fa-calculator"></i> <span data-i18n="form_sec_3">3. EMI & Payment Plan</span>
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="total_price_label">Total Device Price (₹) *</label>
+                                <input type="number" id="input-total-price" class="form-control" value="18000" required>
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="down_payment_label">Down Payment (₹) *</label>
+                                <input type="number" id="input-down-payment" class="form-control" value="3000" required>
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="tenure_label">EMI Tenure (Months) *</label>
+                                <select id="input-emi-tenure" class="form-control">
+                                    <option value="3">3 Months</option>
+                                    <option value="6" selected>6 Months</option>
+                                    <option value="9">9 Months</option>
+                                    <option value="12">12 Months</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label data-i18n="monthly_emi_label">Calculated Monthly EMI</label>
+                                <input type="text" id="input-monthly-emi" class="form-control readonly" readonly value="₹2,500 / month">
+                            </div>
+
+                            <div class="form-actions full-width">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fa-solid fa-qrcode"></i> <span data-i18n="btn_add_device_submit">Register Device & Generate QR / Pairing Code</span>
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- QR Code & Pairing Output -->
+                        <div id="pairing-modal-result" class="pairing-result-box hidden">
+                            <div class="pairing-success-header">
+                                <i class="fa-solid fa-circle-check"></i> Device Registered Successfully!
+                            </div>
+                            <div class="pairing-details-flex">
+                                <div class="qr-code-area">
+                                    <div id="generated-qr-code" class="qr-placeholder">
+                                        <!-- Simulated QR SVG -->
+                                    </div>
+                                    <span>Scan with Customer Phone</span>
+                                </div>
+                                <div class="pairing-code-area">
+                                    <span>Or enter 6-digit Pairing Code in Customer App:</span>
+                                    <div id="generated-otp-code" class="otp-display-code">------</div>
+                                    <p>Enter this code in the Customer App under "Pair Device".</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: DEVICES LIST -->
+            <div id="tab-devices-list" class="tab-content">
+                <div class="card">
+                    <div class="card-header flex-between">
+                        <h3><i class="fa-solid fa-list-ul"></i> <span data-i18n="tab_devices_list">Managed Devices</span></h3>
+                        <div class="search-box">
+                            <i class="fa-solid fa-search"></i>
+                            <input type="text" id="search-device" placeholder="Search IMEI or Customer Name...">
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="th_imei">IMEI / ID</th>
+                                        <th data-i18n="th_customer">Customer Info</th>
+                                        <th data-i18n="th_model">Model</th>
+                                        <th data-i18n="th_emi_status">EMI Status</th>
+                                        <th data-i18n="th_device_status">Device Status</th>
+                                        <th data-i18n="th_last_ping">Last Ping</th>
+                                        <th data-i18n="th_actions">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="devices-table-body">
+                                    <!-- Table rows injected -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: EMI PAYMENTS -->
+            <div id="tab-emi-payments" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-file-invoice-dollar"></i> <span data-i18n="tab_emi_payments">EMI Schedule & Payment Tracker</span></h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="th_installment_no">Installment #</th>
+                                        <th data-i18n="th_customer">Customer</th>
+                                        <th data-i18n="th_amount">Amount (₹)</th>
+                                        <th data-i18n="th_due_date">Due Date</th>
+                                        <th data-i18n="th_payment_status">Payment Status</th>
+                                        <th data-i18n="th_actions">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="emi-table-body">
+                                    <!-- EMI rows injected -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: AUDIT LOGS -->
+            <div id="tab-audit-logs" class="tab-content">
+                <div class="card">
+                    <div class="card-header flex-between">
+                        <h3><i class="fa-solid fa-shield-halved"></i> <span data-i18n="tab_audit_logs">Audit Security Logs (Audit Trail)</span></h3>
+                        <span class="badge badge-secondary">IT Act & Legal Compliant</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="data-table log-table">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="th_timestamp">Timestamp</th>
+                                        <th data-i18n="th_action_type">Action Type</th>
+                                        <th data-i18n="th_imei">Target IMEI</th>
+                                        <th data-i18n="th_operator">Operator / Seller</th>
+                                        <th data-i18n="th_details">Details / Reason</th>
+                                        <th data-i18n="th_payment_status">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="audit-logs-body">
+                                    <!-- Logs injected -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT PANEL: CUSTOMER ANDROID DEVICE SIMULATOR -->
+        <section class="device-simulator-container">
+            <div class="simulator-header">
+                <span class="sim-title"><i class="fa-brands fa-android"></i> <span data-i18n="sim_phone_title">Customer Android Phone (Live Simulator)</span></span>
+                <span class="sim-tag">Tiger Agent v3.4</span>
+            </div>
+
+            <div class="phone-frame">
+                <!-- Phone Speaker & Camera Notch -->
+                <div class="phone-notch">
+                    <div class="camera"></div>
+                    <div class="speaker"></div>
+                </div>
+
+                <!-- Phone Screen Container -->
+                <div id="phone-screen" class="phone-screen">
+                    <!-- Status Bar -->
+                    <div class="phone-status-bar">
+                        <span class="time" id="phone-clock">12:30</span>
+                        <div class="icons">
+                            <i class="fa-solid fa-wifi"></i>
+                            <i class="fa-solid fa-signal"></i>
+                            <i class="fa-solid fa-battery-three-quarters"></i>
+                        </div>
+                    </div>
+
+                    <!-- Push Notification Banner Popup -->
+                    <div id="fcm-notification-banner" class="fcm-banner hidden">
+                        <div class="fcm-icon"><i class="fa-solid fa-shield-cat"></i></div>
+                        <div class="fcm-content">
+                            <strong id="fcm-title">Tiger Locker Agent</strong>
+                            <p id="fcm-body">Command Received</p>
+                        </div>
+                    </div>
+
+                    <!-- Alarm Siren Visual Indicator -->
+                    <div id="alarm-overlay" class="alarm-overlay hidden">
+                        <div class="alarm-box">
+                            <i class="fa-solid fa-volume-high siren-icon"></i>
+                            <h2 data-i18n="sim_siren_title">SIREN ALARM ACTIVE</h2>
+                            <p data-i18n="sim_siren_desc">Security alarm triggered by Seller!</p>
+                        </div>
+                    </div>
+
+                    <!-- SCREEN 1: UNPAIRED / ONBOARDING SCREEN -->
+                    <div id="phone-view-onboarding" class="phone-view">
+                        <div class="app-welcome">
+                            <div class="app-icon-large">
+                                <i class="fa-solid fa-shield-cat"></i>
+                            </div>
+                            <h2 data-i18n="sim_welcome_title">TIGER LOCKER</h2>
+                            <p data-i18n="sim_welcome_sub">Device Security & EMI Control Agent</p>
+                        </div>
+
+                        <div class="onboarding-card">
+                            <h3><i class="fa-solid fa-link"></i> <span data-i18n="sim_pair_title">Pair New Device</span></h3>
+                            <p data-i18n="sim_pair_desc">Enter 6-digit pairing code from Seller Dashboard:</p>
+
+                            <div class="otp-input-group">
+                                <input type="text" id="phone-otp-input" maxlength="6" placeholder="123456">
+                            </div>
+
+                            <button id="btn-phone-pair" class="phone-btn primary">
+                                <i class="fa-solid fa-shield-halved"></i> <span data-i18n="sim_btn_pair">Register & Connect Device</span>
+                            </button>
+
+                            <div class="permission-notice">
+                                <i class="fa-solid fa-circle-info"></i> <span data-i18n="sim_perm_notice">Device Admin Permission required during registration.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SCREEN 2: ACTIVE MANAGED DEVICE HOME -->
+                    <div id="phone-view-active" class="phone-view hidden">
+                        <div class="android-home-header">
+                            <div class="user-greeting">
+                                <span data-i18n="sim_user_greeting">Hello,</span>
+                                <h3 id="phone-user-name">Rahul Sharma</h3>
+                            </div>
+                            <span class="device-status-pill online"><i class="fa-solid fa-shield"></i> <span data-i18n="sim_status_protected">Protected</span></span>
+                        </div>
+
+                        <!-- Active App Cards -->
+                        <div class="phone-card">
+                            <div class="phone-card-title">
+                                <i class="fa-solid fa-mobile-screen"></i> <span data-i18n="sim_card_device_info">Device Status</span>
+                            </div>
+                            <div class="device-info-mini">
+                                <div>IMEI: <span id="phone-display-imei">864521049281734</span></div>
+                                <div>Model: <span id="phone-display-model">Samsung M34</span></div>
+                                <div>Admin Status: <strong style="color: #10b981;">Active (Granted)</strong></div>
+                            </div>
+                        </div>
+
+                        <div class="phone-card">
+                            <div class="phone-card-title">
+                                <i class="fa-solid fa-indian-rupee-sign"></i> <span data-i18n="sim_card_emi_info">Upcoming EMI Payment</span>
+                            </div>
+                            <div class="emi-info-mini">
+                                <div class="emi-amount-large" id="phone-emi-amount">₹2,500</div>
+                                <div class="emi-due-date" id="phone-emi-due">Due Date: Aug 25, 2026</div>
+                                <button id="btn-phone-pay-now" class="phone-btn success">
+                                    <i class="fa-solid fa-bolt"></i> <span data-i18n="sim_btn_pay_now">Pay Installment Now (UPI)</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="phone-apps-grid">
+                            <div class="app-item"><div class="app-icon phone-icon"><i class="fa-solid fa-phone"></i></div><span>Phone</span></div>
+                            <div class="app-item"><div class="app-icon msg-icon"><i class="fa-solid fa-message"></i></div><span>Message</span></div>
+                            <div class="app-item"><div class="app-icon cam-icon"><i class="fa-solid fa-camera"></i></div><span>Camera</span></div>
+                            <div class="app-item"><div class="app-icon map-icon"><i class="fa-solid fa-map-location-dot"></i></div><span>Maps</span></div>
+                        </div>
+                    </div>
+
+                    <!-- SCREEN 3: REMOTELY LOCKED SCREEN OVERLAY (THE LOCKER) -->
+                    <div id="phone-view-locked" class="phone-view hidden locked-state">
+                        <div class="lock-screen-header">
+                            <div class="lock-icon-anim">
+                                <i class="fa-solid fa-lock"></i>
+                            </div>
+                            <h2 data-i18n="sim_locked_header">Device Remotely Locked</h2>
+                            <span class="lock-reason-badge" id="phone-lock-reason" data-i18n="sim_lock_reason">EMI Payment Overdue</span>
+                        </div>
+
+                        <div class="lock-notice-box">
+                            <p id="phone-lock-message">
+                                Dear Customer, your monthly EMI payment is overdue. Please complete your installment payment immediately to unlock your phone.
+                            </p>
+                        </div>
+
+                        <div class="lock-amount-box">
+                            <span>Total Outstanding:</span>
+                            <h3 id="phone-lock-amount">₹2,500</h3>
+                        </div>
+
+                        <div class="lock-actions">
+                            <button id="btn-lock-screen-pay" class="phone-btn success large">
+                                <i class="fa-solid fa-credit-card"></i> <span data-i18n="sim_btn_lock_pay">Pay Installment Online (UPI)</span>
+                            </button>
+                            <button id="btn-lock-screen-call" class="phone-btn outline">
+                                <i class="fa-solid fa-headset"></i> <span data-i18n="sim_btn_lock_call">Call Seller Support</span>
+                            </button>
+                        </div>
+
+                        <div class="lock-footer">
+                            <i class="fa-solid fa-shield-cat"></i> Tiger Device Admin Lockdown Active
+                        </div>
+                    </div>
+
+                    <!-- Phone Bottom Navigation Bar -->
+                    <div class="phone-nav-bar">
+                        <div class="nav-btn"><i class="fa-solid fa-chevron-left"></i></div>
+                        <div class="nav-btn"><i class="fa-regular fa-circle"></i></div>
+                        <div class="nav-btn"><i class="fa-solid fa-square"></i></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Global Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- JS Scripts -->
+    <script src="js/db.js"></script>
+    <script src="js/fcm.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/emi-engine.js"></script>
+    <script src="js/seller.js"></script>
+    <script src="js/device.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

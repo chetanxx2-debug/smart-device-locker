@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Tiger Locker</string>
+    <string name="admin_label">Tiger Locker Device Admin</string>
+    <string name="admin_description">Enforces authorized EMI device lock, policy management, and tamper protection.</string>
+</resources>

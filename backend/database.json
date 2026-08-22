@@ -1,0 +1,2797 @@
+{
+  "devices": [
+    {
+      "id": "DEV-527",
+      "imei": "b5be70d468582594",
+      "model": "XIAOMI Redmi Note 7S",
+      "customerName": "dipak",
+      "customerPhone": "9388378322",
+      "totalAmount": 18000,
+      "downPayment": 3000,
+      "monthlyEmi": 2625,
+      "tenureMonths": 6,
+      "paidEmis": 0,
+      "dueDate": "2026-09-21",
+      "status": "active",
+      "isLocked": false,
+      "pairCode": "449908",
+      "offlineMasterCode": "377683",
+      "isPaired": true,
+      "sirenActive": false,
+      "lastMessage": "Your monthly EMI is overdue. Please contact seller to unlock.",
+      "battery": 100,
+      "network": "Wi-Fi",
+      "lastSeen": "2026-08-22T17:51:03.070Z"
+    }
+  ],
+  "logs": [
+    {
+      "id": 1787420600751,
+      "timestamp": "2026-08-22T17:43:20.751Z",
+      "deviceId": "DEV-527",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787420568380,
+      "timestamp": "2026-08-22T17:42:48.381Z",
+      "deviceId": "DEV-527",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787420551391,
+      "timestamp": "2026-08-22T17:42:31.391Z",
+      "deviceId": "DEV-527",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 7S (dipak) verified & paired successfully with generated code 449908.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787420539110,
+      "timestamp": "2026-08-22T17:42:19.110Z",
+      "deviceId": "DEV-527",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device 35322 registered for dipak. Pair Code: 449908",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787419779191,
+      "timestamp": "2026-08-22T17:29:39.191Z",
+      "deviceId": "DEV-735",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-735 (ergw - ggggggggggg) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787419777980,
+      "timestamp": "2026-08-22T17:29:37.980Z",
+      "deviceId": "DEV-737",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-737 (ergw - ggggggggggg) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787419776747,
+      "timestamp": "2026-08-22T17:29:36.747Z",
+      "deviceId": "DEV-467",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-467 (ergw - ggggggggggg) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787419775501,
+      "timestamp": "2026-08-22T17:29:35.501Z",
+      "deviceId": "DEV-729",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-729 (ergw - ggggggggggg) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787419774281,
+      "timestamp": "2026-08-22T17:29:34.281Z",
+      "deviceId": "DEV-534",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-534 (ergw - ggggggggggg) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787419772391,
+      "timestamp": "2026-08-22T17:29:32.391Z",
+      "deviceId": "DEV-335",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-335 (dipak - XIAOMI Redmi Note 8) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787411542453,
+      "timestamp": "2026-08-22T15:12:22.453Z",
+      "deviceId": "DEV-735",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for ergw. Pair Code: 713387",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787411531782,
+      "timestamp": "2026-08-22T15:12:11.782Z",
+      "deviceId": "DEV-737",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for ergw. Pair Code: 425975",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787411531613,
+      "timestamp": "2026-08-22T15:12:11.613Z",
+      "deviceId": "DEV-467",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for ergw. Pair Code: 705319",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787411531219,
+      "timestamp": "2026-08-22T15:12:11.219Z",
+      "deviceId": "DEV-534",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for ergw. Pair Code: 873795",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787411517090,
+      "timestamp": "2026-08-22T15:11:57.090Z",
+      "deviceId": "DEV-729",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for ergw. Pair Code: 787737",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787410721291,
+      "timestamp": "2026-08-22T14:58:41.291Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410718387,
+      "timestamp": "2026-08-22T14:58:38.387Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410711750,
+      "timestamp": "2026-08-22T14:58:31.750Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410709617,
+      "timestamp": "2026-08-22T14:58:29.617Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410704515,
+      "timestamp": "2026-08-22T14:58:24.515Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410692751,
+      "timestamp": "2026-08-22T14:58:12.751Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410686650,
+      "timestamp": "2026-08-22T14:58:06.650Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410670822,
+      "timestamp": "2026-08-22T14:57:50.822Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410667295,
+      "timestamp": "2026-08-22T14:57:47.295Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410665264,
+      "timestamp": "2026-08-22T14:57:45.264Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410660503,
+      "timestamp": "2026-08-22T14:57:40.503Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410647008,
+      "timestamp": "2026-08-22T14:57:27.008Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410644939,
+      "timestamp": "2026-08-22T14:57:24.939Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410643255,
+      "timestamp": "2026-08-22T14:57:23.255Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410642690,
+      "timestamp": "2026-08-22T14:57:22.690Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410636373,
+      "timestamp": "2026-08-22T14:57:16.373Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410603462,
+      "timestamp": "2026-08-22T14:56:43.462Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410603311,
+      "timestamp": "2026-08-22T14:56:43.311Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410597985,
+      "timestamp": "2026-08-22T14:56:37.985Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410591686,
+      "timestamp": "2026-08-22T14:56:31.686Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410587445,
+      "timestamp": "2026-08-22T14:56:27.445Z",
+      "deviceId": "DEV-335",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787410575651,
+      "timestamp": "2026-08-22T14:56:15.651Z",
+      "deviceId": "DEV-400",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-400 (dipak - f) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787410575591,
+      "timestamp": "2026-08-22T14:56:15.591Z",
+      "deviceId": "DEV-647",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-647 (dipak pawar - ggggggggggg) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787410558482,
+      "timestamp": "2026-08-22T14:55:58.482Z",
+      "deviceId": "DEV-101",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-101 (dipak pawar - ggggggggggg) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787410557468,
+      "timestamp": "2026-08-22T14:55:57.468Z",
+      "deviceId": "DEV-924",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-924 (dipak pawar - ggggggggggg) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787410555266,
+      "timestamp": "2026-08-22T14:55:55.266Z",
+      "deviceId": "DEV-765",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-765 (dipak - f) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787410552864,
+      "timestamp": "2026-08-22T14:55:52.864Z",
+      "deviceId": "DEV-248",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-248 (dipak - f) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787410550625,
+      "timestamp": "2026-08-22T14:55:50.625Z",
+      "deviceId": "DEV-187",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-187 (dipak - f) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787410537916,
+      "timestamp": "2026-08-22T14:55:37.916Z",
+      "deviceId": "DEV-335",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 8 (dipak) verified & paired successfully with generated code 537996.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787410530036,
+      "timestamp": "2026-08-22T14:55:30.036Z",
+      "deviceId": "DEV-187",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device f registered for dipak. Pair Code: 798642",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787410530025,
+      "timestamp": "2026-08-22T14:55:30.025Z",
+      "deviceId": "DEV-335",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device f registered for dipak. Pair Code: 537996",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787410527582,
+      "timestamp": "2026-08-22T14:55:27.582Z",
+      "deviceId": "DEV-400",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device f registered for dipak. Pair Code: 460886",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787410513851,
+      "timestamp": "2026-08-22T14:55:13.851Z",
+      "deviceId": "DEV-248",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device f registered for dipak. Pair Code: 949856",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787410483176,
+      "timestamp": "2026-08-22T14:54:43.176Z",
+      "deviceId": "DEV-765",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device f registered for dipak. Pair Code: 482599",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787409944077,
+      "timestamp": "2026-08-22T14:45:44.077Z",
+      "deviceId": "DEV-924",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for dipak pawar. Pair Code: 402775",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787409883929,
+      "timestamp": "2026-08-22T14:44:43.929Z",
+      "deviceId": "DEV-101",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for dipak pawar. Pair Code: 423036",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787409862059,
+      "timestamp": "2026-08-22T14:44:22.059Z",
+      "deviceId": "DEV-647",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for dipak pawar. Pair Code: 674835",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787409853910,
+      "timestamp": "2026-08-22T14:44:13.910Z",
+      "deviceId": "DEV-424",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-424 (Dipak - XIAOMI Redmi Note 7S) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787409824127,
+      "timestamp": "2026-08-22T14:43:44.127Z",
+      "deviceId": "DEV-424",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787409816403,
+      "timestamp": "2026-08-22T14:43:36.403Z",
+      "deviceId": "DEV-424",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787336188438,
+      "timestamp": "2026-08-21T18:16:28.438Z",
+      "deviceId": "DEV-424",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787336184738,
+      "timestamp": "2026-08-21T18:16:24.738Z",
+      "deviceId": "DEV-424",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787336179045,
+      "timestamp": "2026-08-21T18:16:19.045Z",
+      "deviceId": "DEV-424",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787336173840,
+      "timestamp": "2026-08-21T18:16:13.840Z",
+      "deviceId": "DEV-424",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787336106410,
+      "timestamp": "2026-08-21T18:15:06.410Z",
+      "deviceId": "DEV-424",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787336103078,
+      "timestamp": "2026-08-21T18:15:03.078Z",
+      "deviceId": "DEV-424",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787336099066,
+      "timestamp": "2026-08-21T18:14:59.066Z",
+      "deviceId": "DEV-424",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787336094329,
+      "timestamp": "2026-08-21T18:14:54.329Z",
+      "deviceId": "DEV-424",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787336066025,
+      "timestamp": "2026-08-21T18:14:26.025Z",
+      "deviceId": "DEV-318",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-318 (Dipak - Hdhvdvd) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787336050315,
+      "timestamp": "2026-08-21T18:14:10.315Z",
+      "deviceId": "DEV-424",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 7S (Dipak) verified & paired successfully with generated code 468566.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787336040237,
+      "timestamp": "2026-08-21T18:14:00.237Z",
+      "deviceId": "DEV-424",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device Hdhvdvd registered for Dipak. Pair Code: 468566",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787335958726,
+      "timestamp": "2026-08-21T18:12:38.726Z",
+      "deviceId": "DEV-318",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device Hdhvdvd registered for Dipak. Pair Code: 379071",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787335915159,
+      "timestamp": "2026-08-21T18:11:55.159Z",
+      "deviceId": "DEV-779",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-779 (Dipak - XIAOMI Redmi Note 8) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787335911343,
+      "timestamp": "2026-08-21T18:11:51.343Z",
+      "deviceId": "DEV-769",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-769 (dipak pawar - XIAOMI Redmi Note 8) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787335887678,
+      "timestamp": "2026-08-21T18:11:27.678Z",
+      "deviceId": "DEV-779",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 8 (Dipak) verified & paired successfully with generated code 201407.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787335439746,
+      "timestamp": "2026-08-21T18:03:59.746Z",
+      "deviceId": "DEV-779",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device Hdhvdvd registered for Dipak. Pair Code: 201407",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787335153057,
+      "timestamp": "2026-08-21T17:59:13.057Z",
+      "deviceId": "DEV-769",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787335148562,
+      "timestamp": "2026-08-21T17:59:08.562Z",
+      "deviceId": "DEV-769",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787335143354,
+      "timestamp": "2026-08-21T17:59:03.354Z",
+      "deviceId": "DEV-769",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787335139570,
+      "timestamp": "2026-08-21T17:58:59.570Z",
+      "deviceId": "DEV-769",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787335114395,
+      "timestamp": "2026-08-21T17:58:34.395Z",
+      "deviceId": "DEV-769",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 8 (dipak pawar) verified & paired successfully with generated code 240963.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787335099542,
+      "timestamp": "2026-08-21T17:58:19.542Z",
+      "deviceId": "DEV-769",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for dipak pawar. Pair Code: 240963",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787334923587,
+      "timestamp": "2026-08-21T17:55:23.587Z",
+      "deviceId": "DEV-191",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-191 (dipak - XIAOMI Redmi Note 8) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787334841334,
+      "timestamp": "2026-08-21T17:54:01.334Z",
+      "deviceId": "DEV-191",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787334839395,
+      "timestamp": "2026-08-21T17:53:59.395Z",
+      "deviceId": "DEV-191",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787334831494,
+      "timestamp": "2026-08-21T17:53:51.494Z",
+      "deviceId": "DEV-191",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787334790622,
+      "timestamp": "2026-08-21T17:53:10.622Z",
+      "deviceId": "DEV-191",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787334777844,
+      "timestamp": "2026-08-21T17:52:57.844Z",
+      "deviceId": "DEV-191",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787334775230,
+      "timestamp": "2026-08-21T17:52:55.230Z",
+      "deviceId": "DEV-191",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787334770235,
+      "timestamp": "2026-08-21T17:52:50.235Z",
+      "deviceId": "DEV-191",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787334765974,
+      "timestamp": "2026-08-21T17:52:45.974Z",
+      "deviceId": "DEV-191",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787334682536,
+      "timestamp": "2026-08-21T17:51:22.536Z",
+      "deviceId": "DEV-189",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787334681904,
+      "timestamp": "2026-08-21T17:51:21.904Z",
+      "deviceId": "DEV-189",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787334681009,
+      "timestamp": "2026-08-21T17:51:21.009Z",
+      "deviceId": "DEV-189",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787334679948,
+      "timestamp": "2026-08-21T17:51:19.948Z",
+      "deviceId": "DEV-189",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787334653779,
+      "timestamp": "2026-08-21T17:50:53.779Z",
+      "deviceId": "DEV-189",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787334639065,
+      "timestamp": "2026-08-21T17:50:39.065Z",
+      "deviceId": "DEV-189",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787334630594,
+      "timestamp": "2026-08-21T17:50:30.594Z",
+      "deviceId": "DEV-189",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787334624698,
+      "timestamp": "2026-08-21T17:50:24.698Z",
+      "deviceId": "DEV-189",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787334602245,
+      "timestamp": "2026-08-21T17:50:02.245Z",
+      "deviceId": "DEV-189",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787334593318,
+      "timestamp": "2026-08-21T17:49:53.318Z",
+      "deviceId": "DEV-191",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 8 (dipak) verified & paired successfully with generated code 351361.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787334521112,
+      "timestamp": "2026-08-21T17:48:41.112Z",
+      "deviceId": "DEV-191",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for dipak. Pair Code: 351361",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787334484627,
+      "timestamp": "2026-08-21T17:48:04.627Z",
+      "deviceId": "DEV-189",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for dipak. Pair Code: 218063",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787334480982,
+      "timestamp": "2026-08-21T17:48:00.982Z",
+      "deviceId": "DEV-578",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-578 (dipak - XIAOMI Redmi Note 8) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787333643238,
+      "timestamp": "2026-08-21T17:34:03.238Z",
+      "deviceId": "DEV-578",
+      "action": "COMMAND_MESSAGE",
+      "details": "Command MESSAGE executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787333503367,
+      "timestamp": "2026-08-21T17:31:43.367Z",
+      "deviceId": "DEV-578",
+      "action": "COMMAND_MESSAGE",
+      "details": "Command MESSAGE executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787333493704,
+      "timestamp": "2026-08-21T17:31:33.704Z",
+      "deviceId": "DEV-578",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787333490232,
+      "timestamp": "2026-08-21T17:31:30.232Z",
+      "deviceId": "DEV-578",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787333483519,
+      "timestamp": "2026-08-21T17:31:23.519Z",
+      "deviceId": "DEV-578",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787333473387,
+      "timestamp": "2026-08-21T17:31:13.387Z",
+      "deviceId": "DEV-578",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787333466040,
+      "timestamp": "2026-08-21T17:31:06.040Z",
+      "deviceId": "DEV-578",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787333460658,
+      "timestamp": "2026-08-21T17:31:00.658Z",
+      "deviceId": "DEV-578",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787333443596,
+      "timestamp": "2026-08-21T17:30:43.596Z",
+      "deviceId": "DEV-578",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787333441441,
+      "timestamp": "2026-08-21T17:30:41.441Z",
+      "deviceId": "DEV-578",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787333411926,
+      "timestamp": "2026-08-21T17:30:11.926Z",
+      "deviceId": "DEV-578",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787333383784,
+      "timestamp": "2026-08-21T17:29:43.784Z",
+      "deviceId": "DEV-578",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787333369332,
+      "timestamp": "2026-08-21T17:29:29.332Z",
+      "deviceId": "DEV-578",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787333366274,
+      "timestamp": "2026-08-21T17:29:26.274Z",
+      "deviceId": "DEV-578",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787333349664,
+      "timestamp": "2026-08-21T17:29:09.664Z",
+      "deviceId": "DEV-578",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787333337115,
+      "timestamp": "2026-08-21T17:28:57.115Z",
+      "deviceId": "DEV-578",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787333331797,
+      "timestamp": "2026-08-21T17:28:51.797Z",
+      "deviceId": "DEV-578",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787333316335,
+      "timestamp": "2026-08-21T17:28:36.335Z",
+      "deviceId": "DEV-578",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 8 (dipak) verified & paired successfully with generated code 303277.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787333309784,
+      "timestamp": "2026-08-21T17:28:29.784Z",
+      "deviceId": "DEV-578",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for dipak. Pair Code: 303277",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787333071479,
+      "timestamp": "2026-08-21T17:24:31.479Z",
+      "deviceId": "DEV-136",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-136 (dipak - ggggggggggg) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787333069363,
+      "timestamp": "2026-08-21T17:24:29.363Z",
+      "deviceId": "DEV-974",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-974 (dipak - ggggggggggg) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787332429715,
+      "timestamp": "2026-08-21T17:13:49.715Z",
+      "deviceId": "DEV-974",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for dipak. Pair Code: 906607",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787332316573,
+      "timestamp": "2026-08-21T17:11:56.573Z",
+      "deviceId": "DEV-136",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for dipak. Pair Code: 803203",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787331625672,
+      "timestamp": "2026-08-21T17:00:25.672Z",
+      "deviceId": "DEV-266",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-266 (ergw - XIAOMI Redmi Note 8) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787328590972,
+      "timestamp": "2026-08-21T16:09:50.972Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328590764,
+      "timestamp": "2026-08-21T16:09:50.764Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328590579,
+      "timestamp": "2026-08-21T16:09:50.579Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328590397,
+      "timestamp": "2026-08-21T16:09:50.397Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328563678,
+      "timestamp": "2026-08-21T16:09:23.678Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328563492,
+      "timestamp": "2026-08-21T16:09:23.492Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328563324,
+      "timestamp": "2026-08-21T16:09:23.324Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328552541,
+      "timestamp": "2026-08-21T16:09:12.541Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328539158,
+      "timestamp": "2026-08-21T16:08:59.158Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328499166,
+      "timestamp": "2026-08-21T16:08:19.166Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328482031,
+      "timestamp": "2026-08-21T16:08:02.031Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328476127,
+      "timestamp": "2026-08-21T16:07:56.127Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328437694,
+      "timestamp": "2026-08-21T16:07:17.694Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328433469,
+      "timestamp": "2026-08-21T16:07:13.469Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328429381,
+      "timestamp": "2026-08-21T16:07:09.381Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328428567,
+      "timestamp": "2026-08-21T16:07:08.567Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328426005,
+      "timestamp": "2026-08-21T16:07:06.005Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328411453,
+      "timestamp": "2026-08-21T16:06:51.453Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328357054,
+      "timestamp": "2026-08-21T16:05:57.054Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328356708,
+      "timestamp": "2026-08-21T16:05:56.708Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328356532,
+      "timestamp": "2026-08-21T16:05:56.532Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328349612,
+      "timestamp": "2026-08-21T16:05:49.612Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328333238,
+      "timestamp": "2026-08-21T16:05:33.238Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787328274183,
+      "timestamp": "2026-08-21T16:04:34.183Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787327614062,
+      "timestamp": "2026-08-21T15:53:34.062Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787327610457,
+      "timestamp": "2026-08-21T15:53:30.457Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787327598273,
+      "timestamp": "2026-08-21T15:53:18.273Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787327586969,
+      "timestamp": "2026-08-21T15:53:06.969Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787327584760,
+      "timestamp": "2026-08-21T15:53:04.760Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787327573895,
+      "timestamp": "2026-08-21T15:52:53.895Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787327565406,
+      "timestamp": "2026-08-21T15:52:45.406Z",
+      "deviceId": "DEV-266",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787327544672,
+      "timestamp": "2026-08-21T15:52:24.672Z",
+      "deviceId": "DEV-266",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 8 (ergw) verified & paired successfully with generated code 944179.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787327538746,
+      "timestamp": "2026-08-21T15:52:18.746Z",
+      "deviceId": "DEV-266",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for ergw. Pair Code: 944179",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787327435882,
+      "timestamp": "2026-08-21T15:50:35.882Z",
+      "deviceId": "DEV-195",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-195 (ergw - XIAOMI Redmi Note 8) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787327433955,
+      "timestamp": "2026-08-21T15:50:33.955Z",
+      "deviceId": "DEV-103",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-103 (ergw - XIAOMI Redmi Note 8) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787327356193,
+      "timestamp": "2026-08-21T15:49:16.193Z",
+      "deviceId": "DEV-103",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787327354345,
+      "timestamp": "2026-08-21T15:49:14.345Z",
+      "deviceId": "DEV-103",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787327341137,
+      "timestamp": "2026-08-21T15:49:01.137Z",
+      "deviceId": "DEV-195",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 8 (ergw) verified & paired successfully with generated code 812119.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787327334835,
+      "timestamp": "2026-08-21T15:48:54.835Z",
+      "deviceId": "DEV-195",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for ergw. Pair Code: 812119",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787327331177,
+      "timestamp": "2026-08-21T15:48:51.177Z",
+      "deviceId": "DEV-103",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 8 (ergw) verified & paired successfully with generated code 458200.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787327306980,
+      "timestamp": "2026-08-21T15:48:26.980Z",
+      "deviceId": "DEV-103",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for ergw. Pair Code: 458200",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787327301369,
+      "timestamp": "2026-08-21T15:48:21.369Z",
+      "deviceId": "DEV-338",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-338 (ergw - XIAOMI Redmi Note 8) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787327280210,
+      "timestamp": "2026-08-21T15:48:00.210Z",
+      "deviceId": "DEV-338",
+      "action": "COMMAND_MESSAGE",
+      "details": "Command MESSAGE executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787327276675,
+      "timestamp": "2026-08-21T15:47:56.675Z",
+      "deviceId": "DEV-338",
+      "action": "EMI_PAID",
+      "details": "EMI payment of ₹2625 received for ergw. Installment: 1/6",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787327264845,
+      "timestamp": "2026-08-21T15:47:44.845Z",
+      "deviceId": "DEV-338",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787327246590,
+      "timestamp": "2026-08-21T15:47:26.590Z",
+      "deviceId": "DEV-338",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787327229230,
+      "timestamp": "2026-08-21T15:47:09.230Z",
+      "deviceId": "DEV-338",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 8 (ergw) verified & paired successfully with generated code 209790.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787327217083,
+      "timestamp": "2026-08-21T15:46:57.083Z",
+      "deviceId": "DEV-338",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for ergw. Pair Code: 209790",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787327212246,
+      "timestamp": "2026-08-21T15:46:52.246Z",
+      "deviceId": "DEV-869",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-869 (Chetan - Jdbdv) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787327121970,
+      "timestamp": "2026-08-21T15:45:21.970Z",
+      "deviceId": "DEV-869",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device Jdbdv registered for Chetan. Pair Code: 506549",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787324569390,
+      "timestamp": "2026-08-21T15:02:49.390Z",
+      "deviceId": "DEV-687",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-687 (Durgesh Kumar  - VIVO V2439) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787324534356,
+      "timestamp": "2026-08-21T15:02:14.356Z",
+      "deviceId": "DEV-587",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-587 (Dd - XIAOMI Redmi Note 7S) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787324491653,
+      "timestamp": "2026-08-21T15:01:31.653Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324464843,
+      "timestamp": "2026-08-21T15:01:04.843Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324463246,
+      "timestamp": "2026-08-21T15:01:03.246Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324449097,
+      "timestamp": "2026-08-21T15:00:49.097Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324440986,
+      "timestamp": "2026-08-21T15:00:40.986Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324432161,
+      "timestamp": "2026-08-21T15:00:32.161Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324421206,
+      "timestamp": "2026-08-21T15:00:21.206Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324410898,
+      "timestamp": "2026-08-21T15:00:10.898Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324408712,
+      "timestamp": "2026-08-21T15:00:08.712Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324404345,
+      "timestamp": "2026-08-21T15:00:04.345Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324400026,
+      "timestamp": "2026-08-21T15:00:00.026Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324384989,
+      "timestamp": "2026-08-21T14:59:44.989Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324372182,
+      "timestamp": "2026-08-21T14:59:32.182Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324286735,
+      "timestamp": "2026-08-21T14:58:06.735Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324254161,
+      "timestamp": "2026-08-21T14:57:34.161Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324247008,
+      "timestamp": "2026-08-21T14:57:27.008Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324244160,
+      "timestamp": "2026-08-21T14:57:24.161Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324229034,
+      "timestamp": "2026-08-21T14:57:09.034Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324211810,
+      "timestamp": "2026-08-21T14:56:51.810Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324210403,
+      "timestamp": "2026-08-21T14:56:50.403Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324168883,
+      "timestamp": "2026-08-21T14:56:08.883Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324148692,
+      "timestamp": "2026-08-21T14:55:48.692Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324147835,
+      "timestamp": "2026-08-21T14:55:47.835Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324144571,
+      "timestamp": "2026-08-21T14:55:44.571Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324131052,
+      "timestamp": "2026-08-21T14:55:31.052Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324118001,
+      "timestamp": "2026-08-21T14:55:18.001Z",
+      "deviceId": "DEV-687",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324104108,
+      "timestamp": "2026-08-21T14:55:04.108Z",
+      "deviceId": "DEV-587",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324100185,
+      "timestamp": "2026-08-21T14:55:00.185Z",
+      "deviceId": "DEV-587",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324094074,
+      "timestamp": "2026-08-21T14:54:54.074Z",
+      "deviceId": "DEV-587",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787324042554,
+      "timestamp": "2026-08-21T14:54:02.554Z",
+      "deviceId": "DEV-587",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787323992426,
+      "timestamp": "2026-08-21T14:53:12.426Z",
+      "deviceId": "DEV-702",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-702 (Dd - Dd) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787323453866,
+      "timestamp": "2026-08-21T14:44:13.866Z",
+      "deviceId": "DEV-687",
+      "action": "DEVICE_PAIRED",
+      "details": "Device VIVO V2439 (Durgesh Kumar ) verified & paired successfully with generated code 377529.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787323445869,
+      "timestamp": "2026-08-21T14:44:05.869Z",
+      "deviceId": "DEV-687",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device Vi o registered for Durgesh Kumar . Pair Code: 377529",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787323381855,
+      "timestamp": "2026-08-21T14:43:01.855Z",
+      "deviceId": "DEV-587",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 7S (Dd) verified & paired successfully with generated code 560056.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787323373412,
+      "timestamp": "2026-08-21T14:42:53.412Z",
+      "deviceId": "DEV-587",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device Dd registered for Dd. Pair Code: 560056",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787323356129,
+      "timestamp": "2026-08-21T14:42:36.129Z",
+      "deviceId": "DEV-702",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device Dd registered for Dd. Pair Code: 253356",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787322328811,
+      "timestamp": "2026-08-21T14:25:28.811Z",
+      "deviceId": "DEV-539",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-539 (ergw - XIAOMI Redmi Note 8) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787322135528,
+      "timestamp": "2026-08-21T14:22:15.528Z",
+      "deviceId": "DEV-539",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787322130129,
+      "timestamp": "2026-08-21T14:22:10.129Z",
+      "deviceId": "DEV-539",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787322118864,
+      "timestamp": "2026-08-21T14:21:58.864Z",
+      "deviceId": "DEV-539",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787322112688,
+      "timestamp": "2026-08-21T14:21:52.688Z",
+      "deviceId": "DEV-539",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787322109873,
+      "timestamp": "2026-08-21T14:21:49.873Z",
+      "deviceId": "DEV-208",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-208 (ergw - ggggggggggg) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787322108402,
+      "timestamp": "2026-08-21T14:21:48.402Z",
+      "deviceId": "DEV-381",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-381 (ergw - ggggggggggg) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787322088379,
+      "timestamp": "2026-08-21T14:21:28.379Z",
+      "deviceId": "DEV-539",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 8 (ergw) verified & paired successfully with generated code 884293.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787322068520,
+      "timestamp": "2026-08-21T14:21:08.520Z",
+      "deviceId": "DEV-539",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for ergw. Pair Code: 884293",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787322068442,
+      "timestamp": "2026-08-21T14:21:08.442Z",
+      "deviceId": "DEV-381",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for ergw. Pair Code: 695644",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787322032573,
+      "timestamp": "2026-08-21T14:20:32.573Z",
+      "deviceId": "DEV-208",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for ergw. Pair Code: 297690",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787321005062,
+      "timestamp": "2026-08-21T14:03:25.062Z",
+      "deviceId": "DEV-503",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-503 (Dipak - XIAOMI Redmi Note 7S) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787320993213,
+      "timestamp": "2026-08-21T14:03:13.213Z",
+      "deviceId": "DEV-503",
+      "action": "COMMAND_WIPE",
+      "details": "Command WIPE executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320992274,
+      "timestamp": "2026-08-21T14:03:12.274Z",
+      "deviceId": "DEV-503",
+      "action": "COMMAND_WIPE",
+      "details": "Command WIPE executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320983109,
+      "timestamp": "2026-08-21T14:03:03.109Z",
+      "deviceId": "DEV-503",
+      "action": "COMMAND_WIPE",
+      "details": "Command WIPE executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320977028,
+      "timestamp": "2026-08-21T14:02:57.028Z",
+      "deviceId": "DEV-503",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320973036,
+      "timestamp": "2026-08-21T14:02:53.036Z",
+      "deviceId": "DEV-503",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320967264,
+      "timestamp": "2026-08-21T14:02:47.264Z",
+      "deviceId": "DEV-503",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320961170,
+      "timestamp": "2026-08-21T14:02:41.170Z",
+      "deviceId": "DEV-503",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320946194,
+      "timestamp": "2026-08-21T14:02:26.194Z",
+      "deviceId": "DEV-503",
+      "action": "COMMAND_WIPE",
+      "details": "Command WIPE executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320943343,
+      "timestamp": "2026-08-21T14:02:23.343Z",
+      "deviceId": "DEV-503",
+      "action": "COMMAND_WIPE",
+      "details": "Command WIPE executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320938985,
+      "timestamp": "2026-08-21T14:02:18.985Z",
+      "deviceId": "DEV-503",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320938535,
+      "timestamp": "2026-08-21T14:02:18.535Z",
+      "deviceId": "DEV-503",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320929306,
+      "timestamp": "2026-08-21T14:02:09.306Z",
+      "deviceId": "DEV-503",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320922806,
+      "timestamp": "2026-08-21T14:02:02.806Z",
+      "deviceId": "DEV-503",
+      "action": "COMMAND_WIPE",
+      "details": "Command WIPE executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320914190,
+      "timestamp": "2026-08-21T14:01:54.190Z",
+      "deviceId": "DEV-503",
+      "action": "COMMAND_MESSAGE",
+      "details": "Command MESSAGE executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320900071,
+      "timestamp": "2026-08-21T14:01:40.071Z",
+      "deviceId": "DEV-503",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320893650,
+      "timestamp": "2026-08-21T14:01:33.650Z",
+      "deviceId": "DEV-503",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320866561,
+      "timestamp": "2026-08-21T14:01:06.561Z",
+      "deviceId": "DEV-503",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 7S (Dipak) verified & paired successfully with generated code 560427.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787320818561,
+      "timestamp": "2026-08-21T14:00:18.561Z",
+      "deviceId": "DEV-503",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device Hdhvdvd registered for Dipak. Pair Code: 560427",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787320399100,
+      "timestamp": "2026-08-21T13:53:19.100Z",
+      "deviceId": "DEV-595",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-595 (Customer (Note 7S) - XIAOMI Redmi Note 7S) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787320179247,
+      "timestamp": "2026-08-21T13:49:39.247Z",
+      "deviceId": "DEV-595",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320176088,
+      "timestamp": "2026-08-21T13:49:36.088Z",
+      "deviceId": "DEV-595",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320173673,
+      "timestamp": "2026-08-21T13:49:33.673Z",
+      "deviceId": "DEV-595",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320166753,
+      "timestamp": "2026-08-21T13:49:26.753Z",
+      "deviceId": "DEV-595",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787320129097,
+      "timestamp": "2026-08-21T13:48:49.097Z",
+      "deviceId": "DEV-595",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 7S (Customer (Note 7S)) paired successfully with code 659595.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787319429790,
+      "timestamp": "2026-08-21T13:37:09.790Z",
+      "deviceId": "DEV-540",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-540 (ergw - ggggggggggg) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787319428151,
+      "timestamp": "2026-08-21T13:37:08.151Z",
+      "deviceId": "DEV-136",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-136 (ergw - ggggggggggg) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787319426309,
+      "timestamp": "2026-08-21T13:37:06.309Z",
+      "deviceId": "DEV-627",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-627 (rahul - tddddddddddddddd) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787319420780,
+      "timestamp": "2026-08-21T13:37:00.780Z",
+      "deviceId": "DEV-309",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-309 (rahul - tddddddddddddddd) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787319419247,
+      "timestamp": "2026-08-21T13:36:59.247Z",
+      "deviceId": "DEV-309",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787319418218,
+      "timestamp": "2026-08-21T13:36:58.218Z",
+      "deviceId": "DEV-966",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-966 (rahul - XIAOMI Redmi Note 8) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787319415660,
+      "timestamp": "2026-08-21T13:36:55.660Z",
+      "deviceId": "DEV-501",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-501 (rahul - tddddddddddddddd) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787319414329,
+      "timestamp": "2026-08-21T13:36:54.329Z",
+      "deviceId": "DEV-489",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-489 (rahul - tddddddddddddddd) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787319410949,
+      "timestamp": "2026-08-21T13:36:50.949Z",
+      "deviceId": "DEV-635",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-635 (chetan  - XIAOMI Redmi Note 8) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787319408572,
+      "timestamp": "2026-08-21T13:36:48.572Z",
+      "deviceId": "DEV-189",
+      "action": "DEVICE_DELETED",
+      "details": "Device DEV-189 (dipak - XIAOMI Redmi Note 8) was permanently removed from system by Admin.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787319300824,
+      "timestamp": "2026-08-21T13:35:00.824Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_WIPE",
+      "details": "Command WIPE executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787319293610,
+      "timestamp": "2026-08-21T13:34:53.610Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787319292777,
+      "timestamp": "2026-08-21T13:34:52.777Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787318937757,
+      "timestamp": "2026-08-21T13:28:57.757Z",
+      "deviceId": "DEV-540",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for ergw. Pair Code: 658896",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787318862889,
+      "timestamp": "2026-08-21T13:27:42.889Z",
+      "deviceId": "DEV-136",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device ggggggggggg registered for ergw. Pair Code: 248108",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787318398731,
+      "timestamp": "2026-08-21T13:19:58.731Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787318394797,
+      "timestamp": "2026-08-21T13:19:54.797Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787318352994,
+      "timestamp": "2026-08-21T13:19:12.994Z",
+      "deviceId": "DEV-966",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787318352059,
+      "timestamp": "2026-08-21T13:19:12.059Z",
+      "deviceId": "DEV-966",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787318256302,
+      "timestamp": "2026-08-21T13:17:36.302Z",
+      "deviceId": "DEV-966",
+      "action": "COMMAND_WIPE",
+      "details": "Command WIPE executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787318252978,
+      "timestamp": "2026-08-21T13:17:32.978Z",
+      "deviceId": "DEV-966",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787318250806,
+      "timestamp": "2026-08-21T13:17:30.806Z",
+      "deviceId": "DEV-966",
+      "action": "COMMAND_WIPE",
+      "details": "Command WIPE executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787318240828,
+      "timestamp": "2026-08-21T13:17:20.828Z",
+      "deviceId": "DEV-966",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787318238539,
+      "timestamp": "2026-08-21T13:17:18.539Z",
+      "deviceId": "DEV-966",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787318226812,
+      "timestamp": "2026-08-21T13:17:06.812Z",
+      "deviceId": "DEV-966",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787318224024,
+      "timestamp": "2026-08-21T13:17:04.024Z",
+      "deviceId": "DEV-966",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787318221467,
+      "timestamp": "2026-08-21T13:17:01.467Z",
+      "deviceId": "DEV-966",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787318211457,
+      "timestamp": "2026-08-21T13:16:51.457Z",
+      "deviceId": "DEV-966",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787318190865,
+      "timestamp": "2026-08-21T13:16:30.865Z",
+      "deviceId": "DEV-966",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787318171271,
+      "timestamp": "2026-08-21T13:16:11.271Z",
+      "deviceId": "DEV-966",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 8 (rahul) paired successfully with valid code 423006.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787318164245,
+      "timestamp": "2026-08-21T13:16:04.245Z",
+      "deviceId": "DEV-966",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device tddddddddddddddd registered for rahul. Pair Code: 423006",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787317425934,
+      "timestamp": "2026-08-21T13:03:45.934Z",
+      "deviceId": "DEV-309",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device tddddddddddddddd registered for rahul. Pair Code: 264275",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787316591380,
+      "timestamp": "2026-08-21T12:49:51.380Z",
+      "deviceId": "DEV-501",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device tddddddddddddddd registered for rahul. Pair Code: 141346",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787316591290,
+      "timestamp": "2026-08-21T12:49:51.290Z",
+      "deviceId": "DEV-489",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device tddddddddddddddd registered for rahul. Pair Code: 548095",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787316396318,
+      "timestamp": "2026-08-21T12:46:36.318Z",
+      "deviceId": "DEV-627",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device tddddddddddddddd registered for rahul. Pair Code: 640779",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787298917744,
+      "timestamp": "2026-08-21T07:55:17.744Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787298911076,
+      "timestamp": "2026-08-21T07:55:11.076Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787298701137,
+      "timestamp": "2026-08-21T07:51:41.137Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787298696181,
+      "timestamp": "2026-08-21T07:51:36.181Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787298694606,
+      "timestamp": "2026-08-21T07:51:34.606Z",
+      "deviceId": "DEV-189",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787298672853,
+      "timestamp": "2026-08-21T07:51:12.853Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787298666834,
+      "timestamp": "2026-08-21T07:51:06.834Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787298254398,
+      "timestamp": "2026-08-21T07:44:14.398Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_WIPE",
+      "details": "Command WIPE executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787298246715,
+      "timestamp": "2026-08-21T07:44:06.715Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_MESSAGE",
+      "details": "Command MESSAGE executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787298242467,
+      "timestamp": "2026-08-21T07:44:02.467Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787298235916,
+      "timestamp": "2026-08-21T07:43:55.916Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787298227384,
+      "timestamp": "2026-08-21T07:43:47.384Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787298220604,
+      "timestamp": "2026-08-21T07:43:40.604Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787297732692,
+      "timestamp": "2026-08-21T07:35:32.692Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787297719448,
+      "timestamp": "2026-08-21T07:35:19.448Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787297578911,
+      "timestamp": "2026-08-21T07:32:58.911Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787297569039,
+      "timestamp": "2026-08-21T07:32:49.039Z",
+      "deviceId": "DEV-101",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787297544435,
+      "timestamp": "2026-08-21T07:32:24.435Z",
+      "deviceId": "DEV-635",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787297531163,
+      "timestamp": "2026-08-21T07:32:11.163Z",
+      "deviceId": "DEV-101",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787297504998,
+      "timestamp": "2026-08-21T07:31:44.998Z",
+      "deviceId": "DEV-635",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 8 (chetan ) paired successfully with valid code 397610.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787297484645,
+      "timestamp": "2026-08-21T07:31:24.645Z",
+      "deviceId": "DEV-635",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device gyhhhhhhhhhhhhh registered for chetan . Pair Code: 397610",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787297244584,
+      "timestamp": "2026-08-21T07:27:24.584Z",
+      "deviceId": "DEV-101",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787297239237,
+      "timestamp": "2026-08-21T07:27:19.237Z",
+      "deviceId": "DEV-101",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787296835151,
+      "timestamp": "2026-08-21T07:20:35.151Z",
+      "deviceId": "DEV-189",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787296830372,
+      "timestamp": "2026-08-21T07:20:30.372Z",
+      "deviceId": "DEV-101",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787296818668,
+      "timestamp": "2026-08-21T07:20:18.668Z",
+      "deviceId": "DEV-101",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787296817447,
+      "timestamp": "2026-08-21T07:20:17.447Z",
+      "deviceId": "DEV-101",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787296594253,
+      "timestamp": "2026-08-21T07:16:34.253Z",
+      "deviceId": "DEV-189",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787296569565,
+      "timestamp": "2026-08-21T07:16:09.565Z",
+      "deviceId": "DEV-189",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787296506944,
+      "timestamp": "2026-08-21T07:15:06.944Z",
+      "deviceId": "DEV-101",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787296493523,
+      "timestamp": "2026-08-21T07:14:53.523Z",
+      "deviceId": "DEV-969",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787296486727,
+      "timestamp": "2026-08-21T07:14:46.727Z",
+      "deviceId": "DEV-101",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787296481299,
+      "timestamp": "2026-08-21T07:14:41.299Z",
+      "deviceId": "DEV-101",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787296478908,
+      "timestamp": "2026-08-21T07:14:38.908Z",
+      "deviceId": "DEV-101",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787296476868,
+      "timestamp": "2026-08-21T07:14:36.868Z",
+      "deviceId": "DEV-101",
+      "action": "COMMAND_MESSAGE",
+      "details": "Command MESSAGE executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787296467939,
+      "timestamp": "2026-08-21T07:14:27.939Z",
+      "deviceId": "DEV-189",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 8 (dipak) paired successfully with valid code 733845.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787296459938,
+      "timestamp": "2026-08-21T07:14:19.938Z",
+      "deviceId": "DEV-101",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787296456027,
+      "timestamp": "2026-08-21T07:14:16.027Z",
+      "deviceId": "DEV-101",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787296446787,
+      "timestamp": "2026-08-21T07:14:06.787Z",
+      "deviceId": "DEV-101",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787296440261,
+      "timestamp": "2026-08-21T07:14:00.261Z",
+      "deviceId": "DEV-969",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787296428551,
+      "timestamp": "2026-08-21T07:13:48.551Z",
+      "deviceId": "DEV-101",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787296412551,
+      "timestamp": "2026-08-21T07:13:32.551Z",
+      "deviceId": "DEV-189",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 8 (dipak) paired successfully with valid code 733845.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787296393764,
+      "timestamp": "2026-08-21T07:13:13.764Z",
+      "deviceId": "DEV-189",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device 35322 registered for dipak. Pair Code: 733845",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787296243046,
+      "timestamp": "2026-08-21T07:10:43.046Z",
+      "deviceId": "DEV-969",
+      "action": "COMMAND_UNLOCK",
+      "details": "Command UNLOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787295244636,
+      "timestamp": "2026-08-21T06:54:04.636Z",
+      "deviceId": "874285687698387",
+      "action": "COMMAND_WIPE",
+      "details": "Command WIPE executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787295242188,
+      "timestamp": "2026-08-21T06:54:02.188Z",
+      "deviceId": "874285687698387",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787295240963,
+      "timestamp": "2026-08-21T06:54:00.963Z",
+      "deviceId": "874285687698387",
+      "action": "COMMAND_SIREN_ON",
+      "details": "Command SIREN_ON executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787295150544,
+      "timestamp": "2026-08-21T06:52:30.544Z",
+      "deviceId": "DEV-713",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device vivo y400 pro registered for dipak. Pair Code: 699220",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787295140375,
+      "timestamp": "2026-08-21T06:52:20.375Z",
+      "deviceId": "DEV-109",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device vivo y400 pro registered for dipak. Pair Code: 289443",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787217575077,
+      "timestamp": "2026-08-20T09:19:35.077Z",
+      "deviceId": "DEV-969",
+      "action": "COMMAND_LOCK",
+      "details": "Command LOCK executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    },
+    {
+      "id": 1787217455668,
+      "timestamp": "2026-08-20T09:17:35.668Z",
+      "deviceId": "DEV-299",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 8 (dipak) paired successfully with valid code 630320.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787217334941,
+      "timestamp": "2026-08-20T09:15:34.941Z",
+      "deviceId": "DEV-299",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 8 (dipak) paired successfully with valid code 630320.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787217327634,
+      "timestamp": "2026-08-20T09:15:27.634Z",
+      "deviceId": "DEV-299",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device vivo y400 pro registered for dipak. Pair Code: 630320",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787217319669,
+      "timestamp": "2026-08-20T09:15:19.669Z",
+      "deviceId": "DEV-556",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 8 (dipak) paired successfully with valid code 774694.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787217314292,
+      "timestamp": "2026-08-20T09:15:14.292Z",
+      "deviceId": "DEV-556",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device vivo y400 pro registered for dipak. Pair Code: 774694",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787217254233,
+      "timestamp": "2026-08-20T09:14:14.233Z",
+      "deviceId": "DEV-969",
+      "action": "DEVICE_PAIRED",
+      "details": "Device XIAOMI Redmi Note 8 (dipak) paired successfully with valid code 567740.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787217116983,
+      "timestamp": "2026-08-20T09:11:56.983Z",
+      "deviceId": "DEV-969",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device vivo y400 pro registered for dipak. Pair Code: 567740",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787217090453,
+      "timestamp": "2026-08-20T09:11:30.453Z",
+      "deviceId": "DEV-917",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device vivo y400 pro registered for dipak. Pair Code: 159338",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787216969108,
+      "timestamp": "2026-08-20T09:09:29.109Z",
+      "deviceId": "DEV-535",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device vivo y400 pro registered for dipak. Pair Code: 122047",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787216950298,
+      "timestamp": "2026-08-20T09:09:10.298Z",
+      "deviceId": "DEV-803",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device vivo y400 pro registered for dipak. Pair Code: 232955",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787216838046,
+      "timestamp": "2026-08-20T09:07:18.046Z",
+      "deviceId": "DEV-101",
+      "action": "DEVICE_REGISTERED",
+      "details": "Device vivo y400 pro registered for dipak. Pair Code: 990699",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787216788140,
+      "timestamp": "2026-08-20T09:06:28.140Z",
+      "deviceId": "DEV-101",
+      "action": "DEVICE_PAIRED",
+      "details": "Device Android Smartphone (Rahul Sharma) paired successfully with valid code 849201.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787216646603,
+      "timestamp": "2026-08-20T09:04:06.603Z",
+      "deviceId": "DEV-101",
+      "action": "DEVICE_PAIRED",
+      "details": "Device Android Smartphone paired successfully with code 849201.",
+      "status": "SUCCESS"
+    },
+    {
+      "id": 1787215584168,
+      "timestamp": "2026-08-20T08:46:24.168Z",
+      "deviceId": "DEV-101",
+      "action": "COMMAND_SIREN_OFF",
+      "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
+      "status": "QUEUED"
+    }
+  ]
+}
