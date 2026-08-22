@@ -614,6 +614,12 @@ app.get('/api/devices/:id/poll', (req, res) => {
     }
 
     device.lastSeen = new Date().toISOString();
+
+    // Deliver pendingCommand once (one-shot: clear after sending)
+    const pendingCommand = device.pendingCommand || '';
+    if (pendingCommand) {
+        device.pendingCommand = ''; // Clear after delivery
+    }
     saveDb(db);
 
     res.json({
@@ -622,8 +628,9 @@ app.get('/api/devices/:id/poll', (req, res) => {
         isLocked: device.isLocked,
         sirenActive: device.sirenActive,
         message: device.lastMessage,
-        offlineMasterCode: device.offlineMasterCode || "",
-        dueDate: device.dueDate || ""
+        offlineMasterCode: device.offlineMasterCode || '',
+        dueDate: device.dueDate || '',
+        pendingCommand: pendingCommand
     });
 });
 
@@ -670,6 +677,38 @@ app.post('/api/devices/:id/pay-emi', (req, res) => {
     } else {
         res.status(400).json({ success: false, message: "All EMIs already paid." });
     }
+});
+
+// Allow Uninstall (Shop Owner grants permission to uninstall app)
+app.post('/api/devices/:id/allow-uninstall', requireAuth, (req, res) => {
+    const db = loadDb();
+    const deviceId = req.params.id;
+    const device = db.devices.find(d => d.id === deviceId);
+
+    if (!device) {
+        return res.status(404).json({ success: false, message: "Device not found." });
+    }
+
+    // Retailer only for their own devices
+    if (req.user && req.user.role === 'retailer' && device.retailerId !== req.user.id) {
+        return res.status(403).json({ success: false, message: "Access denied." });
+    }
+
+    // Set pendingCommand — Android app will pick this up on next poll
+    device.pendingCommand = 'ALLOW_UNINSTALL';
+
+    db.logs.unshift({
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        deviceId: deviceId,
+        retailerId: device.retailerId || "USR-SUPERADMIN",
+        action: "ALLOW_UNINSTALL",
+        details: `Shop owner granted uninstall permission for ${device.customerName || deviceId}.`,
+        status: "SUCCESS"
+    });
+
+    saveDb(db);
+    res.json({ success: true, message: "Uninstall permission sent to device." });
 });
 
 // Delete Device

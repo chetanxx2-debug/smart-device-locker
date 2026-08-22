@@ -581,7 +581,15 @@
                     <span>DELETE DEVICE</span>
                     <small>Remove permanently from system</small>
                 </button>
+
+                <!-- 8. ALLOW UNINSTALL -->
+                <button id="btn-ctrl-allow-uninstall" class="master-btn" style="background: linear-gradient(135deg, #b45309 0%, #78350f 100%); box-shadow: 0 4px 15px rgba(180, 83, 9, 0.4); border: 1px solid #f59e0b;" type="button">
+                    <i class="fa-solid fa-box-open"></i>
+                    <span>ALLOW UNINSTALL</span>
+                    <small>Give customer permission to remove app</small>
+                </button>
             </div>
+
         </div>
     </div>
 
@@ -816,6 +824,26 @@
                             }
                         })
                         .catch(e => showToast('Network error while deleting device.', 'danger'));
+                }
+            });
+
+            document.getElementById('btn-ctrl-allow-uninstall').addEventListener('click', () => {
+                const targetName = currentDevice?.customerName ? `${currentDevice.customerName} (${currentDeviceId})` : currentDeviceId;
+                if (confirm(`🔓 ALLOW UNINSTALL PERMISSION\n\nAre you sure you want to grant uninstall permission to [${targetName}]?\n\nThis will deactivate device admin on the customer phone and allow them to safely uninstall Smart Device Locker.`)) {
+                    fetch(`/api/devices/${encodeURIComponent(currentDeviceId)}/allow-uninstall`, {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + authToken }
+                    })
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res.success) {
+                            showToast(`✅ Uninstall permission sent to [${currentDeviceId}]!`, 'success');
+                            fetchDeviceData();
+                        } else {
+                            showToast(`Failed: ${res.message || 'Error'}`, 'danger');
+                        }
+                    })
+                    .catch(e => showToast('Network error while granting permission.', 'danger'));
                 }
             });
         });
