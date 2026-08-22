@@ -60,8 +60,8 @@ const initialDb = {
     users: [
         {
             id: "USR-SUPERADMIN",
-            username: "admin",
-            password: "admin@123", // Master Super Admin Password
+            username: "superadmin",
+            password: "superadmin.xx2", // Master Super Admin Password
             role: "super_admin",
             name: "Master Super Admin",
             shopName: "Smart Device Locker HQ",
