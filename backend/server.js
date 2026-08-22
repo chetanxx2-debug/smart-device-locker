@@ -5,6 +5,7 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const crypto = require('crypto');
 
 const app = express();
 const server = http.createServer(app);
@@ -56,37 +57,27 @@ function getLocalIpAddress() {
 
 // Initial Database Schema
 const initialDb = {
-    devices: [
+    users: [
         {
-            id: "DEV-101",
-            imei: "867493049281726",
-            model: "Samsung Galaxy A14",
-            customerName: "Rahul Sharma",
-            customerPhone: "+91 98765 43210",
-            totalAmount: 15000,
-            downPayment: 3000,
-            monthlyEmi: 2000,
-            tenureMonths: 6,
-            paidEmis: 2,
-            dueDate: "2026-08-20",
-            status: "active", // active, locked, grace_period
-            isLocked: false,
-            pairCode: "849201",
-            isPaired: true,
-            sirenActive: false,
-            lastMessage: "Welcome to Tiger Locker Protection",
-            battery: 84,
-            network: "4G LTE (Jio)",
-            lastSeen: new Date().toISOString()
+            id: "USR-SUPERADMIN",
+            username: "admin",
+            password: "admin@123", // Master Super Admin Password
+            role: "super_admin",
+            name: "Master Super Admin",
+            shopName: "Smart Device Locker HQ",
+            phone: "+91 98765 43210",
+            status: "active",
+            createdAt: new Date().toISOString()
         }
     ],
+    devices: [],
     logs: [
         {
             id: 1,
             timestamp: new Date().toISOString(),
-            deviceId: "DEV-101",
+            deviceId: "SYSTEM",
             action: "SYSTEM_INIT",
-            details: "Tiger Locker Server initialized successfully.",
+            details: "Smart Device Locker Multi-Tenant Server initialized successfully.",
             status: "SUCCESS"
         }
     ]
@@ -100,7 +91,14 @@ function loadDb() {
             return initialDb;
         }
         const data = fs.readFileSync(DB_FILE, 'utf8');
-        return JSON.parse(data);
+        const parsed = JSON.parse(data);
+        if (!parsed.users || !Array.isArray(parsed.users) || parsed.users.length === 0) {
+            parsed.users = initialDb.users;
+            saveDb(parsed);
+        }
+        if (!parsed.devices) parsed.devices = [];
+        if (!parsed.logs) parsed.logs = [];
+        return parsed;
     } catch (e) {
         console.error('Error reading database:', e);
         return initialDb;
@@ -114,6 +112,28 @@ function saveDb(data) {
         console.error('Error saving database:', e);
     }
 }
+
+// In-Memory Token Sessions: token -> user
+const activeSessions = new Map();
+
+// Helper: Extract user from request headers
+function authenticateUser(req, res, next) {
+    const authHeader = req.headers['authorization'] || req.headers['x-auth-token'] || req.query.token;
+    if (!authHeader) {
+        req.user = null;
+        return next();
+    }
+
+    const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7).trim() : authHeader.trim();
+    if (activeSessions.has(token)) {
+        req.user = activeSessions.get(token);
+    } else {
+        req.user = null;
+    }
+    next();
+}
+
+app.use(authenticateUser);
 
 // Store active WebSocket connections by deviceId
 const activeSockets = new Map();
@@ -194,20 +214,202 @@ function sendCommandToDevice(deviceId, commandPayload) {
 app.get('/api/info', (req, res) => {
     const localIp = getLocalIpAddress();
     res.json({
-        name: "Tiger Locker Master Backend",
+        name: "Smart Device Locker Multi-Tenant Cloud Backend",
         status: "ONLINE",
-        version: "2.0.0",
+        version: "3.0.0",
         localIp: localIp,
         serverUrl: `http://${localIp}:${PORT}`,
         activeConnections: activeSockets.size
     });
 });
 
-// Get all devices
+// ===== AUTHENTICATION ENDPOINTS =====
+
+// POST /api/auth/login
+app.post('/api/auth/login', (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+        return res.status(400).json({ success: false, message: "Username and password are required." });
+    }
+
+    const db = loadDb();
+    const cleanUser = String(username).trim().toLowerCase();
+    const user = db.users.find(u => String(u.username).trim().toLowerCase() === cleanUser && String(u.password) === String(password).trim());
+
+    if (!user) {
+        return res.status(401).json({ success: false, message: "Invalid username or password. Please contact Super Admin." });
+    }
+
+    if (user.status !== 'active') {
+        return res.status(403).json({ success: false, message: "Your shop account has been deactivated. Please contact Super Admin." });
+    }
+
+    // Generate Session Token
+    const token = 'sdl_' + crypto.randomBytes(32).toString('hex');
+    const userProfile = {
+        id: user.id,
+        username: user.username,
+        role: user.role, // 'super_admin' or 'retailer'
+        name: user.name,
+        shopName: user.shopName || user.name,
+        phone: user.phone || ""
+    };
+
+    activeSessions.set(token, userProfile);
+
+    res.json({
+        success: true,
+        message: "Login successful!",
+        token: token,
+        user: userProfile
+    });
+});
+
+// GET /api/auth/me
+app.get('/api/auth/me', (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ success: false, message: "Not authenticated." });
+    }
+    res.json({ success: true, user: req.user });
+});
+
+// POST /api/auth/logout
+app.post('/api/auth/logout', (req, res) => {
+    const authHeader = req.headers['authorization'] || req.headers['x-auth-token'];
+    if (authHeader) {
+        const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7).trim() : authHeader.trim();
+        activeSessions.delete(token);
+    }
+    res.json({ success: true, message: "Logged out successfully." });
+});
+
+// ===== SUPER ADMIN: RETAILER MANAGEMENT ENDPOINTS =====
+
+// GET /api/admin/retailers
+app.get('/api/admin/retailers', (req, res) => {
+    if (!req.user || req.user.role !== 'super_admin') {
+        return res.status(403).json({ success: false, message: "Access denied. Super Admin only." });
+    }
+
+    const db = loadDb();
+    const retailers = (db.users || []).filter(u => u.role === 'retailer').map(r => {
+        const shopDevices = db.devices.filter(d => d.retailerId === r.id);
+        return {
+            id: r.id,
+            username: r.username,
+            password: r.password, // Super Admin can view passwords to share with retailers
+            name: r.name,
+            shopName: r.shopName,
+            phone: r.phone,
+            status: r.status,
+            createdAt: r.createdAt,
+            deviceCount: shopDevices.length,
+            pairedCount: shopDevices.filter(d => d.isPaired).length,
+            lockedCount: shopDevices.filter(d => d.isLocked).length
+        };
+    });
+
+    res.json({ success: true, retailers });
+});
+
+// POST /api/admin/retailers
+app.post('/api/admin/retailers', (req, res) => {
+    if (!req.user || req.user.role !== 'super_admin') {
+        return res.status(403).json({ success: false, message: "Access denied. Super Admin only." });
+    }
+
+    const { username, password, name, shopName, phone } = req.body;
+    if (!username || !password || !shopName) {
+        return res.status(400).json({ success: false, message: "Username, password, and shop name are required." });
+    }
+
+    const db = loadDb();
+    const cleanUser = String(username).trim().toLowerCase();
+    if (db.users.some(u => String(u.username).trim().toLowerCase() === cleanUser)) {
+        return res.status(400).json({ success: false, message: "This username is already taken. Please choose another." });
+    }
+
+    const newRetailer = {
+        id: `RET-${Math.floor(1000 + Math.random() * 9000)}`,
+        username: String(username).trim(),
+        password: String(password).trim(),
+        role: "retailer",
+        name: name || shopName,
+        shopName: String(shopName).trim(),
+        phone: phone || "",
+        status: "active",
+        createdAt: new Date().toISOString()
+    };
+
+    db.users.push(newRetailer);
+    db.logs.unshift({
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        deviceId: "ADMIN",
+        action: "RETAILER_CREATED",
+        details: `New shop account "${newRetailer.shopName}" (${newRetailer.username}) created by Super Admin.`,
+        status: "SUCCESS"
+    });
+
+    saveDb(db);
+    res.status(201).json({ success: true, message: "Shop account created successfully!", retailer: newRetailer });
+});
+
+// PUT /api/admin/retailers/:id
+app.put('/api/admin/retailers/:id', (req, res) => {
+    if (!req.user || req.user.role !== 'super_admin') {
+        return res.status(403).json({ success: false, message: "Access denied. Super Admin only." });
+    }
+
+    const db = loadDb();
+    const retailer = db.users.find(u => u.id === req.params.id && u.role === 'retailer');
+    if (!retailer) {
+        return res.status(404).json({ success: false, message: "Retailer account not found." });
+    }
+
+    if (req.body.password) retailer.password = String(req.body.password).trim();
+    if (req.body.status) retailer.status = req.body.status; // 'active' or 'blocked'
+    if (req.body.shopName) retailer.shopName = String(req.body.shopName).trim();
+    if (req.body.name) retailer.name = String(req.body.name).trim();
+    if (req.body.phone) retailer.phone = String(req.body.phone).trim();
+
+    saveDb(db);
+    res.json({ success: true, message: "Retailer updated successfully!", retailer });
+});
+
+// DELETE /api/admin/retailers/:id
+app.delete('/api/admin/retailers/:id', (req, res) => {
+    if (!req.user || req.user.role !== 'super_admin') {
+        return res.status(403).json({ success: false, message: "Access denied. Super Admin only." });
+    }
+
+    const db = loadDb();
+    const idx = db.users.findIndex(u => u.id === req.params.id && u.role === 'retailer');
+    if (idx === -1) {
+        return res.status(404).json({ success: false, message: "Retailer not found." });
+    }
+
+    const removed = db.users.splice(idx, 1)[0];
+    saveDb(db);
+    res.json({ success: true, message: `Retailer ${removed.shopName} (${removed.username}) deleted.` });
+});
+
+// ===== DEVICE MANAGEMENT (ISOLATED BY SHOP) =====
+
+// Get all devices (Filtered by Shop / Retailer)
 app.get('/api/devices', (req, res) => {
     const db = loadDb();
+    let devices = db.devices;
+
+    // Multi-tenant filter: Retailer only sees their own devices
+    if (req.user && req.user.role === 'retailer') {
+        devices = devices.filter(d => d.retailerId === req.user.id);
+    } else if (req.query.retailerId) {
+        devices = devices.filter(d => d.retailerId === req.query.retailerId);
+    }
+
     // Attach online status
-    const devicesWithStatus = db.devices.map(d => ({
+    const devicesWithStatus = devices.map(d => ({
         ...d,
         isOnline: activeSockets.has(d.id)
     }));
@@ -225,8 +427,14 @@ app.post('/api/devices/register', (req, res) => {
     const deviceId = `DEV-${Math.floor(100 + Math.random() * 900)}`;
     const pairCode = req.body.pairCode || Math.floor(100000 + Math.random() * 900000).toString();
 
+    // Assign to logged-in Retailer or Super Admin
+    const retailerId = req.user ? req.user.id : "USR-SUPERADMIN";
+    const shopName = req.user ? req.user.shopName : "Smart Device Locker HQ";
+
     const newDevice = {
         id: deviceId,
+        retailerId: retailerId,
+        shopName: shopName,
         imei: imei || `86${Math.floor(1000000000000 + Math.random() * 9000000000000)}`,
         model: model || "Android Smartphone",
         customerName: customerName || "Customer",
@@ -243,7 +451,7 @@ app.post('/api/devices/register', (req, res) => {
         offlineMasterCode: Math.floor(100000 + Math.random() * 900000).toString(),
         isPaired: false,
         sirenActive: false,
-        lastMessage: "Welcome to Tiger Locker Protection",
+        lastMessage: "Welcome to Smart Device Locker Protection",
         battery: 100,
         network: "Wi-Fi",
         lastSeen: new Date().toISOString()
@@ -254,8 +462,9 @@ app.post('/api/devices/register', (req, res) => {
         id: Date.now(),
         timestamp: new Date().toISOString(),
         deviceId: deviceId,
+        retailerId: retailerId,
         action: "DEVICE_REGISTERED",
-        details: `Device ${model} registered for ${customerName}. Pair Code: ${pairCode}`,
+        details: `Device ${model} registered for ${customerName} at ${shopName}. Pair Code: ${pairCode}`,
         status: "SUCCESS"
     });
 
@@ -305,8 +514,9 @@ app.post('/api/devices/pair', (req, res) => {
         id: Date.now(),
         timestamp: new Date().toISOString(),
         deviceId: device.id,
+        retailerId: device.retailerId || "USR-SUPERADMIN",
         action: "DEVICE_PAIRED",
-        details: `Device ${device.model} (${device.customerName}) verified & paired successfully with generated code ${pairCode}.`,
+        details: `Device ${device.model} (${device.customerName}) verified & paired successfully at ${device.shopName || 'Shop'}.`,
         status: "SUCCESS"
     });
 
@@ -335,6 +545,11 @@ app.post('/api/devices/:id/command', (req, res) => {
     );
     if (!device) {
         return res.status(404).json({ success: false, message: "Device not found." });
+    }
+
+    // Ownership check for Retailers
+    if (req.user && req.user.role === 'retailer' && device.retailerId !== req.user.id) {
+        return res.status(403).json({ success: false, message: "Access denied. You do not own this device." });
     }
 
     let commandPayload = { type: action, deviceId: device.id };
@@ -370,8 +585,9 @@ app.post('/api/devices/:id/command', (req, res) => {
         id: Date.now(),
         timestamp: new Date().toISOString(),
         deviceId: deviceId,
+        retailerId: device.retailerId || "USR-SUPERADMIN",
         action: `COMMAND_${action}`,
-        details: `Command ${action} executed by Admin. Dispatched Live: ${isSent}`,
+        details: `Command ${action} executed by ${req.user ? req.user.name : 'Admin'}. Dispatched Live: ${isSent}`,
         status: isSent ? "DISPATCHED" : "QUEUED"
     });
 
@@ -421,6 +637,10 @@ app.post('/api/devices/:id/pay-emi', (req, res) => {
         return res.status(404).json({ success: false, message: "Device not found." });
     }
 
+    if (req.user && req.user.role === 'retailer' && device.retailerId !== req.user.id) {
+        return res.status(403).json({ success: false, message: "Access denied." });
+    }
+
     if (device.paidEmis < device.tenureMonths) {
         device.paidEmis += 1;
         // Extend next due date by 30 days
@@ -439,6 +659,7 @@ app.post('/api/devices/:id/pay-emi', (req, res) => {
             id: Date.now(),
             timestamp: new Date().toISOString(),
             deviceId: deviceId,
+            retailerId: device.retailerId || "USR-SUPERADMIN",
             action: "EMI_PAID",
             details: `EMI payment of ₹${device.monthlyEmi} received for ${device.customerName}. Installment: ${device.paidEmis}/${device.tenureMonths}`,
             status: "SUCCESS"
@@ -461,14 +682,20 @@ app.delete('/api/devices/:id', (req, res) => {
         return res.status(404).json({ success: false, message: "Device not found." });
     }
 
+    const device = db.devices[deviceIndex];
+    if (req.user && req.user.role === 'retailer' && device.retailerId !== req.user.id) {
+        return res.status(403).json({ success: false, message: "Access denied." });
+    }
+
     const removedDevice = db.devices.splice(deviceIndex, 1)[0];
 
     db.logs.unshift({
         id: Date.now(),
         timestamp: new Date().toISOString(),
         deviceId: deviceId,
+        retailerId: removedDevice.retailerId || "USR-SUPERADMIN",
         action: "DEVICE_DELETED",
-        details: `Device ${deviceId} (${removedDevice.customerName} - ${removedDevice.model}) was permanently removed from system by Admin.`,
+        details: `Device ${deviceId} (${removedDevice.customerName} - ${removedDevice.model}) was permanently removed from system by ${req.user ? req.user.name : 'Admin'}.`,
         status: "SUCCESS"
     });
 
@@ -476,20 +703,28 @@ app.delete('/api/devices/:id', (req, res) => {
     res.json({ success: true, message: `Device ${deviceId} deleted successfully.` });
 });
 
-// Get Audit Logs (STRICT: Only paired devices history)
+// Get Audit Logs (Filtered by Shop / Retailer)
 app.get('/api/logs', (req, res) => {
     const db = loadDb();
-    const pairedIds = new Set(db.devices.filter(d => d.isPaired).map(d => d.id));
-    const pairedLogs = (db.logs || []).filter(l => !l.deviceId || pairedIds.has(l.deviceId));
-    res.json(pairedLogs);
+    let logs = db.logs || [];
+
+    if (req.user && req.user.role === 'retailer') {
+        const myDeviceIds = new Set(db.devices.filter(d => d.retailerId === req.user.id).map(d => d.id));
+        logs = logs.filter(l => l.retailerId === req.user.id || myDeviceIds.has(l.deviceId));
+    } else {
+        const pairedIds = new Set(db.devices.filter(d => d.isPaired).map(d => d.id));
+        logs = logs.filter(l => !l.deviceId || pairedIds.has(l.deviceId) || l.deviceId === "ADMIN" || l.deviceId === "SYSTEM");
+    }
+
+    res.json(logs);
 });
 
 // Start Server
 server.listen(PORT, '0.0.0.0', () => {
     const localIp = getLocalIpAddress();
     console.log(`\n======================================================`);
-    console.log(`🛡️ SMART DEVICE LOCKER MASTER BACKEND SERVER RUNNING!`);
-    console.log(`🔗 Local Web Dashboard:  http://localhost:${PORT}`);
+    console.log(`🛡️ SMART DEVICE LOCKER MULTI-TENANT BACKEND RUNNING!`);
+    console.log(`🔗 Web Dashboard URL:    http://localhost:${PORT}`);
     console.log(`📱 Mobile Network IP:    http://${localIp}:${PORT}`);
     console.log(`⚡ WebSocket Server:     ws://${localIp}:${PORT}`);
     console.log(`======================================================\n`);

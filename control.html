@@ -591,6 +591,25 @@
         let currentDeviceId = '';
         let currentDevice = null;
         let allDevices = [];
+        let authToken = localStorage.getItem('sdl_auth_token') || '';
+
+        // ── AUTH GUARD ──────────────────────────────────────────────────────
+        (function checkAuthGuard() {
+            if (!authToken) {
+                window.location.href = 'index.html';
+                return;
+            }
+            fetch('/api/auth/me', {
+                headers: { 'Authorization': 'Bearer ' + authToken }
+            }).then(r => {
+                if (!r.ok) {
+                    localStorage.removeItem('sdl_auth_token');
+                    window.location.href = 'index.html';
+                }
+            }).catch(() => {
+                // Network error — allow offline usage but don't redirect
+            });
+        })();
 
         function getDeviceIdFromUrl() {
             const params = new URLSearchParams(window.location.search);
@@ -621,7 +640,9 @@
         }
 
         function fetchDeviceData() {
-            fetch('/api/devices')
+            fetch('/api/devices', {
+                headers: { 'Authorization': 'Bearer ' + authToken }
+            })
                 .then(r => r.json())
                 .then(devices => {
                     const rawList = Array.isArray(devices) ? devices : [];
@@ -698,7 +719,10 @@
             if (!currentDeviceId) return;
             fetch(`/api/devices/${encodeURIComponent(currentDeviceId)}/command`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + authToken
+                },
                 body: JSON.stringify({ action, message })
             })
             .then(r => r.json())
@@ -755,7 +779,10 @@
 
             document.getElementById('btn-ctrl-pay').addEventListener('click', () => {
                 if (confirm(`Confirm Recording EMI Payment for ${currentDevice?.customerName || currentDeviceId}?\nThis will automatically unlock the device and extend the due date by 30 days.`)) {
-                    fetch(`/api/devices/${encodeURIComponent(currentDeviceId)}/pay-emi`, { method: 'POST' })
+                    fetch(`/api/devices/${encodeURIComponent(currentDeviceId)}/pay-emi`, { 
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + authToken }
+                    })
                         .then(r => r.json())
                         .then(res => {
                             showToast(`✅ Payment Recorded! Device unlocked & extended.`, 'success');
@@ -774,7 +801,10 @@
             document.getElementById('btn-ctrl-delete').addEventListener('click', () => {
                 const targetName = currentDevice?.customerName ? `${currentDevice.customerName} (${currentDeviceId})` : currentDeviceId;
                 if (confirm(`🗑️ DELETE DEVICE CONFIRMATION\n\nAre you sure you want to permanently delete [${targetName}] from Tiger Locker?\n\nThis will remove all its records from the system.`)) {
-                    fetch(`/api/devices/${encodeURIComponent(currentDeviceId)}`, { method: 'DELETE' })
+                    fetch(`/api/devices/${encodeURIComponent(currentDeviceId)}`, { 
+                        method: 'DELETE',
+                        headers: { 'Authorization': 'Bearer ' + authToken }
+                    })
                         .then(r => r.json())
                         .then(res => {
                             if (res.success) {

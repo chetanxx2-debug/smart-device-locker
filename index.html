@@ -32,6 +32,15 @@
         </div>
 
         <div class="header-actions">
+            <!-- User Profile & Logout -->
+            <div id="user-badge-display" class="user-profile-badge super-admin" style="display:none;">
+                <i class="fa-solid fa-crown" id="user-role-icon"></i> 
+                <span id="user-display-name">Master Admin</span>
+            </div>
+            <button id="btn-auth-logout" class="btn-auth-logout" style="display:none;" title="Sign out of account">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </button>
+
             <!-- Language Selector Dropdown -->
             <div class="language-picker">
                 <i class="fa-solid fa-globe"></i>
@@ -44,7 +53,7 @@
 
             <div class="system-status">
                 <span class="status-dot pulsing"></span>
-                <span class="status-text" data-i18n="server_status">Backend Server: <strong>ONLINE (HTTPS Encrypted)</strong></span>
+                <span class="status-text" data-i18n="server_status">Cloud Server: <strong>24/7 ONLINE</strong></span>
             </div>
             <button id="btn-reset-demo" class="btn btn-secondary btn-sm">
                 <i class="fa-solid fa-rotate-left"></i> <span data-i18n="reset_demo">Reset Demo Data</span>
@@ -74,6 +83,9 @@
                 </button>
                 <button class="nav-tab" data-tab="tab-audit-logs">
                     <i class="fa-solid fa-list-check"></i> <span data-i18n="tab_audit_logs">Audit Security Logs</span>
+                </button>
+                <button class="nav-tab" id="nav-tab-shops" data-tab="tab-shops" style="display:none;">
+                    <i class="fa-solid fa-store"></i> <span>Manage Shops (Super Admin)</span>
                 </button>
             </nav>
 
@@ -383,6 +395,94 @@
                     </div>
                 </div>
             </div>
+
+            <!-- TAB 6: MANAGE SHOPS (SUPER ADMIN ONLY) -->
+            <div id="tab-shops" class="tab-content">
+                <div class="metrics-grid" style="margin-bottom: 20px;">
+                    <div class="metric-card primary">
+                        <div class="metric-icon"><i class="fa-solid fa-store"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label">Total Registered Shops</span>
+                            <h3 id="stat-total-shops">0</h3>
+                            <span class="metric-sub">Active Retailer Accounts</span>
+                        </div>
+                    </div>
+                    <div class="metric-card success">
+                        <div class="metric-icon"><i class="fa-solid fa-mobile-screen"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label">Total Network Devices</span>
+                            <h3 id="stat-shops-total-devices">0</h3>
+                            <span class="metric-sub">Across All Shops</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create New Retailer Form Card -->
+                <div class="card" style="margin-bottom: 25px;">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-user-plus" style="color:var(--primary);"></i> Create New Shop Account (Generate ID & Password)</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="create-retailer-form">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Shop / Business Name *</label>
+                                    <input type="text" id="new-shop-name" class="form-control" placeholder="e.g. Sharma Mobile Care" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Owner / Contact Person *</label>
+                                    <input type="text" id="new-owner-name" class="form-control" placeholder="e.g. Rajesh Sharma" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Mobile Number *</label>
+                                    <input type="tel" id="new-shop-phone" class="form-control" placeholder="e.g. 9876543210" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Assign Username * (for login)</label>
+                                    <input type="text" id="new-shop-username" class="form-control" placeholder="e.g. sharma_mobiles" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Assign Password *</label>
+                                    <input type="text" id="new-shop-password" class="form-control" placeholder="e.g. Shop@1234" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="margin-top: 15px;">
+                                <i class="fa-solid fa-key"></i> Create & Activate Shop Account
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Retailer Shops Table Card -->
+                <div class="card">
+                    <div class="card-header flex-between">
+                        <h3><i class="fa-solid fa-list-check"></i> Registered Shop Accounts</h3>
+                        <button class="btn btn-secondary btn-sm" id="btn-refresh-shops">
+                            <i class="fa-solid fa-arrows-rotate"></i> Refresh List
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Shop ID & Name</th>
+                                        <th>Owner & Phone</th>
+                                        <th>Login Username</th>
+                                        <th>Password</th>
+                                        <th>Devices</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="retailers-table-body">
+                                    <!-- Dynamic Retailers List Injected -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- RIGHT PANEL: CUSTOMER ANDROID DEVICE SIMULATOR -->
@@ -545,6 +645,45 @@
             </div>
         </section>
     </main>
+
+    <!-- AUTHENTICATION LOGIN OVERLAY MODAL -->
+    <div id="auth-modal-container" class="auth-overlay">
+        <div class="auth-card">
+            <div class="auth-logo">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h2>Smart Device Locker</h2>
+            <p>Enter your authorized Retailer / Admin credentials to access dashboard.</p>
+
+            <div id="auth-error-msg" class="auth-error"></div>
+
+            <form id="auth-login-form" class="auth-form">
+                <div class="auth-field">
+                    <label>Username</label>
+                    <div class="input-group">
+                        <i class="fa-solid fa-user"></i>
+                        <input type="text" id="auth-username" placeholder="Enter assigned username" required autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="auth-field">
+                    <label>Password</label>
+                    <div class="input-group">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="auth-password" placeholder="••••••••" required autocomplete="current-password">
+                    </div>
+                </div>
+
+                <button type="submit" id="btn-auth-submit" class="auth-btn-submit">
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i> Login to Portal
+                </button>
+            </form>
+
+            <div style="margin-top: 20px; font-size: 11px; color: #64748b; line-height: 1.4;">
+                <i class="fa-solid fa-lock"></i> Secured by Multi-Tenant Encryption &bull; Contact Master Admin if you forgot your credentials.
+            </div>
+        </div>
+    </div>
 
     <!-- Global Toast Container -->
     <div id="toast-container" class="toast-container"></div>

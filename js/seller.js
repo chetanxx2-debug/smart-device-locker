@@ -1,4 +1,4 @@
-/* Tiger Locker - Seller Portal UI Controller (js/seller.js) */
+/* Smart Device Locker - Multi-Tenant Seller & Super Admin Portal UI Controller (js/seller.js) */
 
 class SellerPortal {
     constructor() {
@@ -6,21 +6,35 @@ class SellerPortal {
         this.api = window.api;
         this.emiEngine = window.emiEngine;
         this.backendDevices = []; // Live devices from backend server
+        this.retailersList = [];  // List of shops for Super Admin
         this.quickSearchQuery = '';
         this.tableSearchQuery = '';
         this.selectedDeviceId = localStorage.getItem('tiger_active_device_id') || '';
+        this.token = localStorage.getItem('sdl_auth_token') || '';
+        this.currentUser = null;
         this.init();
     }
 
     init() {
+        this.setupAuth();
         this.setupTabs();
         this.setupForm();
         this.setupSearch();
         this.setupCommandConsole();
-        this.loadBackendDevicesAndRender();
+        this.setupShopManagement();
 
-        // Auto-refresh backend devices every 5 seconds
-        setInterval(() => this.loadBackendDevicesAndRender(), 5000);
+        // Check authentication state
+        this.checkAuth();
+
+        // Auto-refresh backend devices every 4 seconds
+        setInterval(() => {
+            if (this.currentUser) {
+                this.loadBackendDevicesAndRender();
+                if (this.currentUser.role === 'super_admin') {
+                    this.loadRetailersList();
+                }
+            }
+        }, 4000);
 
         // Listen to FCM commands to keep live feed updated
         window.fcmBus.subscribe((noti) => {
@@ -30,7 +44,324 @@ class SellerPortal {
         });
     }
 
-    // Setup live search listeners
+    getAuthHeaders() {
+        const headers = { 'Content-Type': 'application/json' };
+        if (this.token) {
+            headers['Authorization'] = `Bearer ${this.token}`;
+        }
+        return headers;
+    }
+
+    // ===== AUTHENTICATION & LOGIN LOGIC =====
+    setupAuth() {
+        const loginForm = document.getElementById('auth-login-form');
+        const logoutBtn = document.getElementById('btn-auth-logout');
+
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const userField = document.getElementById('auth-username');
+                const passField = document.getElementById('auth-password');
+                const errBox = document.getElementById('auth-error-msg');
+                const submitBtn = document.getElementById('btn-auth-submit');
+
+                const username = userField ? userField.value.trim() : '';
+                const password = passField ? passField.value.trim() : '';
+
+                if (!username || !password) return;
+
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
+                }
+
+                fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                })
+                .then(r => r.json())
+                .then(res => {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i> Login to Portal';
+                    }
+
+                    if (res.success && res.token) {
+                        this.token = res.token;
+                        this.currentUser = res.user;
+                        localStorage.setItem('sdl_auth_token', this.token);
+                        if (errBox) errBox.style.display = 'none';
+
+                        this.applyUserSession();
+                        this.showToast(`Welcome, ${res.user.name || res.user.shopName}!`, 'success');
+                    } else {
+                        if (errBox) {
+                            errBox.textContent = res.message || 'Invalid username or password.';
+                            errBox.style.display = 'block';
+                        }
+                    }
+                })
+                .catch(err => {
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = '<i class="fa-solid fa-arrow-right-to-bracket"></i> Login to Portal';
+                    }
+                    if (errBox) {
+                        errBox.textContent = 'Server connection error. Please try again.';
+                        errBox.style.display = 'block';
+                    }
+                });
+            });
+        }
+
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to sign out?')) {
+                    this.logout();
+                }
+            });
+        }
+    }
+
+    checkAuth() {
+        if (!this.token) {
+            this.showLoginModal();
+            return;
+        }
+
+        fetch('/api/auth/me', {
+            headers: this.getAuthHeaders()
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success && res.user) {
+                this.currentUser = res.user;
+                this.applyUserSession();
+            } else {
+                this.token = '';
+                localStorage.removeItem('sdl_auth_token');
+                this.showLoginModal();
+            }
+        })
+        .catch(() => {
+            // Offline or server start: prompt login
+            this.showLoginModal();
+        });
+    }
+
+    showLoginModal() {
+        const modal = document.getElementById('auth-modal-container');
+        if (modal) modal.style.display = 'flex';
+
+        const userBadge = document.getElementById('user-badge-display');
+        const logoutBtn = document.getElementById('btn-auth-logout');
+        const shopsTab = document.getElementById('nav-tab-shops');
+
+        if (userBadge) userBadge.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'none';
+        if (shopsTab) shopsTab.style.display = 'none';
+    }
+
+    applyUserSession() {
+        const modal = document.getElementById('auth-modal-container');
+        if (modal) modal.style.display = 'none';
+
+        const userBadge = document.getElementById('user-badge-display');
+        const userDisplayName = document.getElementById('user-display-name');
+        const userRoleIcon = document.getElementById('user-role-icon');
+        const logoutBtn = document.getElementById('btn-auth-logout');
+        const shopsTab = document.getElementById('nav-tab-shops');
+
+        if (this.currentUser) {
+            if (userBadge && userDisplayName) {
+                userBadge.style.display = 'inline-flex';
+                if (this.currentUser.role === 'super_admin') {
+                    userBadge.className = 'user-profile-badge super-admin';
+                    userDisplayName.textContent = `👑 Master Admin (${this.currentUser.username})`;
+                    if (userRoleIcon) userRoleIcon.className = 'fa-solid fa-crown';
+                    if (shopsTab) shopsTab.style.display = 'inline-flex';
+                    this.loadRetailersList();
+                } else {
+                    userBadge.className = 'user-profile-badge';
+                    userDisplayName.textContent = `🏪 ${this.currentUser.shopName} (${this.currentUser.name})`;
+                    if (userRoleIcon) userRoleIcon.className = 'fa-solid fa-store';
+                    if (shopsTab) shopsTab.style.display = 'none';
+                }
+            }
+            if (logoutBtn) logoutBtn.style.display = 'inline-flex';
+
+            this.loadBackendDevicesAndRender();
+        }
+    }
+
+    logout() {
+        fetch('/api/auth/logout', {
+            method: 'POST',
+            headers: this.getAuthHeaders()
+        }).finally(() => {
+            this.token = '';
+            this.currentUser = null;
+            localStorage.removeItem('sdl_auth_token');
+            this.showLoginModal();
+            this.showToast('Logged out successfully.', 'info');
+        });
+    }
+
+    // ===== SUPER ADMIN: SHOP / RETAILER MANAGEMENT =====
+    setupShopManagement() {
+        const createForm = document.getElementById('create-retailer-form');
+        const refreshBtn = document.getElementById('btn-refresh-shops');
+
+        if (createForm) {
+            createForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const shopName = document.getElementById('new-shop-name').value.trim();
+                const ownerName = document.getElementById('new-owner-name').value.trim();
+                const phone = document.getElementById('new-shop-phone').value.trim();
+                const username = document.getElementById('new-shop-username').value.trim();
+                const password = document.getElementById('new-shop-password').value.trim();
+
+                if (!shopName || !username || !password) return;
+
+                fetch('/api/admin/retailers', {
+                    method: 'POST',
+                    headers: this.getAuthHeaders(),
+                    body: JSON.stringify({ shopName, name: ownerName, phone, username, password })
+                })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        this.showToast(`✅ Shop "${shopName}" created! Login: ${username}`, 'success');
+                        createForm.reset();
+                        this.loadRetailersList();
+                    } else {
+                        this.showToast(`Error: ${res.message || 'Could not create shop'}`, 'danger');
+                    }
+                })
+                .catch(err => {
+                    console.error('Create retailer error:', err);
+                    this.showToast('Network error while creating shop account.', 'danger');
+                });
+            });
+        }
+
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                this.loadRetailersList();
+                this.showToast('Shop accounts list refreshed.', 'info');
+            });
+        }
+    }
+
+    loadRetailersList() {
+        if (!this.currentUser || this.currentUser.role !== 'super_admin') return;
+
+        fetch('/api/admin/retailers', {
+            headers: this.getAuthHeaders()
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success && Array.isArray(res.retailers)) {
+                this.retailersList = res.retailers;
+                this.renderRetailersTable();
+            }
+        })
+        .catch(err => console.error('Error fetching retailers:', err));
+    }
+
+    renderRetailersTable() {
+        const tbody = document.getElementById('retailers-table-body');
+        const statTotalShops = document.getElementById('stat-total-shops');
+        const statShopsTotalDevices = document.getElementById('stat-shops-total-devices');
+
+        if (statTotalShops) statTotalShops.textContent = this.retailersList.length;
+
+        const totalNetworkDevices = this.retailersList.reduce((sum, r) => sum + (r.deviceCount || 0), 0);
+        if (statShopsTotalDevices) statShopsTotalDevices.textContent = totalNetworkDevices;
+
+        if (!tbody) return;
+
+        if (!this.retailersList.length) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-dim); padding:20px;">No retailer shop accounts created yet. Use form above to create one.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = this.retailersList.map(r => {
+            const isBlocked = r.status === 'blocked';
+            const statusBadge = isBlocked ? '<span class="badge badge-danger">🔴 Blocked</span>' : '<span class="badge badge-success">🟢 Active</span>';
+
+            return `
+                <tr>
+                    <td>
+                        <strong style="color:var(--primary);">${r.shopName}</strong><br>
+                        <small style="color:var(--text-muted); font-size:11px;">ID: ${r.id}</small>
+                    </td>
+                    <td>
+                        <strong>${r.name || 'Owner'}</strong><br>
+                        <small style="color:var(--text-muted);"><i class="fa-solid fa-phone"></i> ${r.phone || 'N/A'}</small>
+                    </td>
+                    <td><code>${r.username}</code></td>
+                    <td><code style="color:#f59e0b; font-weight:700;">${r.password}</code></td>
+                    <td>
+                        <strong>${r.pairedCount || 0}</strong> Active <br>
+                        <small style="color:var(--text-muted);">(${r.deviceCount || 0} Total)</small>
+                    </td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <div style="display:flex; gap:6px;">
+                            ${isBlocked 
+                                ? `<button class="btn btn-sm btn-success" title="Unblock Shop" onclick="sellerPortal.toggleRetailerStatus('${r.id}', 'active')"><i class="fa-solid fa-check"></i> Activate</button>`
+                                : `<button class="btn btn-sm btn-warning" title="Block Shop Access" onclick="sellerPortal.toggleRetailerStatus('${r.id}', 'blocked')"><i class="fa-solid fa-ban"></i> Block</button>`
+                            }
+                            <button class="btn btn-sm btn-danger" title="Delete Shop Account" onclick="sellerPortal.deleteRetailerAccount('${r.id}', '${(r.shopName || '').replace(/'/g, "\\'")}')">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    toggleRetailerStatus(retailerId, newStatus) {
+        fetch(`/api/admin/retailers/${encodeURIComponent(retailerId)}`, {
+            method: 'PUT',
+            headers: this.getAuthHeaders(),
+            body: JSON.stringify({ status: newStatus })
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                this.showToast(`Shop account marked as ${newStatus}!`, 'success');
+                this.loadRetailersList();
+            } else {
+                this.showToast(res.message || 'Update failed.', 'warning');
+            }
+        })
+        .catch(err => console.error('Status update error:', err));
+    }
+
+    deleteRetailerAccount(retailerId, shopName) {
+        if (!confirm(`⚠️ Are you sure you want to permanently delete shop account: "${shopName}"?`)) return;
+
+        fetch(`/api/admin/retailers/${encodeURIComponent(retailerId)}`, {
+            method: 'DELETE',
+            headers: this.getAuthHeaders()
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                this.showToast(`🗑️ Shop account "${shopName}" deleted.`, 'danger');
+                this.loadRetailersList();
+            } else {
+                this.showToast(res.message || 'Delete failed.', 'warning');
+            }
+        })
+        .catch(err => console.error('Delete retailer error:', err));
+    }
+
+    // ===== SEARCH & CONSOLE SETUP =====
     setupSearch() {
         const quickInput = document.getElementById('quick-search-device');
         const clearQuickBtn = document.getElementById('btn-clear-quick-search');
@@ -67,21 +398,24 @@ class SellerPortal {
         }
     }
 
-    // Load devices from backend server API (source of truth)
+    // Load devices from backend server API (Filtered automatically by Shop)
     loadBackendDevicesAndRender() {
-        fetch('/api/devices')
-            .then(r => r.json())
-            .then(devices => {
-                this.backendDevices = Array.isArray(devices) ? devices : [];
-                this.renderDeviceDropdownFromBackend();
-                this.renderDevicesTableFromBackend();
-                this.renderMetrics();
-            })
-            .catch(() => {
-                // Fallback to local db if server not reachable
-                this.renderDeviceDropdown();
-                this.renderDevicesTable();
-            });
+        if (!this.currentUser) return;
+
+        fetch('/api/devices', {
+            headers: this.getAuthHeaders()
+        })
+        .then(r => r.json())
+        .then(devices => {
+            this.backendDevices = Array.isArray(devices) ? devices : [];
+            this.renderDeviceDropdownFromBackend();
+            this.renderDevicesTableFromBackend();
+            this.renderMetrics();
+        })
+        .catch(() => {
+            this.renderDeviceDropdown();
+            this.renderDevicesTable();
+        });
     }
 
     setupTabs() {
@@ -93,7 +427,8 @@ class SellerPortal {
 
                 tab.classList.add('active');
                 const targetId = tab.dataset.tab;
-                document.getElementById(targetId).classList.add('active');
+                const contentEl = document.getElementById(targetId);
+                if (contentEl) contentEl.classList.add('active');
             });
         });
     }
@@ -122,10 +457,15 @@ class SellerPortal {
             .filter(e => e.status === 'OVERDUE')
             .reduce((sum, e) => sum + e.amount, 0);
 
-        document.getElementById('stat-total-devices').textContent = total;
-        document.getElementById('stat-active-devices').textContent = active;
-        document.getElementById('stat-locked-devices').textContent = locked;
-        document.getElementById('stat-pending-emi').textContent = `₹${overdueTotal.toLocaleString('en-IN')}`;
+        const elTotal = document.getElementById('stat-total-devices');
+        const elActive = document.getElementById('stat-active-devices');
+        const elLocked = document.getElementById('stat-locked-devices');
+        const elPending = document.getElementById('stat-pending-emi');
+
+        if (elTotal) elTotal.textContent = total;
+        if (elActive) elActive.textContent = active;
+        if (elLocked) elLocked.textContent = locked;
+        if (elPending) elPending.textContent = `₹${overdueTotal.toLocaleString('en-IN')}`;
     }
 
     renderLiveFeed() {
@@ -166,7 +506,6 @@ class SellerPortal {
     }
 
     renderDeviceDropdown() {
-        // Fallback - use local db
         const select = document.getElementById('active-device-select');
         if (!select) return;
         const devices = this.db.getDevices().filter(d => d.isPaired);
@@ -220,18 +559,16 @@ class SellerPortal {
 
         const optionsHtml = devices.map(d => {
             const statusLabel = d.isLocked ? '🔒 Locked' : '🟢 Active';
-            return `<option value="${d.id}">[${d.id}] ${d.customerName} — ${d.model} (${statusLabel})</option>`;
+            const shopLabel = (this.currentUser && this.currentUser.role === 'super_admin' && d.shopName) ? ` [${d.shopName}]` : '';
+            return `<option value="${d.id}">[${d.id}] ${d.customerName} — ${d.model}${shopLabel} (${statusLabel})</option>`;
         }).join('');
 
-        // Only update innerHTML if options changed to prevent glitching
         if (select.innerHTML !== optionsHtml) {
             select.innerHTML = optionsHtml;
         }
 
-        // Strictly determine which device to select:
         let targetId = this.selectedDeviceId;
         if (!targetId || !devices.find(d => d.id === targetId)) {
-            // Fallback to first available paired device in filtered list
             targetId = devices[0].id;
         }
 
@@ -241,12 +578,10 @@ class SellerPortal {
         this.updateQuickConsoleInfoFromBackend();
     }
 
-    // Helper: Select device from table and scroll to Console
     selectDeviceForConsole(deviceId) {
         this.selectedDeviceId = deviceId;
         localStorage.setItem('tiger_active_device_id', deviceId);
 
-        // Switch to Dashboard Tab
         document.querySelectorAll('.seller-nav .nav-tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         const dashTabBtn = document.querySelector('[data-tab="tab-dashboard"]');
@@ -254,7 +589,6 @@ class SellerPortal {
         const dashTab = document.getElementById('tab-dashboard');
         if (dashTab) dashTab.classList.add('active');
 
-        // Clear search so all devices show
         const quickInput = document.getElementById('quick-search-device');
         if (quickInput) quickInput.value = '';
         this.quickSearchQuery = '';
@@ -278,11 +612,15 @@ class SellerPortal {
         const dev = this.db.getDeviceByImei(imei);
         if (!dev) return;
         const cust = this.db.getCustomers().find(c => c.id === dev.customerId);
-        document.getElementById('quick-cust-name').textContent = cust ? cust.name : 'Unknown';
-        document.getElementById('quick-cust-imei').textContent = dev.imei;
+        const nameEl = document.getElementById('quick-cust-name');
+        const imeiEl = document.getElementById('quick-cust-imei');
         const statusBadge = document.getElementById('quick-cust-status');
-        statusBadge.textContent = dev.status;
-        statusBadge.className = `badge ${dev.status === 'ACTIVE' ? 'badge-success' : dev.status === 'LOCKED' ? 'badge-danger' : 'badge-warning'}`;
+        if (nameEl) nameEl.textContent = cust ? cust.name : 'Unknown';
+        if (imeiEl) imeiEl.textContent = dev.imei;
+        if (statusBadge) {
+            statusBadge.textContent = dev.status;
+            statusBadge.className = `badge ${dev.status === 'ACTIVE' ? 'badge-success' : dev.status === 'LOCKED' ? 'badge-danger' : 'badge-warning'}`;
+        }
     }
 
     updateQuickConsoleInfoFromBackend() {
@@ -292,13 +630,18 @@ class SellerPortal {
         const dev = this.backendDevices.find(d => d.id === deviceId);
         if (!dev) return;
 
-        document.getElementById('quick-cust-name').textContent = dev.customerName || 'Unknown';
-        document.getElementById('quick-cust-imei').textContent = dev.imei || dev.id;
-
+        const nameEl = document.getElementById('quick-cust-name');
+        const imeiEl = document.getElementById('quick-cust-imei');
         const statusBadge = document.getElementById('quick-cust-status');
-        const statusText = dev.isLocked ? 'LOCKED' : dev.isPaired ? 'ACTIVE' : 'UNPAIRED';
-        statusBadge.textContent = statusText;
-        statusBadge.className = `badge ${dev.isLocked ? 'badge-danger' : dev.isPaired ? 'badge-success' : 'badge-warning'}`;
+
+        if (nameEl) nameEl.textContent = dev.customerName || 'Unknown';
+        if (imeiEl) imeiEl.textContent = dev.imei || dev.id;
+
+        if (statusBadge) {
+            const statusText = dev.isLocked ? 'LOCKED' : dev.isPaired ? 'ACTIVE' : 'UNPAIRED';
+            statusBadge.textContent = statusText;
+            statusBadge.className = `badge ${dev.isLocked ? 'badge-danger' : dev.isPaired ? 'badge-success' : 'badge-warning'}`;
+        }
 
         const controlBtn = document.getElementById('btn-open-dedicated-control');
         if (controlBtn) {
@@ -307,18 +650,16 @@ class SellerPortal {
         }
     }
 
-    // Send command directly to backend by device ID
     sendBackendCommand(deviceId, action, message) {
         const url = `/api/devices/${encodeURIComponent(deviceId)}/command`;
         fetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: this.getAuthHeaders(),
             body: JSON.stringify({ action, message: message || '' })
         })
         .then(r => r.json())
         .then(result => {
             console.log(`[CMD] ${action} → ${deviceId}:`, result);
-            // Refresh device list to show updated status
             setTimeout(() => this.loadBackendDevicesAndRender(), 500);
         })
         .catch(e => console.error('Command error:', e));
@@ -326,85 +667,81 @@ class SellerPortal {
 
     setupCommandConsole() {
         const getSelectedDeviceId = () => document.getElementById('active-device-select').value;
-        const getSelectedDevName = () => {
-            const id = getSelectedDeviceId();
-            const dev = this.backendDevices.find(d => d.id === id);
-            return dev ? `[${id}] ${dev.customerName}` : `[${id}]`;
-        };
 
-        document.getElementById('cmd-lock').addEventListener('click', () => {
-            const deviceId = getSelectedDeviceId();
-            if (!deviceId) return this.showToast('Please select a device first!', 'warning');
-            const targetName = getSelectedDevName();
-            const msg = prompt(`Lock message to show on phone for ${targetName}:`, 'Your EMI is overdue. Please contact seller to unlock.');
-            if (msg !== null) {
-                this.sendBackendCommand(deviceId, 'LOCK', msg);
-                this.showToast(`🔒 Lock command sent to ${targetName}!`, 'danger');
-            }
-        });
+        const btnLock = document.getElementById('cmd-lock');
+        const btnUnlock = document.getElementById('cmd-unlock');
+        const btnMsg = document.getElementById('cmd-msg');
+        const btnSound = document.getElementById('cmd-sound');
+        const btnInfo = document.getElementById('cmd-info');
+        const btnWipe = document.getElementById('cmd-wipe');
 
-        document.getElementById('cmd-unlock').addEventListener('click', () => {
-            const deviceId = getSelectedDeviceId();
-            if (!deviceId) return this.showToast('Please select a device first!', 'warning');
-            const targetName = getSelectedDevName();
-            this.sendBackendCommand(deviceId, 'UNLOCK');
-            this.showToast(`🔓 Unlock command sent to ${targetName}!`, 'success');
-        });
+        if (btnLock) {
+            btnLock.addEventListener('click', () => {
+                const deviceId = getSelectedDeviceId();
+                if (!deviceId) return this.showToast('Please select a device first!', 'warning');
+                this.sendBackendCommand(deviceId, 'LOCK', 'Device access restricted due to pending EMI.');
+                this.showToast(`🔒 Lock Command sent to [${deviceId}]!`, 'danger');
+            });
+        }
 
-        document.getElementById('cmd-message').addEventListener('click', () => {
-            const deviceId = getSelectedDeviceId();
-            if (!deviceId) return this.showToast('Please select a device first!', 'warning');
-            const targetName = getSelectedDevName();
-            const msg = prompt(`Message to send to ${targetName}:`, 'Reminder: Your EMI installment is due.');
-            if (msg) {
-                this.sendBackendCommand(deviceId, 'MESSAGE', msg);
-                this.showToast(`📢 Message sent to ${targetName}!`, 'info');
-            }
-        });
+        if (btnUnlock) {
+            btnUnlock.addEventListener('click', () => {
+                const deviceId = getSelectedDeviceId();
+                if (!deviceId) return this.showToast('Please select a device first!', 'warning');
+                this.sendBackendCommand(deviceId, 'UNLOCK');
+                this.showToast(`🔓 Unlock Command sent to [${deviceId}]!`, 'success');
+            });
+        }
 
-        const soundBtn = document.getElementById('cmd-sound');
-        let isSirenActive = false;
+        if (btnMsg) {
+            btnMsg.addEventListener('click', () => {
+                const deviceId = getSelectedDeviceId();
+                if (!deviceId) return this.showToast('Please select a device first!', 'warning');
+                const customMsg = prompt('Enter message to display on phone screen:', 'Dear Customer, your EMI installment is due. Please pay today.');
+                if (customMsg !== null && customMsg.trim() !== '') {
+                    this.sendBackendCommand(deviceId, 'MESSAGE', customMsg.trim());
+                    this.showToast(`💬 Message sent to [${deviceId}]!`, 'info');
+                }
+            });
+        }
 
-        soundBtn.addEventListener('click', () => {
-            const deviceId = getSelectedDeviceId();
-            if (!deviceId) return this.showToast('Please select a device first!', 'warning');
+        if (btnSound) {
+            btnSound.addEventListener('click', () => {
+                const deviceId = getSelectedDeviceId();
+                if (!deviceId) return this.showToast('Please select a device first!', 'warning');
+                const dev = this.backendDevices.find(d => d.id === deviceId);
+                if (dev && dev.sirenActive) {
+                    this.sendBackendCommand(deviceId, 'STOP_SIREN');
+                    this.showToast(`🔇 Siren Stopped on [${deviceId}]!`, 'info');
+                } else {
+                    this.sendBackendCommand(deviceId, 'SIREN');
+                    this.showToast(`🔊 Siren Triggered on [${deviceId}]!`, 'warning');
+                }
+            });
+        }
 
-            if (!isSirenActive) {
-                isSirenActive = true;
-                this.sendBackendCommand(deviceId, 'SIREN_ON');
-                soundBtn.classList.remove('btn-warning');
-                soundBtn.classList.add('btn-danger', 'pulsing-btn');
-                soundBtn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i> <span>Siren: ON (Click to OFF)</span>';
-                this.showToast('🔊 Alarm Siren ON!', 'warning');
-            } else {
-                isSirenActive = false;
-                this.sendBackendCommand(deviceId, 'SIREN_OFF');
-                soundBtn.classList.remove('btn-danger', 'pulsing-btn');
-                soundBtn.classList.add('btn-warning');
-                soundBtn.innerHTML = '<i class="fa-solid fa-volume-high"></i> <span>Alarm Siren</span>';
-                this.showToast('🔕 Alarm Siren OFF!', 'info');
-            }
-        });
+        if (btnInfo) {
+            btnInfo.addEventListener('click', () => {
+                const deviceId = getSelectedDeviceId();
+                if (!deviceId) return this.showToast('Please select a device first!', 'warning');
+                const dev = this.backendDevices.find(d => d.id === deviceId);
+                if (dev) {
+                    alert(`[DEVICE STATUS]\nCustomer: ${dev.customerName}\nShop: ${dev.shopName || 'Main'}\nIMEI: ${dev.imei}\nModel: ${dev.model}\nStatus: ${dev.isLocked ? 'LOCKED' : 'ACTIVE'}\nBattery: ${dev.battery}%\nNetwork: ${dev.network}\nLast Seen: ${new Date(dev.lastSeen).toLocaleString()}`);
+                }
+            });
+        }
 
-        document.getElementById('cmd-info').addEventListener('click', () => {
-            const deviceId = getSelectedDeviceId();
-            if (!deviceId) return this.showToast('Please select a device first!', 'warning');
-            const dev = this.backendDevices.find(d => d.id === deviceId);
-            if (dev) {
-                alert(`[DEVICE STATUS]\nCustomer: ${dev.customerName}\nIMEI: ${dev.imei}\nModel: ${dev.model}\nStatus: ${dev.isLocked ? 'LOCKED' : 'ACTIVE'}\nBattery: ${dev.battery}%\nNetwork: ${dev.network}\nLast Seen: ${new Date(dev.lastSeen).toLocaleString()}`);
-            }
-        });
-
-        document.getElementById('cmd-wipe').addEventListener('click', () => {
-            const deviceId = getSelectedDeviceId();
-            if (!deviceId) return this.showToast('Please select a device first!', 'warning');
-            if (confirm('⚠️ Are you sure? This will send Remote Wipe command to the device!')) {
-                this.sendBackendCommand(deviceId, 'WIPE');
-                this.showToast('⚠️ Remote Wipe command dispatched!', 'danger');
-            }
-        });
+        if (btnWipe) {
+            btnWipe.addEventListener('click', () => {
+                const deviceId = getSelectedDeviceId();
+                if (!deviceId) return this.showToast('Please select a device first!', 'warning');
+                if (confirm('⚠️ Are you sure? This will send Remote Wipe command to the device!')) {
+                    this.sendBackendCommand(deviceId, 'WIPE');
+                    this.showToast('⚠️ Remote Wipe command dispatched!', 'danger');
+                }
+            });
+        }
     }
-
 
     setupForm() {
         const form = document.getElementById('add-device-form');
@@ -413,17 +750,19 @@ class SellerPortal {
         const tenureSelect = document.getElementById('input-emi-tenure');
         const monthlyEmiInput = document.getElementById('input-monthly-emi');
 
+        if (!form) return;
+
         const updateEmiCalculation = () => {
             const total = Number(totalPriceInput.value) || 0;
             const down = Number(downPaymentInput.value) || 0;
             const months = Number(tenureSelect.value) || 6;
             const emi = this.emiEngine.calculateMonthlyEmi(total, down, months);
-            monthlyEmiInput.value = `₹${emi.toLocaleString('en-IN')} / month`;
+            if (monthlyEmiInput) monthlyEmiInput.value = `₹${emi.toLocaleString('en-IN')} / month`;
         };
 
-        totalPriceInput.addEventListener('input', updateEmiCalculation);
-        downPaymentInput.addEventListener('input', updateEmiCalculation);
-        tenureSelect.addEventListener('change', updateEmiCalculation);
+        if (totalPriceInput) totalPriceInput.addEventListener('input', updateEmiCalculation);
+        if (downPaymentInput) downPaymentInput.addEventListener('input', updateEmiCalculation);
+        if (tenureSelect) tenureSelect.addEventListener('change', updateEmiCalculation);
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -440,27 +779,50 @@ class SellerPortal {
             const tenure = Number(tenureSelect.value);
             const monthlyEmi = this.emiEngine.calculateMonthlyEmi(totalPrice, downPayment, tenure);
 
-            const result = this.api.registerDevice(
-                { name: custName, phone: custPhone, kyc: custKyc },
-                { imei: devImei, model: devModel, totalPrice, downPayment, tenure, monthlyEmi },
-                {}
-            );
+            // Call Backend /api/devices/register with Auth Headers
+            fetch('/api/devices/register', {
+                method: 'POST',
+                headers: this.getAuthHeaders(),
+                body: JSON.stringify({
+                    customerName: custName,
+                    customerPhone: custPhone,
+                    model: devModel,
+                    imei: devImei,
+                    totalAmount: totalPrice,
+                    downPayment: downPayment,
+                    monthlyEmi: monthlyEmi,
+                    tenureMonths: tenure
+                })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success && res.device) {
+                    const otpCode = res.device.pairCode;
+                    const modalResult = document.getElementById('pairing-modal-result');
+                    const codeDisplay = document.getElementById('generated-otp-code');
+                    const qrDisplay = document.getElementById('generated-qr-code');
 
-            // Display Pairing Output
-            document.getElementById('pairing-modal-result').classList.remove('hidden');
-            document.getElementById('generated-otp-code').textContent = result.otpCode;
-            
-            // Generate QR Code SVG
-            document.getElementById('generated-qr-code').innerHTML = `
-                <svg viewBox="0 0 100 100" width="120" height="120">
-                    <rect width="100" height="100" fill="white"/>
-                    <path d="M10 10h30v30h-30z M15 15h20v20h-20z M60 10h30v30h-30z M65 15h20v20h-20z M10 60h30v30h-30z M15 65h20v20h-20z M45 10h10v10h-10z M45 30h10v10h-10z M45 60h10v10h-10z M60 60h15v15h-15z M75 75h15v15h-15z M60 80h10v10h-10z" fill="black"/>
-                </svg>
-            `;
+                    if (modalResult) modalResult.classList.remove('hidden');
+                    if (codeDisplay) codeDisplay.textContent = otpCode;
+                    if (qrDisplay) {
+                        qrDisplay.innerHTML = `
+                            <svg viewBox="0 0 100 100" width="120" height="120">
+                                <rect width="100" height="100" fill="white"/>
+                                <path d="M10 10h30v30h-30z M15 15h20v20h-20z M60 10h30v30h-30z M65 15h20v20h-20z M10 60h30v30h-30z M15 65h20v20h-20z M45 10h10v10h-10z M45 30h10v10h-10z M45 60h10v10h-10z M60 60h15v15h-15z M75 75h15v15h-15z M60 80h10v10h-10z" fill="black"/>
+                            </svg>
+                        `;
+                    }
 
-            this.showToast(`New Device Enrolled! Pairing Code: ${result.otpCode}`, 'success');
-            this.loadBackendDevicesAndRender();
-            this.renderAll();
+                    this.showToast(`New Device Enrolled! Pairing Code: ${otpCode}`, 'success');
+                    this.loadBackendDevicesAndRender();
+                } else {
+                    this.showToast(`Failed: ${res.message || 'Error registering device'}`, 'warning');
+                }
+            })
+            .catch(err => {
+                console.error('Register error:', err);
+                this.showToast('Network error while registering device.', 'danger');
+            });
         });
     }
 
@@ -468,7 +830,7 @@ class SellerPortal {
         const tbody = document.getElementById('devices-table-body');
         if (!tbody) return;
 
-        const devices = this.db.getDevices();
+        const devices = this.db.getDevices().filter(d => d.isPaired);
         const customers = this.db.getCustomers();
 
         tbody.innerHTML = devices.map(d => {
@@ -519,11 +881,13 @@ class SellerPortal {
                 const imei = (d.imei || '').toLowerCase();
                 const id = (d.id || '').toLowerCase();
                 const model = (d.model || '').toLowerCase();
+                const shop = (d.shopName || '').toLowerCase();
                 return name.includes(this.tableSearchQuery) || 
                        phone.includes(this.tableSearchQuery) || 
                        imei.includes(this.tableSearchQuery) || 
                        id.includes(this.tableSearchQuery) || 
-                       model.includes(this.tableSearchQuery);
+                       model.includes(this.tableSearchQuery) ||
+                       shop.includes(this.tableSearchQuery);
             });
         }
 
@@ -533,17 +897,19 @@ class SellerPortal {
         }
 
         tbody.innerHTML = devices.map(d => {
-            const statusText = d.isLocked ? 'LOCKED' : d.isPaired ? 'ACTIVE' : 'UNPAIRED';
-            const statusClass = d.isLocked ? 'badge-danger' : d.isPaired ? 'badge-success' : 'badge-warning';
+            const statusText = d.isLocked ? 'LOCKED' : 'ACTIVE';
+            const statusClass = d.isLocked ? 'badge-danger' : 'badge-success';
             const onlineIcon = d.isOnline ? '🟢 Online' : '⚪ Standby';
             const lastSeenStr = d.lastSeen ? new Date(d.lastSeen).toLocaleTimeString() : 'N/A';
             const isSirenOn = !!d.sirenActive;
+            const shopBadge = (this.currentUser && this.currentUser.role === 'super_admin' && d.shopName) ? `<br><small style="color:#38bdf8;"><i class="fa-solid fa-store"></i> ${d.shopName}</small>` : '';
 
             return `
                 <tr>
                     <td>
                         <strong style="color:var(--primary);">${d.id}</strong><br>
                         <code style="font-size:11px;">${d.imei || 'No IMEI'}</code>
+                        ${shopBadge}
                     </td>
                     <td>
                         <strong>${d.customerName || 'N/A'}</strong><br>
@@ -588,20 +954,19 @@ class SellerPortal {
         }).join('');
     }
 
-    // Permanently Delete Device
     confirmDeleteDevice(deviceId, customerName) {
         const displayName = customerName ? `${customerName} (${deviceId})` : deviceId;
-        const confirmed = confirm(`⚠️ Are you sure you want to permanently DELETE device: ${displayName}?\n\nThis will remove it from Tiger Locker database.`);
+        const confirmed = confirm(`⚠️ Are you sure you want to permanently DELETE device: ${displayName}?\n\nThis will remove it from database.`);
         if (!confirmed) return;
 
         fetch(`/api/devices/${encodeURIComponent(deviceId)}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: this.getAuthHeaders()
         })
         .then(r => r.json())
         .then(res => {
             if (res.success) {
                 this.showToast(`🗑️ Device ${deviceId} deleted successfully!`, 'danger');
-                // If the deleted device was selected in console, clear it
                 if (this.selectedDeviceId === deviceId) {
                     this.selectedDeviceId = '';
                     localStorage.removeItem('tiger_active_device_id');
@@ -650,10 +1015,33 @@ class SellerPortal {
         const tbody = document.getElementById('audit-logs-body');
         if (!tbody) return;
 
-        const logs = this.db.getAuditLogs();
+        fetch('/api/logs', {
+            headers: this.getAuthHeaders()
+        })
+        .then(r => r.json())
+        .then(logs => {
+            if (!Array.isArray(logs) || !logs.length) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-dim); padding:20px;">No audit log records</td></tr>';
+                return;
+            }
 
-        tbody.innerHTML = logs.map(l => {
-            return `
+            tbody.innerHTML = logs.slice(0, 50).map(l => {
+                return `
+                    <tr>
+                        <td><small class="font-mono">${new Date(l.timestamp).toLocaleString()}</small></td>
+                        <td><span class="badge badge-secondary">${l.action}</span></td>
+                        <td><code>${l.deviceId || '-'}</code></td>
+                        <td>${l.retailerId || 'Admin'}</td>
+                        <td>${l.details || ''}</td>
+                        <td><span class="badge badge-success">${l.status || 'SUCCESS'}</span></td>
+                    </tr>
+                `;
+            }).join('');
+        })
+        .catch(() => {
+            // Fallback
+            const logs = this.db.getAuditLogs();
+            tbody.innerHTML = logs.map(l => `
                 <tr>
                     <td><small class="font-mono">${new Date(l.timestamp).toLocaleString()}</small></td>
                     <td><span class="badge badge-secondary">${l.action}</span></td>
@@ -662,12 +1050,13 @@ class SellerPortal {
                     <td>${l.details}</td>
                     <td><span class="badge badge-success">${l.status}</span></td>
                 </tr>
-            `;
-        }).join('');
+            `).join('');
+        });
     }
 
     showToast(message, type = 'info') {
         const container = document.getElementById('toast-container');
+        if (!container) return;
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
         toast.innerHTML = `<i class="fa-solid fa-circle-info"></i> <span>${message}</span>`;
@@ -681,4 +1070,3 @@ class SellerPortal {
 }
 
 window.sellerPortal = new SellerPortal();
-
