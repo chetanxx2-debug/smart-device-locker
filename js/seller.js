@@ -22,6 +22,7 @@ class SellerPortal {
         this.setupSearch();
         this.setupCommandConsole();
         this.setupShopManagement();
+        this.setupQrProvisioning();
 
         // Check authentication state
         this.checkAuth();
@@ -432,6 +433,11 @@ class SellerPortal {
                 const targetId = tab.dataset.tab;
                 const contentEl = document.getElementById(targetId);
                 if (contentEl) contentEl.classList.add('active');
+
+                if (targetId === 'tab-qr-setup') {
+                    this.generateEnterpriseQR();
+                    this.generateDirectDownloadQR();
+                }
             });
         });
     }
@@ -1069,6 +1075,120 @@ class SellerPortal {
             toast.style.opacity = '0';
             setTimeout(() => toast.remove(), 300);
         }, 3500);
+    }
+
+    // ===== 6-TAP ANDROID ENTERPRISE QR PROVISIONING =====
+    setupQrProvisioning() {
+        const updateBtn = document.getElementById('btn-update-wifi-qr');
+        const refreshBtn = document.getElementById('btn-refresh-qr');
+        const printBtn = document.getElementById('btn-print-qr');
+
+        if (updateBtn) {
+            updateBtn.addEventListener('click', () => {
+                this.generateEnterpriseQR();
+                this.showToast('✅ QR Code updated with Wi-Fi details!', 'success');
+            });
+        }
+
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                this.generateEnterpriseQR();
+                this.generateDirectDownloadQR();
+                this.showToast('🔄 QR Codes refreshed!', 'info');
+            });
+        }
+
+        if (printBtn) {
+            printBtn.addEventListener('click', () => {
+                window.print();
+            });
+        }
+
+        // Auto-generate QR when script loads
+        setTimeout(() => {
+            this.generateEnterpriseQR();
+            this.generateDirectDownloadQR();
+        }, 600);
+    }
+
+    generateEnterpriseQR() {
+        const container = document.getElementById('enterprise-qr-canvas');
+        if (!container) return;
+
+        if (typeof QRCode === 'undefined') {
+            console.warn('QRCode library not loaded yet, retrying...');
+            setTimeout(() => this.generateEnterpriseQR(), 1000);
+            return;
+        }
+
+        container.innerHTML = '';
+
+        const serverOrigin = window.location.origin;
+        const apkUrl = `${serverOrigin}/SmartDeviceLocker.apk`;
+
+        const payload = {
+            "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME": "com.smartlocker.client/com.smartlocker.client.LockerAdminReceiver",
+            "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION": apkUrl,
+            "android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM": "s8xCFm8_umf3I25U24KnwWsUiQXkS-za9t3MqzLIraU",
+            "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED": true,
+            "android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE": {
+                "server_url": serverOrigin
+            }
+        };
+
+        const ssid = document.getElementById('qr-wifi-ssid')?.value?.trim();
+        const wifiPass = document.getElementById('qr-wifi-password')?.value?.trim();
+        const wifiSec = document.getElementById('qr-wifi-security')?.value || 'WPA';
+
+        if (ssid) {
+            payload["android.app.extra.PROVISIONING_WIFI_SSID"] = ssid;
+            payload["android.app.extra.PROVISIONING_WIFI_SECURITY_TYPE"] = wifiSec;
+            if (wifiPass) {
+                payload["android.app.extra.PROVISIONING_WIFI_PASSWORD"] = wifiPass;
+            }
+        }
+
+        const jsonStr = JSON.stringify(payload);
+
+        try {
+            new QRCode(container, {
+                text: jsonStr,
+                width: 220,
+                height: 220,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        } catch (e) {
+            console.error('Error generating enterprise QR:', e);
+        }
+    }
+
+    generateDirectDownloadQR() {
+        const container = document.getElementById('direct-download-qr-canvas');
+        if (!container) return;
+
+        if (typeof QRCode === 'undefined') {
+            setTimeout(() => this.generateDirectDownloadQR(), 1000);
+            return;
+        }
+
+        container.innerHTML = '';
+
+        const apkUrl = `${window.location.origin}/SmartDeviceLocker.apk`;
+
+        try {
+            new QRCode(container, {
+                text: apkUrl,
+                width: 140,
+                height: 140,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        } catch (e) {
+            console.error('Error generating direct download QR:', e);
+        }
     }
 }
 

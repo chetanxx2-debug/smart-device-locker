@@ -84,6 +84,9 @@
                 <button class="nav-tab" data-tab="tab-audit-logs">
                     <i class="fa-solid fa-list-check"></i> <span data-i18n="tab_audit_logs">Audit Security Logs</span>
                 </button>
+                <button class="nav-tab" data-tab="tab-qr-setup">
+                    <i class="fa-solid fa-qrcode"></i> <span>⚡ 6-Tap QR Setup</span>
+                </button>
                 <button class="nav-tab" id="nav-tab-shops" data-tab="tab-shops" style="display:none;">
                     <i class="fa-solid fa-store"></i> <span>Manage Shops (Super Admin)</span>
                 </button>
@@ -483,6 +486,96 @@
                     </div>
                 </div>
             </div>
+
+            <!-- TAB 6: 6-TAP ENTERPRISE QR ENROLLMENT -->
+            <div id="tab-qr-setup" class="tab-content">
+                <div class="card">
+                    <div class="card-header flex-between">
+                        <div>
+                            <h3><i class="fa-solid fa-qrcode"></i> Android Enterprise 6-Tap QR Provisioning</h3>
+                            <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+                                Setup new / unboxed / factory reset phones in 10 seconds with 100% unbreakable Device Owner lock.
+                            </p>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" id="btn-print-qr">
+                            <i class="fa-solid fa-print"></i> Print QR Sheet
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <!-- 3-Step Guide Banner -->
+                        <div class="qr-steps-container">
+                            <div class="qr-step-card">
+                                <div class="step-badge">1</div>
+                                <h4>New / Reset Phone</h4>
+                                <p>Naya phone on karein ya purana phone <strong>Factory Reset</strong> karein.</p>
+                            </div>
+                            <div class="qr-step-card">
+                                <div class="step-badge">2</div>
+                                <h4>Tap 6 Times</h4>
+                                <p>Welcome / Start screen par <strong>lagataar 6 baar tap</strong> karein. Scanner khul jayega.</p>
+                            </div>
+                            <div class="qr-step-card">
+                                <div class="step-badge">3</div>
+                                <h4>Scan & Auto-Setup</h4>
+                                <p>Yeh QR scan karein. Phone <strong>auto-download & permanent lock</strong> ho jayega!</p>
+                            </div>
+                        </div>
+
+                        <div class="qr-main-grid">
+                            <!-- Left: Live Enterprise QR Display -->
+                            <div class="qr-display-box">
+                                <div class="qr-header-badge">
+                                    <i class="fa-solid fa-shield-halved"></i> 100% Anti-Uninstall Device Owner Mode
+                                </div>
+                                <div id="enterprise-qr-canvas" class="qr-canvas-wrapper"></div>
+                                <div class="qr-footer-actions">
+                                    <button class="btn btn-primary btn-sm" id="btn-refresh-qr">
+                                        <i class="fa-solid fa-arrows-rotate"></i> Regenerate QR
+                                    </button>
+                                    <a href="/SmartDeviceLocker.apk" download="SmartDeviceLocker.apk" class="btn btn-secondary btn-sm">
+                                        <i class="fa-solid fa-download"></i> Download APK
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Right: Wi-Fi Pre-Configurator & Direct QR -->
+                            <div class="qr-settings-box">
+                                <h4><i class="fa-solid fa-wifi"></i> Shop Wi-Fi Auto-Connect (Optional)</h4>
+                                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+                                    Wi-Fi details bharne par phone bina password maange automatic connect hoga aur download shuru karega.
+                                </p>
+                                <div class="form-group">
+                                    <label>Wi-Fi Name (SSID)</label>
+                                    <input type="text" id="qr-wifi-ssid" class="form-control" placeholder="e.g. Sharma_Mobiles_5G">
+                                </div>
+                                <div class="form-group">
+                                    <label>Wi-Fi Password</label>
+                                    <input type="password" id="qr-wifi-password" class="form-control" placeholder="••••••••">
+                                </div>
+                                <div class="form-group">
+                                    <label>Security Type</label>
+                                    <select id="qr-wifi-security" class="form-control">
+                                        <option value="WPA" selected>WPA / WPA2 / WPA3 (Standard)</option>
+                                        <option value="WEP">WEP</option>
+                                        <option value="NONE">Open / No Password</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary" id="btn-update-wifi-qr" style="width: 100%; margin-top: 10px;">
+                                    <i class="fa-solid fa-bolt"></i> Update QR with Wi-Fi
+                                </button>
+
+                                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 20px 0;">
+
+                                <h4><i class="fa-solid fa-camera"></i> Normal Camera Direct Download QR</h4>
+                                <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">
+                                    Jo phone already setup hain, unke normal camera / Google Lens se scan karke direct APK download karein.
+                                </p>
+                                <div id="direct-download-qr-canvas" style="display: flex; justify-content: center; padding: 10px; background: white; border-radius: 8px; width: fit-content; margin: 0 auto;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- RIGHT PANEL: CUSTOMER ANDROID DEVICE SIMULATOR -->
@@ -689,6 +782,7 @@
     <div id="toast-container" class="toast-container"></div>
 
     <!-- JS Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="js/db.js"></script>
     <script src="js/fcm.js"></script>
     <script src="js/api.js"></script>
