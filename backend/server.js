@@ -135,6 +135,21 @@ function authenticateUser(req, res, next) {
 
 app.use(authenticateUser);
 
+// Strict Auth Middleware (rejects if not logged in)
+function requireAuth(req, res, next) {
+    if (!req.user) {
+        return res.status(401).json({ success: false, message: "Authentication required. Please login." });
+    }
+    next();
+}
+
+function requireSuperAdmin(req, res, next) {
+    if (!req.user || req.user.role !== 'super_admin') {
+        return res.status(403).json({ success: false, message: "Access denied. Master Super Admin only." });
+    }
+    next();
+}
+
 // Store active WebSocket connections by deviceId
 const activeSockets = new Map();
 
