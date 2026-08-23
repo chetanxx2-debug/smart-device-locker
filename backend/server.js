@@ -429,12 +429,14 @@ app.post('/api/devices/register', (req, res) => {
 
     // Assign to logged-in Retailer or Super Admin
     const retailerId = req.user ? req.user.id : "USR-SUPERADMIN";
-    const shopName = req.user ? req.user.shopName : "Smart Device Locker HQ";
+    const shopName = req.user ? (req.user.shopName || req.user.name) : "Smart Device Locker HQ";
+    const retailerPhone = req.user ? (req.user.phone || "") : "+91 98765 43210";
 
     const newDevice = {
         id: deviceId,
         retailerId: retailerId,
         shopName: shopName,
+        retailerPhone: retailerPhone,
         imei: imei || `86${Math.floor(1000000000000 + Math.random() * 9000000000000)}`,
         model: model || "Android Smartphone",
         customerName: customerName || "Customer",
@@ -510,13 +512,20 @@ app.post('/api/devices/pair', (req, res) => {
     if (deviceModel) device.model = deviceModel;
     device.lastSeen = new Date().toISOString();
 
+    // Attach retailer details
+    const ownerUser = (db.users || []).find(u => u.id === device.retailerId);
+    const retailerPhone = device.retailerPhone || (ownerUser ? ownerUser.phone : "+91 98765 43210");
+    const shopName = device.shopName || (ownerUser ? (ownerUser.shopName || ownerUser.name) : "Smart Device Locker HQ");
+    device.retailerPhone = retailerPhone;
+    device.shopName = shopName;
+
     db.logs.unshift({
         id: Date.now(),
         timestamp: new Date().toISOString(),
         deviceId: device.id,
         retailerId: device.retailerId || "USR-SUPERADMIN",
         action: "DEVICE_PAIRED",
-        details: `Device ${device.model} (${device.customerName}) verified & paired successfully at ${device.shopName || 'Shop'}.`,
+        details: `Device ${device.model} (${device.customerName}) verified & paired successfully at ${shopName}.`,
         status: "SUCCESS"
     });
 
@@ -527,7 +536,11 @@ app.post('/api/devices/pair', (req, res) => {
         success: true,
         message: "Device paired successfully!",
         deviceId: device.id,
-        device: device
+        device: {
+            ...device,
+            retailerPhone: retailerPhone,
+            shopName: shopName
+        }
     });
 });
 
@@ -622,6 +635,10 @@ app.get('/api/devices/:id/poll', (req, res) => {
     }
     saveDb(db);
 
+    const ownerUser = (db.users || []).find(u => u.id === device.retailerId);
+    const retailerPhone = device.retailerPhone || (ownerUser ? ownerUser.phone : "+91 98765 43210");
+    const shopName = device.shopName || (ownerUser ? (ownerUser.shopName || ownerUser.name) : "Smart Device Locker HQ");
+
     res.json({
         success: true,
         deviceId: device.id,
@@ -630,6 +647,8 @@ app.get('/api/devices/:id/poll', (req, res) => {
         message: device.lastMessage,
         offlineMasterCode: device.offlineMasterCode || '',
         dueDate: device.dueDate || '',
+        retailerPhone: retailerPhone,
+        shopName: shopName,
         pendingCommand: pendingCommand
     });
 });
