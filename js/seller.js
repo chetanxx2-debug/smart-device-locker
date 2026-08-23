@@ -1104,6 +1104,14 @@ class SellerPortal {
             });
         }
 
+        const headerQrBtn = document.getElementById('btn-header-open-qr');
+        if (headerQrBtn) {
+            headerQrBtn.addEventListener('click', () => {
+                const qrTab = document.querySelector('.nav-tab[data-tab="tab-qr-setup"]');
+                if (qrTab) qrTab.click();
+            });
+        }
+
         // Auto-generate QR when script loads
         setTimeout(() => {
             this.generateEnterpriseQR();
