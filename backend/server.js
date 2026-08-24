@@ -42,6 +42,21 @@ app.use((req, res, next) => {
 });
 app.use(express.static(path.join(__dirname, '..')));
 
+// ── PWA: Service Worker (must be served from root with correct MIME) ──
+app.get('/sw.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.setHeader('Service-Worker-Allowed', '/');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.sendFile(path.join(__dirname, '..', 'sw.js'));
+});
+
+// ── PWA: Web App Manifest ─────────────────────────────────────────
+app.get('/manifest.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/manifest+json');
+    res.sendFile(path.join(__dirname, '..', 'manifest.json'));
+});
+
+
 // Helper to get Local IP Address
 function getLocalIpAddress() {
     const interfaces = os.networkInterfaces();
