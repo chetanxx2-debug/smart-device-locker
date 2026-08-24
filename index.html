@@ -88,6 +88,24 @@
             <button id="btn-header-open-qr" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); border-color: #f97316; font-weight: 700; box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4);">
                 <i class="fa-solid fa-qrcode"></i> <span>⚡ 6-Tap QR Setup</span>
             </button>
+            <button id="btn-pwa-install" class="btn btn-sm" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; font-weight: 700; border: none; border-radius: var(--radius-md); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);">
+                <i class="fa-solid fa-download"></i> <span>📲 Install App</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Floating PWA Install Banner -->
+    <div id="pwa-install-banner" style="display:none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; background: #1e293b; border: 1px solid #3b82f6; box-shadow: 0 10px 30px rgba(0,0,0,0.8); border-radius: 16px; padding: 12px 18px; width: 92%; max-width: 440px; align-items: center; justify-content: space-between; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <img src="/icons/icon-192.jpg" alt="App Icon" style="width: 42px; height: 42px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);">
+            <div>
+                <div style="font-weight: 700; font-size: 13px; color: #fff;">Smart Device Locker</div>
+                <div style="font-size: 11px; color: #94a3b8;">Home screen par app install karein</div>
+            </div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <button id="btn-banner-install" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff; font-weight: 700; font-size: 12px; border: none; padding: 7px 14px; border-radius: 8px; cursor: pointer;">Install</button>
+            <button id="btn-banner-close" style="background: transparent; color: #94a3b8; border: none; font-size: 16px; cursor: pointer; padding: 4px;">✕</button>
         </div>
     </div>
 
@@ -909,13 +927,69 @@
 
     <!-- JS Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="js/db.js?v=4.4"></script>
-    <script src="js/fcm.js?v=4.4"></script>
-    <script src="js/api.js?v=4.4"></script>
-    <script src="js/i18n.js?v=4.4"></script>
-    <script src="js/emi-engine.js?v=4.4"></script>
-    <script src="js/seller.js?v=4.4"></script>
-    <script src="js/device.js?v=4.4"></script>
-    <script src="js/app.js?v=4.4"></script>
+    <script src="js/db.js?v=4.5"></script>
+    <script src="js/fcm.js?v=4.5"></script>
+    <script src="js/api.js?v=4.5"></script>
+    <script src="js/i18n.js?v=4.5"></script>
+    <script src="js/emi-engine.js?v=4.5"></script>
+    <script src="js/seller.js?v=4.5"></script>
+    <script src="js/device.js?v=4.5"></script>
+    <script src="js/app.js?v=4.5"></script>
+
+    <!-- PWA Install Interaction Script -->
+    <script>
+        (function() {
+            let deferredPrompt = null;
+            const installBtn = document.getElementById('btn-pwa-install');
+            const installBanner = document.getElementById('pwa-install-banner');
+            const bannerInstallBtn = document.getElementById('btn-banner-install');
+            const bannerCloseBtn = document.getElementById('btn-banner-close');
+
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+            if (isStandalone) {
+                if (installBtn) installBtn.style.display = 'none';
+                if (installBanner) installBanner.style.display = 'none';
+                return;
+            }
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                if (installBtn) installBtn.style.display = 'inline-flex';
+                if (installBanner && !sessionStorage.getItem('pwa_dismissed')) {
+                    installBanner.style.display = 'flex';
+                }
+            });
+
+            async function triggerInstall() {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        if (installBanner) installBanner.style.display = 'none';
+                        if (installBtn) installBtn.style.display = 'none';
+                    }
+                    deferredPrompt = null;
+                } else {
+                    const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+                    if (isIos) {
+                        alert("🍏 iPhone / iPad par Install karne ke liye:\n\n1. Safari me neeche Share icon (📤) dabayein.\n2. 'Add to Home Screen' (+) select karein.\n3. Upar 'Add' tap karein.");
+                    } else {
+                        alert("📲 Browser Menu (⋮) me jakar 'Install App' ya 'Add to Home screen' select karein.");
+                    }
+                }
+            }
+
+            if (installBtn) installBtn.addEventListener('click', triggerInstall);
+            if (bannerInstallBtn) bannerInstallBtn.addEventListener('click', triggerInstall);
+            if (bannerCloseBtn) {
+                bannerCloseBtn.addEventListener('click', () => {
+                    if (installBanner) installBanner.style.display = 'none';
+                    sessionStorage.setItem('pwa_dismissed', '1');
+                });
+            }
+        })();
+    </script>
 </body>
 </html>
