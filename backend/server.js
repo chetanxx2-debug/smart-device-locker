@@ -600,7 +600,7 @@ app.post('/api/devices/pair', (req, res) => {
     });
 });
 
-// Send Remote Command (LOCK, UNLOCK, SIREN, MESSAGE, WIPE)
+// Send Remote Command (LOCK, UNLOCK, SIREN, MESSAGE, WIPE, UNINSTALL_APP)
 app.post('/api/devices/:id/command', (req, res) => {
     const db = loadDb();
     const deviceId = req.params.id;
@@ -645,10 +645,16 @@ app.post('/api/devices/:id/command', (req, res) => {
         device.lastMessage = commandPayload.message;
     } else if (action === 'WIPE') {
         commandPayload.action = "WIPE_DATA";
+    } else if (action === 'UNINSTALL_APP') {
+        // Force uninstall: send via WebSocket + set pendingCommand as fallback for poll
+        commandPayload.type = "UNINSTALL_APP";
+        commandPayload.message = "Shopkeeper ne app uninstall karne ka command bheja hai.";
+        device.pendingCommand = 'UNINSTALL_APP'; // poll fallback
+        device.status = "uninstalled";
     }
 
-    // Push via WebSocket
-    const isSent = sendCommandToDevice(deviceId, commandPayload);
+    // Push via WebSocket (instant delivery if device is online)
+    const isSent = sendCommandToDevice(device.id, commandPayload);
 
     db.logs.unshift({
         id: Date.now(),

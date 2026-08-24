@@ -708,6 +708,7 @@ class SellerPortal {
         const btnSound = document.getElementById('cmd-sound');
         const btnInfo = document.getElementById('cmd-info');
         const btnWipe = document.getElementById('cmd-wipe');
+        const btnUninstall = document.getElementById('cmd-uninstall');
 
         if (btnLock) {
             btnLock.addEventListener('click', () => {
@@ -772,6 +773,19 @@ class SellerPortal {
                 if (confirm('⚠️ Are you sure? This will send Remote Wipe command to the device!')) {
                     this.sendBackendCommand(deviceId, 'WIPE');
                     this.showToast('⚠️ Remote Wipe command dispatched!', 'danger');
+                }
+            });
+        }
+
+        if (btnUninstall) {
+            btnUninstall.addEventListener('click', () => {
+                const deviceId = getSelectedDeviceId();
+                if (!deviceId) return this.showToast('Pehle device select karein!', 'warning');
+                const dev = this.backendDevices.find(d => d.id === deviceId);
+                const customerName = dev ? dev.customerName : deviceId;
+                if (confirm(`🗑️ App Uninstall Command\n\nKya aap "${customerName}" ke device par Smart Locker app uninstall karna chahte hain?\n\nYeh command turant app hatane ka signal bhejega.`)) {
+                    this.sendBackendCommand(deviceId, 'UNINSTALL_APP');
+                    this.showToast(`🗑️ App Uninstall command bheja gaya [${deviceId}]!`, 'warning');
                 }
             });
         }
