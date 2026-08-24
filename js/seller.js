@@ -761,7 +761,29 @@ class SellerPortal {
                 if (!deviceId) return this.showToast('Please select a device first!', 'warning');
                 const dev = this.backendDevices.find(d => d.id === deviceId);
                 if (dev) {
-                    alert(`[DEVICE STATUS]\nCustomer: ${dev.customerName}\nShop: ${dev.shopName || 'Main'}\nIMEI: ${dev.imei}\nModel: ${dev.model}\nStatus: ${dev.isLocked ? 'LOCKED' : 'ACTIVE'}\nBattery: ${dev.battery}%\nNetwork: ${dev.network}\nLast Seen: ${new Date(dev.lastSeen).toLocaleString()}`);
+                    const locStr = (dev.location && dev.location.lat) ? `\nLocation: ${dev.location.lat.toFixed(5)}, ${dev.location.lng.toFixed(5)} (Live GPS)` : '\nLocation: Syncing...';
+                    alert(`[DEVICE STATUS]\nCustomer: ${dev.customerName}\nShop: ${dev.shopName || 'Main'}\nIMEI: ${dev.imei}\nModel: ${dev.model}\nStatus: ${dev.isLocked ? 'LOCKED' : 'ACTIVE'}\nBattery: ${dev.battery || 100}%\nNetwork: ${dev.network || 'Online'}${locStr}\nLast Seen: ${new Date(dev.lastSeen).toLocaleString()}`);
+                }
+            });
+        }
+
+        const btnLocation = document.getElementById('cmd-location');
+        if (btnLocation) {
+            btnLocation.addEventListener('click', () => {
+                const deviceId = getSelectedDeviceId();
+                if (!deviceId) return this.showToast('Pehle device select karein!', 'warning');
+                const dev = this.backendDevices.find(d => d.id === deviceId);
+                if (!dev) return;
+
+                const loc = dev.location;
+                if (loc && loc.lat && loc.lng) {
+                    const timeStr = new Date(loc.updatedAt || dev.lastSeen).toLocaleString();
+                    const accStr = loc.accuracy ? ` (Accuracy: ±${Math.round(loc.accuracy)}m)` : '';
+                    if (confirm(`📍 DEVICE LIVE LOCATION FOUND!\n\nCustomer: ${dev.customerName}\nModel: ${dev.model}\nCoordinates: ${loc.lat.toFixed(6)}, ${loc.lng.toFixed(6)}${accStr}\nRecorded: ${timeStr}\n\n👉 Click 'OK' to view exact phone location on Google Maps!`)) {
+                        window.open(`https://www.google.com/maps?q=${loc.lat},${loc.lng}`, '_blank');
+                    }
+                } else {
+                    alert(`📍 Device GPS Location Tracker\n\nCustomer: ${dev.customerName}\nModel: ${dev.model}\nStatus: ${dev.isOnline ? '🟢 Online' : 'Standby'}\nBattery: ${dev.battery || 100}%\nLast Ping: ${dev.lastSeen ? new Date(dev.lastSeen).toLocaleTimeString() : 'N/A'}\n\nℹ️ GPS coordinates phone se sync ho rahe hain. Jaise hi phone location bhejega, yahan Google Maps ka exact link open ho jayega.`);
                 }
             });
         }
@@ -1006,6 +1028,11 @@ class SellerPortal {
                             <a href="control.html?id=${encodeURIComponent(d.id)}" class="btn btn-sm btn-primary" title="Open Dedicated Single-Device Control Page" style="text-decoration:none;">
                                 <i class="fa-solid fa-up-right-from-square"></i> Open Control Page
                             </a>
+
+                            ${d.location && d.location.lat
+                                ? `<a href="https://www.google.com/maps?q=${d.location.lat},${d.location.lng}" target="_blank" class="btn btn-sm btn-info" style="background:#0284c7; color:#fff; text-decoration:none;" title="View Live Location on Google Maps"><i class="fa-solid fa-location-dot"></i> 📍 View Map</a>`
+                                : `<button class="btn btn-sm btn-secondary" onclick="alert('Device [${d.customerName || d.id}] GPS location is syncing with server.')" title="GPS Location Syncing"><i class="fa-solid fa-location-crosshairs"></i> Loc Sync</button>`
+                            }
 
                             ${d.isLocked
                                 ? `<button class="btn btn-sm btn-success" title="Unlock Device" onclick="sellerPortal.sendBackendCommand('${d.id}', 'UNLOCK'); sellerPortal.showToast('Unlocked [${d.id}]!', 'success');"><i class="fa-solid fa-lock-open"></i> Unlock</button>`

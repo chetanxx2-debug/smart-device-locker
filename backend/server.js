@@ -195,13 +195,22 @@ wss.on('connection', (ws, req) => {
                 activeSockets.set(connectedDeviceId, ws);
                 console.log(`[WS] Device registered on socket: ${connectedDeviceId}`);
 
-                // Update device lastSeen
+                // Update device lastSeen & Location
                 const db = loadDb();
                 const dev = db.devices.find(d => d.id === connectedDeviceId);
                 if (dev) {
                     dev.lastSeen = new Date().toISOString();
                     if (data.battery) dev.battery = data.battery;
                     if (data.network) dev.network = data.network;
+                    if (data.lat && data.lng) {
+                        dev.location = {
+                            lat: parseFloat(data.lat),
+                            lng: parseFloat(data.lng),
+                            accuracy: data.accuracy || null,
+                            mapsUrl: `https://www.google.com/maps?q=${data.lat},${data.lng}`,
+                            updatedAt: new Date().toISOString()
+                        };
+                    }
                     saveDb(db);
                 }
 
@@ -222,6 +231,15 @@ wss.on('connection', (ws, req) => {
                     if (data.battery !== undefined) dev.battery = data.battery;
                     if (data.network) dev.network = data.network;
                     if (data.isLocked !== undefined) dev.isLocked = data.isLocked;
+                    if (data.lat && data.lng) {
+                        dev.location = {
+                            lat: parseFloat(data.lat),
+                            lng: parseFloat(data.lng),
+                            accuracy: data.accuracy || null,
+                            mapsUrl: `https://www.google.com/maps?q=${data.lat},${data.lng}`,
+                            updatedAt: new Date().toISOString()
+                        };
+                    }
                     saveDb(db);
                 }
             }
@@ -706,6 +724,26 @@ app.get('/api/devices/:id/poll', (req, res) => {
 
     device.lastSeen = new Date().toISOString();
 
+    // Capture location query parameters if provided
+    if (req.query.lat && req.query.lng) {
+        const lat = parseFloat(req.query.lat);
+        const lng = parseFloat(req.query.lng);
+        if (!isNaN(lat) && !isNaN(lng) && (lat !== 0 || lng !== 0)) {
+            device.location = {
+                lat: lat,
+                lng: lng,
+                accuracy: req.query.acc ? parseFloat(req.query.acc) : null,
+                mapsUrl: `https://www.google.com/maps?q=${lat},${lng}`,
+                updatedAt: new Date().toISOString()
+            };
+        }
+    }
+
+    if (req.query.battery) {
+        const bat = parseInt(req.query.battery);
+        if (!isNaN(bat)) device.battery = bat;
+    }
+
     // Deliver pendingCommand once (one-shot: clear after sending)
     const pendingCommand = device.pendingCommand || '';
     if (pendingCommand) {
@@ -720,6 +758,7 @@ app.get('/api/devices/:id/poll', (req, res) => {
     res.json({
         success: true,
         deviceId: device.id,
+        location: device.location || null,
         isLocked: device.isLocked,
         sirenActive: device.sirenActive,
         message: device.lastMessage,
@@ -806,6 +845,33 @@ app.post('/api/devices/:id/allow-uninstall', requireAuth, (req, res) => {
 
     saveDb(db);
     res.json({ success: true, message: "Uninstall permission sent to device." });
+});
+
+// Update Device Live Location
+app.post('/api/devices/:id/location', (req, res) => {
+    const db = loadDb();
+    const deviceId = req.params.id;
+    const device = db.devices.find(d => d.id === deviceId || d.imei === deviceId);
+
+    if (!device) {
+        return res.status(404).json({ success: false, message: "Device not found." });
+    }
+
+    const { lat, lng, accuracy } = req.body;
+    if (lat && lng) {
+        device.location = {
+            lat: parseFloat(lat),
+            lng: parseFloat(lng),
+            accuracy: accuracy ? parseFloat(accuracy) : null,
+            mapsUrl: `https://www.google.com/maps?q=${lat},${lng}`,
+            updatedAt: new Date().toISOString()
+        };
+        device.lastSeen = new Date().toISOString();
+        saveDb(db);
+        return res.json({ success: true, location: device.location });
+    }
+
+    res.status(400).json({ success: false, message: "Valid latitude and longitude required." });
 });
 
 // Delete Device
