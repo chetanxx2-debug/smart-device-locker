@@ -409,8 +409,16 @@ class SellerPortal {
         fetch('/api/devices', {
             headers: this.getAuthHeaders()
         })
-        .then(r => r.json())
+        .then(r => {
+            // 401 = session killed (admin deleted or blocked this account)
+            if (r.status === 401) {
+                this.forceLogout('⚠️ Aapka account delete ya block kar diya gaya hai. Logout ho raha hai...');
+                return null;
+            }
+            return r.json();
+        })
         .then(devices => {
+            if (!devices) return; // forceLogout already called
             this.backendDevices = Array.isArray(devices) ? devices : [];
             this.renderDeviceDropdownFromBackend();
             this.renderDevicesTableFromBackend();
@@ -420,6 +428,22 @@ class SellerPortal {
             this.renderDeviceDropdown();
             this.renderDevicesTable();
         });
+    }
+
+    // Force logout — called when server kicks the session (account deleted/blocked)
+    forceLogout(reason) {
+        if (this._forceLogoutShown) return; // prevent double popup
+        this._forceLogoutShown = true;
+
+        // Clear session locally
+        this.token = '';
+        this.currentUser = null;
+        localStorage.removeItem('sdl_auth_token');
+
+        // Show alert and then show login screen
+        alert(reason || 'Aapka session expire ho gaya hai. Please dobara login karein.');
+        this.showLoginModal();
+        this._forceLogoutShown = false;
     }
 
     setupTabs() {

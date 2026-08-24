@@ -126,7 +126,17 @@ function authenticateUser(req, res, next) {
 
     const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7).trim() : authHeader.trim();
     if (activeSessions.has(token)) {
-        req.user = activeSessions.get(token);
+        const sessionUser = activeSessions.get(token);
+        // Verify user still exists in DB and is still active (detects delete/block in real-time)
+        const db = loadDb();
+        const dbUser = db.users.find(u => u.id === sessionUser.id);
+        if (!dbUser || dbUser.status !== 'active') {
+            // User deleted or blocked — kill session immediately
+            activeSessions.delete(token);
+            req.user = null;
+        } else {
+            req.user = sessionUser;
+        }
     } else {
         req.user = null;
     }
@@ -370,6 +380,15 @@ app.post('/api/admin/retailers', (req, res) => {
     res.status(201).json({ success: true, message: "Shop account created successfully!", retailer: newRetailer });
 });
 
+// Helper: Kill all sessions of a given retailer ID
+function killRetailerSessions(retailerId) {
+    for (const [token, user] of activeSessions.entries()) {
+        if (user.id === retailerId) {
+            activeSessions.delete(token);
+        }
+    }
+}
+
 // PUT /api/admin/retailers/:id
 app.put('/api/admin/retailers/:id', (req, res) => {
     if (!req.user || req.user.role !== 'super_admin') {
@@ -383,7 +402,13 @@ app.put('/api/admin/retailers/:id', (req, res) => {
     }
 
     if (req.body.password) retailer.password = String(req.body.password).trim();
-    if (req.body.status) retailer.status = req.body.status; // 'active' or 'blocked'
+    if (req.body.status) {
+        retailer.status = req.body.status; // 'active' or 'blocked'
+        // If blocked, kill all active sessions immediately (force logout)
+        if (req.body.status === 'blocked') {
+            killRetailerSessions(retailer.id);
+        }
+    }
     if (req.body.shopName) retailer.shopName = String(req.body.shopName).trim();
     if (req.body.name) retailer.name = String(req.body.name).trim();
     if (req.body.phone) retailer.phone = String(req.body.phone).trim();
@@ -405,8 +430,21 @@ app.delete('/api/admin/retailers/:id', (req, res) => {
     }
 
     const removed = db.users.splice(idx, 1)[0];
+
+    // Kill all active sessions of this retailer immediately (force logout)
+    killRetailerSessions(removed.id);
+
+    db.logs.unshift({
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        deviceId: "ADMIN",
+        action: "RETAILER_DELETED",
+        details: `Shop account "${removed.shopName}" (${removed.username}) deleted and force-logged-out by Super Admin.`,
+        status: "WARNING"
+    });
+
     saveDb(db);
-    res.json({ success: true, message: `Retailer ${removed.shopName} (${removed.username}) deleted.` });
+    res.json({ success: true, message: `Retailer ${removed.shopName} (${removed.username}) deleted and logged out.` });
 });
 
 // ===== DEVICE MANAGEMENT (ISOLATED BY SHOP) =====
