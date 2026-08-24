@@ -2793,5 +2793,18 @@
       "details": "Command SIREN_OFF executed by Admin. Dispatched Live: false",
       "status": "QUEUED"
     }
+  ],
+  "users": [
+    {
+      "id": "USR-SUPERADMIN",
+      "username": "superadmin",
+      "password": "superadmin.xx2",
+      "role": "super_admin",
+      "name": "Master Super Admin",
+      "shopName": "Smart Device Locker HQ",
+      "phone": "+91 98765 43210",
+      "status": "active",
+      "createdAt": "2026-08-24T06:10:10.713Z"
+    }
   ]
 }

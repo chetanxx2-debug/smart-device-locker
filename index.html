@@ -267,8 +267,15 @@
                                 <i class="fa-solid fa-mobile-retro"></i> <span data-i18n="form_sec_2">2. Device Hardware Details</span>
                             </div>
                             <div class="form-group">
+                                <label>Device Platform / Operating System *</label>
+                                <select id="input-dev-platform" class="form-control">
+                                    <option value="android" selected>🤖 Android Smartphone (Samsung, Vivo, Oppo, Xiaomi, etc.)</option>
+                                    <option value="ios">🍏 Apple iPhone (iOS 15, 16, 17, 18+)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <label data-i18n="dev_model_input_label">Device Model Name *</label>
-                                <input type="text" id="input-dev-model" class="form-control" placeholder="Samsung Galaxy M34 5G" required>
+                                <input type="text" id="input-dev-model" class="form-control" placeholder="e.g. Samsung Galaxy M34 / Apple iPhone 15 Pro" required>
                             </div>
                             <div class="form-group">
                                 <label data-i18n="dev_imei_input_label">IMEI / Serial Number (15 Digits) *</label>
@@ -592,6 +599,76 @@
                                     Jo phone already setup hain, unke normal camera / Google Lens se scan karke direct APK download karein.
                                 </p>
                                 <div id="direct-download-qr-canvas" style="display: flex; justify-content: center; padding: 10px; background: white; border-radius: 8px; width: fit-content; margin: 0 auto;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- APPLE iPHONE (iOS) ENROLLMENT CARD -->
+                <div class="card" style="margin-top: 24px; border: 1.5px solid #0071e3; background: linear-gradient(135deg, rgba(0, 113, 227, 0.1) 0%, rgba(15, 23, 42, 0.9) 100%);">
+                    <div class="card-header flex-between">
+                        <div>
+                            <h3 style="color: #60a5fa;"><i class="fa-brands fa-apple"></i> Apple iPhone (iOS) OTA Profile Enrollment</h3>
+                            <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+                                Enroll any iPhone (iOS 15, 16, 17, 18+) in 2 taps using Apple Configuration Profile &amp; Managed Lost Mode.
+                            </p>
+                        </div>
+                        <span class="badge" style="background: rgba(0, 113, 227, 0.2); color: #60a5fa; border: 1px solid #0071e3; padding: 6px 12px; font-weight: 700;">
+                            🍏 Apple MDM Ready
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <!-- iOS 3-Step Guide Banner -->
+                        <div class="qr-steps-container">
+                            <div class="qr-step-card" style="border-color: rgba(0, 113, 227, 0.3);">
+                                <div class="step-badge" style="background: linear-gradient(135deg, #0071e3 0%, #0284c7 100%);">1</div>
+                                <h4>Scan via iPhone Camera</h4>
+                                <p>iPhone Camera se yeh QR code scan karein aur Safari mein open karein.</p>
+                            </div>
+                            <div class="qr-step-card" style="border-color: rgba(0, 113, 227, 0.3);">
+                                <div class="step-badge" style="background: linear-gradient(135deg, #0071e3 0%, #0284c7 100%);">2</div>
+                                <h4>Open iPhone Settings</h4>
+                                <p><strong>Settings -> Profile Downloaded</strong> par tap karein.</p>
+                            </div>
+                            <div class="qr-step-card" style="border-color: rgba(0, 113, 227, 0.3);">
+                                <div class="step-badge" style="background: linear-gradient(135deg, #0071e3 0%, #0284c7 100%);">3</div>
+                                <h4>Tap "Install"</h4>
+                                <p>Install dabayein. iPhone par EMI protection &amp; Lost Mode active ho jayega!</p>
+                            </div>
+                        </div>
+
+                        <div class="qr-main-grid">
+                            <!-- Left: Live iOS QR Code -->
+                            <div class="qr-display-box" style="border-color: rgba(0, 113, 227, 0.4);">
+                                <div class="qr-header-badge" style="background: rgba(0, 113, 227, 0.15); color: #60a5fa; border-color: rgba(0, 113, 227, 0.3);">
+                                    <i class="fa-brands fa-apple"></i> Apple iOS Over-The-Air (OTA) QR
+                                </div>
+                                <div id="ios-enroll-qr-canvas" class="qr-canvas-wrapper"></div>
+                                <div class="qr-footer-actions">
+                                    <button class="btn btn-primary btn-sm" id="btn-refresh-ios-qr" style="background: #0071e3; border-color: #0284c7;">
+                                        <i class="fa-solid fa-arrows-rotate"></i> Refresh iOS QR
+                                    </button>
+                                    <a id="btn-open-ios-enroll-link" href="/ios/enroll" target="_blank" class="btn btn-secondary btn-sm">
+                                        <i class="fa-solid fa-up-right-from-square"></i> Open Safari Link
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Right: iOS Enrollment Info & Direct Profile Download -->
+                            <div class="qr-settings-box" style="border-color: rgba(0, 113, 227, 0.4);">
+                                <h4><i class="fa-brands fa-apple"></i> Apple iOS Protection Features</h4>
+                                <ul style="font-size: 13px; color: #cbd5e1; line-height: 1.8; margin-top: 10px; padding-left: 20px;">
+                                    <li><strong>Apple Managed Lost Mode:</strong> Remote lock screen with custom warning and shopkeeper call button.</li>
+                                    <li><strong>Loud Alarm (PlaySound):</strong> Play emergency siren even when iPhone is on Silent Mode.</li>
+                                    <li><strong>Smart Locker Web Clip:</strong> Instant customer EMI portal on iPhone Home Screen.</li>
+                                    <li><strong>Anti-Tamper:</strong> Password-protected profile removal prevention.</li>
+                                </ul>
+
+                                <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 18px 0;">
+
+                                <a href="/ios/enroll.mobileconfig" class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #0071e3 0%, #0284c7 100%); border-color: #0071e3; font-weight: 700;">
+                                    <i class="fa-solid fa-download"></i> Direct Download .mobileconfig Profile
+                                </a>
                             </div>
                         </div>
                     </div>

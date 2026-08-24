@@ -683,7 +683,12 @@
         function renderDeviceUI(d) {
             document.title = `Control: ${d.customerName} [${d.id}] — Tiger Locker`;
             document.getElementById('dev-customer-name').textContent = d.customerName || 'Unknown Customer';
-            document.getElementById('dev-model').innerHTML = `<i class="fa-solid fa-mobile-screen"></i> ${d.model || 'Android Smartphone'}`;
+            
+            const isIos = d.platform === 'ios' || (d.model && d.model.toLowerCase().includes('iphone'));
+            document.getElementById('dev-model').innerHTML = isIos 
+                ? `<i class="fa-brands fa-apple" style="color:#60a5fa;"></i> ${d.model || 'Apple iPhone'} <span style="background:#0071e3; color:#fff; font-size:11px; padding:2px 8px; border-radius:4px; margin-left:6px; font-weight:700;">🍏 Apple MDM</span>`
+                : `<i class="fa-brands fa-android" style="color:#22c55e;"></i> ${d.model || 'Android Smartphone'} <span style="background:#16a34a; color:#fff; font-size:11px; padding:2px 8px; border-radius:4px; margin-left:6px; font-weight:700;">🤖 Android Device Owner</span>`;
+                
             document.getElementById('dev-id').textContent = d.id;
             document.getElementById('dev-pair-code').textContent = d.pairCode || '------';
             

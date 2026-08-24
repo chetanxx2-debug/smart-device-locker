@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Smart Locker">
+    <meta name="theme-color" content="#0b1120">
+    <title>Smart Device Locker - Apple iOS Client</title>
+    <!-- Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0b1120;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --primary: #f97316;
+            --primary-gradient: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            --apple-blue: #0071e3;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --red-locked: #ef4444;
+            --green-active: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Plus Jakarta Sans", sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: env(safe-area-inset-top, 24px) 20px env(safe-area-inset-bottom, 24px) 20px;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(249, 115, 22, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 113, 227, 0.15) 0%, transparent 40%);
+        }
+
+        .ios-container {
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin: auto 0;
+        }
+
+        /* Apple Header */
+        .ios-header {
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .apple-shield-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1.5px solid rgba(249, 115, 22, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: var(--primary);
+            margin: 0 auto 12px auto;
+            box-shadow: 0 8px 24px rgba(249, 115, 22, 0.25);
+        }
+
+        .ios-header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .ios-header p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Glassmorphism Card */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Status Banner */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 14px;
+        }
+
+        .status-badge.active {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-badge.locked {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            font-size: 14px;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .info-label {
+            color: var(--text-muted);
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #ffffff;
+            font-family: inherit;
+        }
+
+        /* EMI Amount Highlight Box */
+        .emi-box {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
+            border: 1px solid rgba(249, 115, 22, 0.4);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            margin: 6px 0;
+        }
+
+        .emi-box span {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .emi-box h2 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 4px 0;
+        }
+
+        /* Buttons */
+        .btn-ios {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-ios:active {
+            transform: scale(0.98);
+        }
+
+        .btn-pay {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-call {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.35);
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.06);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ios-container">
+        <!-- Header -->
+        <div class="ios-header">
+            <div class="apple-shield-icon">
+                <i class="fa-brands fa-apple"></i>
+            </div>
+            <h1>Smart Device Locker</h1>
+            <p>Apple iOS Device Protection &amp; EMI Client</p>
+        </div>
+
+        <!-- Status Card -->
+        <div class="glass-card">
+            <div id="status-badge" class="status-badge active">
+                <i class="fa-solid fa-circle-check"></i> <span id="status-text">Protected &amp; Active</span>
+            </div>
+
+            <div class="emi-box">
+                <span>Next EMI Due Date</span>
+                <h2 id="emi-amount">₹1,500</h2>
+                <span id="emi-due-date">Due on: 24 Sep 2026</span>
+            </div>
+
+            <div style="margin-top: 14px;">
+                <div class="info-row">
+                    <span class="info-label">Customer Name</span>
+                    <span class="info-value" id="cust-name">Loading...</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Device Model</span>
+                    <span class="info-value" id="dev-model">Apple iPhone</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Device ID</span>
+                    <span class="info-value" id="dev-id">DEV-XXX</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Tenure / Completed</span>
+                    <span class="info-value" id="emi-progress">0 / 6 Months</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shopkeeper Contact Card -->
+        <div class="glass-card">
+            <div class="info-row">
+                <span class="info-label"><i class="fa-solid fa-store"></i> Shop</span>
+                <span class="info-value" id="shop-name">Authorized Retailer</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label"><i class="fa-solid fa-phone"></i> Contact</span>
+                <span class="info-value" id="shop-phone">+91 98765 43210</span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <a id="btn-pay-upi" href="#" class="btn-ios btn-pay">
+            <i class="fa-solid fa-bolt"></i> Pay EMI Online (Instant)
+        </a>
+
+        <a id="btn-call-shop" href="tel:+919876543210" class="btn-ios btn-call">
+            <i class="fa-solid fa-phone"></i> Call Retailer Support
+        </a>
+
+        <div class="footer-note">
+            🔒 Protected under Apple MDM &amp; Finance Security Agreement.<br>
+            Managed by Smart Device Locker Cloud.
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const deviceId = urlParams.get('id') || urlParams.get('deviceId') || '';
+
+        function fetchDeviceData() {
+            if (!deviceId) return;
+
+            fetch(`/api/devices/${encodeURIComponent(deviceId)}/poll`)
+                .then(r => r.json())
+                .then(dev => {
+                    if (dev && dev.success !== false) {
+                        document.getElementById('dev-id').textContent = dev.deviceId || deviceId;
+                        if (dev.dueDate) document.getElementById('emi-due-date').textContent = 'Due on: ' + dev.dueDate;
+                        if (dev.shopName) document.getElementById('shop-name').textContent = dev.shopName;
+                        if (dev.retailerPhone) {
+                            document.getElementById('shop-phone').textContent = dev.retailerPhone;
+                            document.getElementById('btn-call-shop').href = 'tel:' + dev.retailerPhone;
+                        }
+
+                        const statusBadge = document.getElementById('status-badge');
+                        const statusText = document.getElementById('status-text');
+
+                        if (dev.isLocked) {
+                            statusBadge.className = 'status-badge locked';
+                            statusText.textContent = 'Device Locked (EMI Overdue)';
+                        } else {
+                            statusBadge.className = 'status-badge active';
+                            statusText.textContent = 'Protected & Active';
+                        }
+                    }
+                })
+                .catch(err => console.error('Fetch error:', err));
+        }
+
+        fetchDeviceData();
+        setInterval(fetchDeviceData, 5000);
+    </script>
+</body>
+</html>

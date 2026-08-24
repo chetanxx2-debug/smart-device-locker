@@ -437,6 +437,7 @@ class SellerPortal {
                 if (targetId === 'tab-qr-setup') {
                     this.generateEnterpriseQR();
                     this.generateDirectDownloadQR();
+                    this.generateIosEnrollmentQR();
                 }
             });
         });
@@ -773,6 +774,25 @@ class SellerPortal {
         if (downPaymentInput) downPaymentInput.addEventListener('input', updateEmiCalculation);
         if (tenureSelect) tenureSelect.addEventListener('change', updateEmiCalculation);
 
+        const platformSelect = document.getElementById('input-dev-platform');
+        const devModelInput = document.getElementById('input-dev-model');
+
+        if (platformSelect && devModelInput) {
+            platformSelect.addEventListener('change', () => {
+                if (platformSelect.value === 'ios') {
+                    devModelInput.placeholder = 'e.g. Apple iPhone 15 Pro (128GB)';
+                    if (!devModelInput.value || devModelInput.value.toLowerCase().includes('samsung')) {
+                        devModelInput.value = 'Apple iPhone 15';
+                    }
+                } else {
+                    devModelInput.placeholder = 'e.g. Samsung Galaxy M34 5G';
+                    if (devModelInput.value.toLowerCase().includes('iphone')) {
+                        devModelInput.value = 'Samsung Galaxy M34 5G';
+                    }
+                }
+            });
+        }
+
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -780,7 +800,8 @@ class SellerPortal {
             const custPhone = document.getElementById('input-cust-phone').value;
             const custKyc = document.getElementById('input-cust-kyc').value;
 
-            const devModel = document.getElementById('input-dev-model').value;
+            const devPlatform = platformSelect ? platformSelect.value : 'android';
+            const devModel = devModelInput ? devModelInput.value : '';
             const devImei = document.getElementById('input-dev-imei').value;
 
             const totalPrice = Number(totalPriceInput.value);
@@ -795,6 +816,7 @@ class SellerPortal {
                 body: JSON.stringify({
                     customerName: custName,
                     customerPhone: custPhone,
+                    platform: devPlatform,
                     model: devModel,
                     imei: devImei,
                     totalAmount: totalPrice,
@@ -926,7 +948,11 @@ class SellerPortal {
                         <small style="color:var(--primary);"><i class="fa-solid fa-key"></i> Code: <strong>${d.pairCode || '-'}</strong></small>
                     </td>
                     <td>
-                        <strong>${d.model || 'Android'}</strong><br>
+                        ${d.platform === 'ios' || (d.model && d.model.toLowerCase().includes('iphone')) 
+                            ? '<span class="badge" style="background:#0071e3; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; margin-bottom:4px; display:inline-block;"><i class="fa-brands fa-apple"></i> Apple iOS</span><br>'
+                            : '<span class="badge" style="background:#16a34a; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; margin-bottom:4px; display:inline-block;"><i class="fa-brands fa-android"></i> Android</span><br>'
+                        }
+                        <strong>${d.model || (d.platform === 'ios' ? 'Apple iPhone' : 'Android')}</strong><br>
                         <small class="font-mono">${onlineIcon}</small>
                     </td>
                     <td>₹${(d.monthlyEmi || 0).toLocaleString()}/mo (${d.tenureMonths || '?'}M)</td>
@@ -1112,10 +1138,19 @@ class SellerPortal {
             });
         }
 
+        const refreshIosBtn = document.getElementById('btn-refresh-ios-qr');
+        if (refreshIosBtn) {
+            refreshIosBtn.addEventListener('click', () => {
+                this.generateIosEnrollmentQR();
+                this.showToast('🔄 Apple iOS Enrollment QR refreshed!', 'info');
+            });
+        }
+
         // Auto-generate QR when script loads
         setTimeout(() => {
             this.generateEnterpriseQR();
             this.generateDirectDownloadQR();
+            this.generateIosEnrollmentQR();
         }, 600);
     }
 
@@ -1196,6 +1231,33 @@ class SellerPortal {
             });
         } catch (e) {
             console.error('Error generating direct download QR:', e);
+        }
+    }
+
+    generateIosEnrollmentQR() {
+        const container = document.getElementById('ios-enroll-qr-canvas');
+        if (!container) return;
+
+        if (typeof QRCode === 'undefined') {
+            setTimeout(() => this.generateIosEnrollmentQR(), 1000);
+            return;
+        }
+
+        container.innerHTML = '';
+
+        const iosUrl = `${window.location.origin}/ios/enroll`;
+
+        try {
+            new QRCode(container, {
+                text: iosUrl,
+                width: 220,
+                height: 220,
+                colorDark: "#0071e3",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        } catch (e) {
+            console.error('Error generating iOS enrollment QR:', e);
         }
     }
 }

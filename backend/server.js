@@ -447,13 +447,16 @@ app.post('/api/devices/register', (req, res) => {
     const shopName = req.user ? (req.user.shopName || req.user.name) : "Smart Device Locker HQ";
     const retailerPhone = req.user ? (req.user.phone || "") : "+91 98765 43210";
 
+    const platform = req.body.platform || ((model && model.toLowerCase().includes('iphone')) ? 'ios' : 'android');
+
     const newDevice = {
         id: deviceId,
+        platform: platform,
         retailerId: retailerId,
         shopName: shopName,
         retailerPhone: retailerPhone,
         imei: imei || `86${Math.floor(1000000000000 + Math.random() * 9000000000000)}`,
-        model: model || "Android Smartphone",
+        model: model || (platform === 'ios' ? "Apple iPhone 15" : "Android Smartphone"),
         customerName: customerName || "Customer",
         customerPhone: customerPhone || "+91 9800000000",
         totalAmount: Number(totalAmount) || 12000,
@@ -468,7 +471,7 @@ app.post('/api/devices/register', (req, res) => {
         offlineMasterCode: Math.floor(100000 + Math.random() * 900000).toString(),
         isPaired: false,
         sirenActive: false,
-        lastMessage: "Welcome to Smart Device Locker Protection",
+        lastMessage: platform === 'ios' ? "Welcome to Smart Device Locker Apple Protection" : "Welcome to Smart Device Locker Protection",
         battery: 100,
         network: "Wi-Fi",
         lastSeen: new Date().toISOString()
@@ -790,6 +793,278 @@ app.get('/api/logs', (req, res) => {
     }
 
     res.json(logs);
+});
+
+// =========================================================================
+// 🍏 APPLE iOS MDM & CONFIGURATION PROFILE (OTA ENROLLMENT) SYSTEM
+// =========================================================================
+
+// Generate Apple XML Configuration Profile (.mobileconfig)
+function generateIosProfile(device, origin) {
+    const orgName = device ? (device.shopName || "Smart Device Locker") : "Smart Device Locker";
+    const devId = device ? device.id : "DEV-GENERIC";
+    const custName = device ? (device.customerName || "Customer") : "Customer";
+    const retailerPhone = device ? (device.retailerPhone || "+91 98765 43210") : "+91 98765 43210";
+    const profileUuid = crypto.randomUUID ? crypto.randomUUID() : `SDL-UUID-${Date.now()}`;
+    const webClipUuid = `SDL-WEBCLIP-${Date.now()}`;
+    const mdmUuid = `SDL-MDM-${Date.now()}`;
+    const accessUuid = `SDL-ACCESS-${Date.now()}`;
+
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PayloadDescription</key>
+    <string>Enforces authorized EMI device protection, due reminders, and remote lost mode management.</string>
+    <key>PayloadDisplayName</key>
+    <string>Smart Locker EMI Protection (${orgName})</string>
+    <key>PayloadIdentifier</key>
+    <string>com.smartlocker.ios.profile.${devId}</string>
+    <key>PayloadOrganization</key>
+    <string>${orgName}</string>
+    <key>PayloadRemovalDisallowed</key>
+    <true/>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadUUID</key>
+    <string>${profileUuid}</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+    <key>PayloadContent</key>
+    <array>
+        <!-- 1. Web Clip for Customer EMI Portal & Payment -->
+        <dict>
+            <key>FullScreen</key>
+            <true/>
+            <key>IsRemovable</key>
+            <false/>
+            <key>Label</key>
+            <string>Smart Locker</string>
+            <key>PayloadDescription</key>
+            <string>Access your monthly EMI schedule, payment gateway, and shopkeeper support.</string>
+            <key>PayloadDisplayName</key>
+            <string>Smart Locker EMI Portal</string>
+            <key>PayloadIdentifier</key>
+            <string>com.apple.webClip.managed.${devId}</string>
+            <key>PayloadType</key>
+            <string>com.apple.webClip.managed</string>
+            <key>PayloadUUID</key>
+            <string>${webClipUuid}</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>Precomposed</key>
+            <true/>
+            <key>URL</key>
+            <string>${origin}/ios/client.html?id=${encodeURIComponent(devId)}</string>
+        </dict>
+        <!-- 2. Apple MDM Configuration Payload -->
+        <dict>
+            <key>AccessRights</key>
+            <integer>8191</integer>
+            <key>CheckInURL</key>
+            <string>${origin}/ios/mdm/checkin?id=${encodeURIComponent(devId)}</string>
+            <key>CheckOutWhenRemoved</key>
+            <true/>
+            <key>IdentityCertificateUUID</key>
+            <string>${profileUuid}</string>
+            <key>PayloadDescription</key>
+            <string>Configures Apple Managed Lost Mode, remote lockdown, and security policies.</string>
+            <key>PayloadDisplayName</key>
+            <string>Apple MDM Service</string>
+            <key>PayloadIdentifier</key>
+            <string>com.apple.mdm.${devId}</string>
+            <key>PayloadType</key>
+            <string>com.apple.mdm</string>
+            <key>PayloadUUID</key>
+            <string>${mdmUuid}</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>ServerURL</key>
+            <string>${origin}/ios/mdm/server?id=${encodeURIComponent(devId)}</string>
+            <key>SignMessage</key>
+            <false/>
+            <key>Topic</key>
+            <string>com.apple.mgmt.external.${devId}</string>
+        </dict>
+        <!-- 3. Security Restrictions Payload -->
+        <dict>
+            <key>PayloadDescription</key>
+            <string>Protects device against unauthorized removal or diagnostic changes.</string>
+            <key>PayloadDisplayName</key>
+            <string>Security Restrictions</string>
+            <key>PayloadIdentifier</key>
+            <string>com.apple.applicationaccess.${devId}</string>
+            <key>PayloadType</key>
+            <string>com.apple.applicationaccess</string>
+            <key>PayloadUUID</key>
+            <string>${accessUuid}</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>allowDiagnosticSubmission</key>
+            <false/>
+            <key>allowFingerprintForUnlock</key>
+            <true/>
+        </dict>
+    </array>
+</dict>
+</plist>`;
+}
+
+// 1. iOS Enrollment Landing Page
+app.get('/ios/enroll', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'ios', 'enroll.html'));
+});
+
+// 2. Download Apple Configuration Profile (.mobileconfig)
+app.get(['/ios/enroll.mobileconfig', '/ios/profile.mobileconfig'], (req, res) => {
+    const db = loadDb();
+    const pairCode = String(req.query.pairCode || req.query.code || '').trim();
+    const deviceId = String(req.query.id || req.query.deviceId || '').trim();
+
+    let device = null;
+    if (pairCode) {
+        device = db.devices.find(d => String(d.pairCode).trim() === pairCode);
+    } else if (deviceId) {
+        device = db.devices.find(d => d.id === deviceId);
+    }
+
+    if (device) {
+        device.platform = 'ios';
+        device.isPaired = true;
+        device.lastSeen = new Date().toISOString();
+        db.logs.unshift({
+            id: Date.now(),
+            timestamp: new Date().toISOString(),
+            deviceId: device.id,
+            retailerId: device.retailerId || "USR-SUPERADMIN",
+            action: "IOS_ENROLLED",
+            details: `Apple iPhone (${device.model}) enrolled with OTA MDM Profile at ${device.shopName || 'Shop'}.`,
+            status: "SUCCESS"
+        });
+        saveDb(db);
+    }
+
+    const host = req.get('host') || `localhost:${PORT}`;
+    const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
+    const origin = `${protocol}://${host}`;
+
+    const profileXml = generateIosProfile(device, origin);
+
+    res.set({
+        'Content-Type': 'application/x-apple-aspen-config; charset=utf-8',
+        'Content-Disposition': `attachment; filename="SmartDeviceLocker_${device ? device.id : 'Profile'}.mobileconfig"`
+    });
+    res.send(profileXml);
+});
+
+// 3. Apple MDM CheckIn Endpoint (Authenticate, TokenUpdate, CheckOut)
+app.all('/ios/mdm/checkin', (req, res) => {
+    const deviceId = req.query.id || req.query.deviceId || '';
+    console.log(`[Apple MDM CheckIn] Received for device: ${deviceId}`);
+
+    if (deviceId) {
+        const db = loadDb();
+        const device = db.devices.find(d => d.id === deviceId);
+        if (device) {
+            device.platform = 'ios';
+            device.isPaired = true;
+            device.lastSeen = new Date().toISOString();
+            saveDb(db);
+        }
+    }
+
+    res.set('Content-Type', 'application/xml');
+    res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Status</key>
+    <string>Acknowledged</string>
+</dict>
+</plist>`);
+});
+
+// 4. Apple MDM Server Endpoint (Command Delivery & Lost Mode)
+app.all('/ios/mdm/server', (req, res) => {
+    const deviceId = req.query.id || req.query.deviceId || '';
+    const db = loadDb();
+    const device = db.devices.find(d => d.id === deviceId);
+
+    res.set('Content-Type', 'application/xml');
+
+    if (!device) {
+        return res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict><key>Status</key><string>Acknowledged</string></dict></plist>`);
+    }
+
+    device.lastSeen = new Date().toISOString();
+
+    // Check if device is in Locked / Lost Mode
+    if (device.isLocked) {
+        const lockMsg = device.lastMessage || `⚠️ Device Locked: Monthly EMI payment is overdue. Please contact ${device.shopName || 'Shop'} to unlock.`;
+        const phone = device.retailerPhone || '+91 98765 43210';
+        const footnote = `Managed by ${device.shopName || 'Smart Device Locker'}`;
+
+        saveDb(db);
+        return res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CommandUUID</key>
+    <string>CMD-LOCK-${Date.now()}</string>
+    <key>Command</key>
+    <dict>
+        <key>RequestType</key>
+        <string>EnableLostMode</string>
+        <key>Message</key>
+        <string>${lockMsg}</string>
+        <key>PhoneNumber</key>
+        <string>${phone}</string>
+        <key>Footnote</key>
+        <string>${footnote}</string>
+    </dict>
+</dict>
+</plist>`);
+    }
+
+    if (device.sirenActive) {
+        return res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CommandUUID</key>
+    <string>CMD-SIREN-${Date.now()}</string>
+    <key>Command</key>
+    <dict>
+        <key>RequestType</key>
+        <string>PlayLostModeSound</string>
+    </dict>
+</dict>
+</plist>`);
+    }
+
+    // Default Idle status
+    res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CommandUUID</key>
+    <string>CMD-IDLE-${Date.now()}</string>
+    <key>Command</key>
+    <dict>
+        <key>RequestType</key>
+        <string>DeviceInformation</string>
+        <key>Queries</key>
+        <array>
+            <string>BatteryLevel</string>
+            <string>DeviceName</string>
+            <string>OSVersion</string>
+            <string>ModelName</string>
+        </array>
+    </dict>
+</dict>
+</plist>`);
 });
 
 // Start Server
