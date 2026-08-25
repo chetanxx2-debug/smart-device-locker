@@ -39,6 +39,21 @@ app.get('/manifest.json', (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'manifest.json'));
 });
 
+// ── ANDROID APK DIRECT DOWNLOAD ROUTE ───────────────────────────────
+app.get(['/download-apk', '/downloads/SmartDeviceLocker.apk', '/SmartDeviceLocker.apk'], (req, res) => {
+    const p1 = path.join(__dirname, '..', 'downloads', 'SmartDeviceLocker.apk');
+    const p2 = path.join(__dirname, '..', 'SmartDeviceLocker.apk');
+    if (fs.existsSync(p1)) {
+        res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+        return res.download(p1, 'SmartDeviceLocker.apk');
+    }
+    if (fs.existsSync(p2)) {
+        res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+        return res.download(p2, 'SmartDeviceLocker.apk');
+    }
+    res.status(404).send('APK file not found.');
+});
+
 app.use(express.static(path.join(__dirname, '..')));
 
 const PORT = process.env.PORT || 3000;
