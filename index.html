@@ -538,12 +538,17 @@
                                 </div>
 
                                 <div class="form-group" style="margin-bottom:14px;">
-                                    <label style="font-size:12px; color:var(--text-muted);">UPI Transaction ID / UTR (Optional):</label>
-                                    <input type="text" id="input-payment-utr" class="form-control font-mono" placeholder="Enter 12-digit UTR after payment" style="font-size:13px;">
+                                    <label style="font-size:12px; color:var(--text-muted); font-weight:700;">
+                                        <i class="fa-solid fa-receipt" style="color:var(--primary);"></i> 12-Digit UTR / UPI Reference Number <span style="color:#ef4444;">* (Mandatory)</span>:
+                                    </label>
+                                    <input type="text" id="input-payment-utr" class="form-control font-mono" placeholder="e.g. 423891029381 (from PhonePe/GPay receipt)" style="font-size:14px; font-weight:700; letter-spacing:1px;" required maxlength="24">
+                                    <small style="color:#94a3b8; font-size:11px; margin-top:3px; display:block;">
+                                        Payment ke baad PhonePe/GPay/Paytm se 12-digit UTR yahan enter karein.
+                                    </small>
                                 </div>
 
-                                <button id="btn-confirm-buy-keys" class="btn btn-primary btn-lg" style="width:100%; font-weight:700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border:none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);">
-                                    <i class="fa-solid fa-circle-check"></i> <span id="btn-buy-keys-text">I Have Paid &bull; Generate 1 Key</span>
+                                <button id="btn-confirm-buy-keys" class="btn btn-primary btn-lg" style="width:100%; font-weight:700; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); border:none; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.4);">
+                                    <i class="fa-solid fa-paper-plane"></i> <span id="btn-buy-keys-text">Submit Payment Request &bull; 1 Key (₹100)</span>
                                 </button>
                             </div>
 
@@ -568,6 +573,51 @@
                                     UPI: <strong style="color:#93c5fd;">9326205462@ybl</strong>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUPER ADMIN: PENDING PAYMENT VERIFICATION QUEUE -->
+                <div id="superadmin-payment-queue-card" class="card" style="display:none; margin-bottom: 24px; border: 1.5px solid #f59e0b; background: rgba(245, 158, 11, 0.04);">
+                    <div class="card-header flex-between">
+                        <div>
+                            <h3 style="color:#f59e0b;"><i class="fa-solid fa-bell"></i> Super Admin: Pending Payment Verification Requests</h3>
+                            <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
+                                Check your Bank/UPI app for received UTR &bull; Click "Approve" to instantly unlock 7-character keys for the shop.
+                            </p>
+                        </div>
+                        <span id="badge-pending-requests-count" class="badge badge-warning" style="font-size:12px;">0 Pending</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Shop Name</th>
+                                        <th>Requested Keys</th>
+                                        <th>Amount (₹)</th>
+                                        <th>UTR / Reference No.</th>
+                                        <th>Submitted Time</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="superadmin-pending-requests-tbody">
+                                    <!-- Injected via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RETAILER: MY PAYMENT REQUESTS STATUS -->
+                <div id="retailer-requests-status-card" class="card" style="margin-bottom: 24px;">
+                    <div class="card-header flex-between">
+                        <h3><i class="fa-solid fa-hourglass-half" style="color:#38bdf8;"></i> My Payment Requests &amp; Approval Status</h3>
+                        <button class="btn btn-secondary btn-sm" id="btn-refresh-my-requests"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="retailer-requests-list" style="display: flex; flex-direction: column; gap: 10px;">
+                            <!-- Injected via JS -->
                         </div>
                     </div>
                 </div>
