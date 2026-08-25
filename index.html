@@ -126,6 +126,10 @@
                 <button class="nav-tab" data-tab="tab-emi-payments">
                     <i class="fa-solid fa-indian-rupee-sign"></i> <span data-i18n="tab_emi_payments">EMI & Payments</span>
                 </button>
+                <button class="nav-tab" data-tab="tab-license-keys">
+                    <i class="fa-solid fa-key"></i> <span>🔑 License Keys</span>
+                    <span id="nav-unused-keys-count" class="badge" style="background:#10b981; color:#fff; font-size:10px; margin-left:4px; display:none;">0</span>
+                </button>
                 <button class="nav-tab" data-tab="tab-audit-logs">
                     <i class="fa-solid fa-list-check"></i> <span data-i18n="tab_audit_logs">Audit Security Logs</span>
                 </button>
@@ -314,7 +318,23 @@
                             </div>
 
                             <div class="form-section-title">
-                                <i class="fa-solid fa-mobile-retro"></i> <span data-i18n="form_sec_2">2. Device Hardware Details</span>
+                                <i class="fa-solid fa-mobile-retro"></i> <span data-i18n="form_sec_2">2. Device Hardware & Activation Key</span>
+                            </div>
+                            <div class="form-group" id="group-activation-key">
+                                <label style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span><i class="fa-solid fa-key" style="color:var(--primary);"></i> Device Activation Key (7-char) <span style="color:#ef4444;">*</span></span>
+                                    <a href="javascript:void(0)" id="btn-quick-buy-key" style="font-size:12px; color:#38bdf8; text-decoration:none; font-weight:700;">🔑 Buy Key (₹100)</a>
+                                </label>
+                                <div style="display:flex; gap:8px;">
+                                    <input type="text" id="input-activation-key" class="form-control font-mono" placeholder="e.g. X7K9M2P" maxlength="7" style="text-transform:uppercase; font-weight:800; font-size:16px; letter-spacing:3px; flex:1;" required>
+                                    <select id="select-my-unused-keys" class="form-control font-mono" style="max-width:210px; display:none;">
+                                        <option value="">-- Choose My Key --</option>
+                                    </select>
+                                </div>
+                                <small id="key-help-text" style="color:var(--text-muted); font-size:11px;">1 Key = 1 Device registration. Each 7-char key is single-use only.</small>
+                                <div id="superadmin-free-badge" style="display:none; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); padding:8px 12px; border-radius:8px; color:#a7f3d0; font-size:12px; font-weight:700; margin-top:6px;">
+                                    <i class="fa-solid fa-crown"></i> 👑 Super Admin Mode: 100% Free (No Key Required)
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label>Device Platform / Operating System *</label>
@@ -444,6 +464,172 @@
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: LICENSE & ACTIVATION KEYS (₹100 / KEY) -->
+            <div id="tab-license-keys" class="tab-content">
+                <!-- Key Summary Cards -->
+                <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 20px;">
+                    <div class="metric-card success">
+                        <div class="metric-icon"><i class="fa-solid fa-key"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label">Available Unused Keys</span>
+                            <h3 id="stat-unused-keys">0</h3>
+                            <span class="metric-sub">Ready to register devices</span>
+                        </div>
+                    </div>
+                    <div class="metric-card warning">
+                        <div class="metric-icon"><i class="fa-solid fa-lock-open"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label">Used / Activated Keys</span>
+                            <h3 id="stat-used-keys">0</h3>
+                            <span class="metric-sub">Registered devices</span>
+                        </div>
+                    </div>
+                    <div class="metric-card primary">
+                        <div class="metric-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label">Total Key Purchases</span>
+                            <h3 id="stat-total-spent">₹0</h3>
+                            <span class="metric-sub">₹100 per device key</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buy Keys Box with Dynamic UPI QR Code -->
+                <div class="card" style="margin-bottom: 24px; border: 1.5px solid var(--primary); background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);">
+                    <div class="card-header flex-between">
+                        <div>
+                            <h3><i class="fa-solid fa-cart-shopping" style="color:var(--primary);"></i> Buy Device Activation Keys (₹100 / Key)</h3>
+                            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">
+                                Select quantity &bull; Scan UPI QR Code &bull; Get instant 7-character activation keys.
+                            </p>
+                        </div>
+                        <span class="badge badge-success" style="font-size:12px; padding:6px 12px; font-weight:700;">₹100 / Device</span>
+                    </div>
+                    <div class="card-body">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; align-items: center;">
+                            <!-- Left: Selector and Details -->
+                            <div>
+                                <label style="font-weight:700; font-size:14px; margin-bottom:8px; display:block;">Select Number of Device Keys:</label>
+                                <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px;">
+                                    <button type="button" class="btn btn-secondary btn-key-qty active" data-qty="1" style="flex:1; min-width:80px; font-weight:700;">1 Key<br><small>₹100</small></button>
+                                    <button type="button" class="btn btn-secondary btn-key-qty" data-qty="2" style="flex:1; min-width:80px; font-weight:700;">2 Keys<br><small>₹200</small></button>
+                                    <button type="button" class="btn btn-secondary btn-key-qty" data-qty="5" style="flex:1; min-width:80px; font-weight:700;">5 Keys<br><small>₹500</small></button>
+                                    <button type="button" class="btn btn-secondary btn-key-qty" data-qty="10" style="flex:1; min-width:80px; font-weight:700;">10 Keys<br><small>₹1,000</small></button>
+                                </div>
+
+                                <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 18px;">
+                                    <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:13px;">
+                                        <span style="color:var(--text-muted);">Quantity:</span>
+                                        <strong id="buy-key-qty-label">1 Device Key</strong>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:13px;">
+                                        <span style="color:var(--text-muted);">Price per Key:</span>
+                                        <strong>₹100</strong>
+                                    </div>
+                                    <hr style="border:0; border-top:1px solid var(--border-color); margin:8px 0;">
+                                    <div style="display:flex; justify-content:space-between; font-size:16px;">
+                                        <span style="font-weight:700;">Total Payable:</span>
+                                        <strong id="buy-key-total-label" style="color:var(--primary); font-size:18px;">₹100</strong>
+                                    </div>
+                                </div>
+
+                                <div class="form-group" style="margin-bottom:14px;">
+                                    <label style="font-size:12px; color:var(--text-muted);">UPI Transaction ID / UTR (Optional):</label>
+                                    <input type="text" id="input-payment-utr" class="form-control font-mono" placeholder="Enter 12-digit UTR after payment" style="font-size:13px;">
+                                </div>
+
+                                <button id="btn-confirm-buy-keys" class="btn btn-primary btn-lg" style="width:100%; font-weight:700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border:none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);">
+                                    <i class="fa-solid fa-circle-check"></i> <span id="btn-buy-keys-text">I Have Paid &bull; Generate 1 Key</span>
+                                </button>
+                            </div>
+
+                            <!-- Right: Clean Dynamic UPI QR Code (Only QR as requested) -->
+                            <div style="background: #0f172a; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <div style="font-size:12px; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;">
+                                    <i class="fa-solid fa-qrcode"></i> Scan to Pay via Any UPI App
+                                </div>
+                                <div style="background:#ffffff; padding:14px; border-radius:12px; display:inline-block; box-shadow:0 8px 25px rgba(0,0,0,0.5);">
+                                    <div id="payment-upi-qr-canvas" style="display:flex; justify-content:center;"></div>
+                                </div>
+                                <div style="margin-top:14px; display:flex; align-items:center; gap:6px; justify-content:center;">
+                                    <span class="badge" style="background:#1e293b; color:#cbd5e1; border:1px solid #334155; font-size:10px;">GPay</span>
+                                    <span class="badge" style="background:#1e293b; color:#cbd5e1; border:1px solid #334155; font-size:10px;">PhonePe</span>
+                                    <span class="badge" style="background:#1e293b; color:#cbd5e1; border:1px solid #334155; font-size:10px;">Paytm</span>
+                                    <span class="badge" style="background:#1e293b; color:#cbd5e1; border:1px solid #334155; font-size:10px;">BHIM UPI</span>
+                                </div>
+                                <div style="margin-top:8px; font-size:12px; color:#94a3b8;">
+                                    Pay: <strong id="qr-amount-text" style="color:#a7f3d0; font-size:14px;">₹100</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Available Unused Keys Section -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <div class="card-header flex-between">
+                        <h3><i class="fa-solid fa-key" style="color:#10b981;"></i> My Available Keys (🟢 Ready to Use)</h3>
+                        <span id="available-keys-badge" class="badge badge-success">0 Keys</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="unused-keys-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px;">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Used Keys History Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fa-solid fa-clock-rotate-left"></i> Key Activation History (🔴 Used Keys)</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Activation Key</th>
+                                        <th>Status</th>
+                                        <th>Device ID</th>
+                                        <th>Customer Name</th>
+                                        <th>Date Activated</th>
+                                        <th>Cost</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="used-keys-table-body">
+                                    <!-- Injected via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Super Admin Master Promo Generator -->
+                <div id="superadmin-promo-card" class="card" style="display:none; margin-top:24px; border:1.5px solid #f59e0b; background: rgba(245,158,11,0.05);">
+                    <div class="card-header flex-between">
+                        <h3 style="color:#f59e0b;"><i class="fa-solid fa-crown"></i> Super Admin: Generate Free Promo Keys for Shop</h3>
+                        <span class="badge badge-warning">Master Tool</span>
+                    </div>
+                    <div class="card-body">
+                        <form id="form-superadmin-promo" style="display:grid; grid-template-columns: 1fr 120px auto; gap:14px; align-items:flex-end;">
+                            <div class="form-group" style="margin:0;">
+                                <label>Select Target Shop:</label>
+                                <select id="promo-target-shop" class="form-control" required>
+                                    <!-- Injected via JS -->
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label>Key Count:</label>
+                                <input type="number" id="promo-key-count" class="form-control" value="5" min="1" max="50" required>
+                            </div>
+                            <button type="submit" class="btn btn-warning" style="height:42px; font-weight:700;">
+                                <i class="fa-solid fa-gift"></i> Issue Free Keys
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

@@ -23,6 +23,7 @@ class SellerPortal {
         this.setupCommandConsole();
         this.setupShopManagement();
         this.setupQrProvisioning();
+        this.setupLicenseKeys();
 
         // Check authentication state
         this.checkAuth();
@@ -178,6 +179,11 @@ class SellerPortal {
         const shopsTab = document.getElementById('nav-tab-shops');
 
         if (this.currentUser) {
+            const superAdminPromoCard = document.getElementById('superadmin-promo-card');
+            const superAdminFreeBadge = document.getElementById('superadmin-free-badge');
+            const keyInput = document.getElementById('input-activation-key');
+            const keyGroup = document.getElementById('group-activation-key');
+
             if (userBadge && userDisplayName) {
                 userBadge.style.display = 'inline-flex';
                 if (this.currentUser.role === 'super_admin') {
@@ -185,17 +191,30 @@ class SellerPortal {
                     userDisplayName.textContent = `👑 Master Admin (${this.currentUser.username})`;
                     if (userRoleIcon) userRoleIcon.className = 'fa-solid fa-crown';
                     if (shopsTab) shopsTab.style.display = 'inline-flex';
+                    if (superAdminPromoCard) superAdminPromoCard.style.display = 'block';
+                    if (superAdminFreeBadge) superAdminFreeBadge.style.display = 'block';
+                    if (keyInput) {
+                        keyInput.required = false;
+                        keyInput.placeholder = 'Super Admin Mode: Free (Optional)';
+                    }
                     this.loadRetailersList();
                 } else {
                     userBadge.className = 'user-profile-badge';
                     userDisplayName.textContent = `🏪 ${this.currentUser.shopName} (${this.currentUser.name})`;
                     if (userRoleIcon) userRoleIcon.className = 'fa-solid fa-store';
                     if (shopsTab) shopsTab.style.display = 'none';
+                    if (superAdminPromoCard) superAdminPromoCard.style.display = 'none';
+                    if (superAdminFreeBadge) superAdminFreeBadge.style.display = 'none';
+                    if (keyInput) {
+                        keyInput.required = true;
+                        keyInput.placeholder = 'e.g. X7K9M2P';
+                    }
                 }
             }
             if (logoutBtn) logoutBtn.style.display = 'inline-flex';
 
             this.loadBackendDevicesAndRender();
+            this.loadLicenseKeysAndRender();
         }
     }
 
@@ -462,6 +481,8 @@ class SellerPortal {
                     this.generateEnterpriseQR();
                     this.generateDirectDownloadQR();
                     this.generateIosEnrollmentQR();
+                } else if (targetId === 'tab-license-keys') {
+                    this.loadLicenseKeysAndRender();
                 }
             });
         });
@@ -869,6 +890,9 @@ class SellerPortal {
             const tenure = Number(tenureSelect.value);
             const monthlyEmi = this.emiEngine.calculateMonthlyEmi(totalPrice, downPayment, tenure);
 
+            const keyInput = document.getElementById('input-activation-key');
+            const activationKey = keyInput ? keyInput.value.trim().toUpperCase() : '';
+
             // Call Backend /api/devices/register with Auth Headers
             fetch('/api/devices/register', {
                 method: 'POST',
@@ -882,12 +906,14 @@ class SellerPortal {
                     totalAmount: totalPrice,
                     downPayment: downPayment,
                     monthlyEmi: monthlyEmi,
-                    tenureMonths: tenure
+                    tenureMonths: tenure,
+                    activationKey: activationKey
                 })
             })
             .then(r => r.json())
             .then(res => {
                 if (res.success && res.device) {
+                    if (keyInput) keyInput.value = '';
                     const otpCode = res.device.pairCode;
                     const modalResult = document.getElementById('pairing-modal-result');
                     const codeDisplay = document.getElementById('generated-otp-code');
@@ -1324,6 +1350,298 @@ class SellerPortal {
         } catch (e) {
             console.error('Error generating iOS enrollment QR:', e);
         }
+    }
+
+    // ===== LICENSE & ACTIVATION KEYS CONTROLLER (₹100 / KEY) =====
+    setupLicenseKeys() {
+        let currentSelectedQty = 1;
+
+        // Quantity Buttons Click
+        const qtyButtons = document.querySelectorAll('.btn-key-qty');
+        const qtyLabel = document.getElementById('buy-key-qty-label');
+        const totalLabel = document.getElementById('buy-key-total-label');
+        const qrAmountText = document.getElementById('qr-amount-text');
+        const btnBuyText = document.getElementById('btn-buy-keys-text');
+
+        const updatePaymentDetails = (qty) => {
+            currentSelectedQty = qty;
+            const total = qty * 100;
+            if (qtyLabel) qtyLabel.textContent = `${qty} Device Key${qty > 1 ? 's' : ''}`;
+            if (totalLabel) totalLabel.textContent = `₹${total.toLocaleString('en-IN')}`;
+            if (qrAmountText) qrAmountText.textContent = `₹${total.toLocaleString('en-IN')}`;
+            if (btnBuyText) btnBuyText.textContent = `I Have Paid • Generate ${qty} Key${qty > 1 ? 's' : ''}`;
+            this.renderPaymentUPIQR(total);
+        };
+
+        qtyButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                qtyButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const qty = parseInt(btn.dataset.qty) || 1;
+                updatePaymentDetails(qty);
+            });
+        });
+
+        // Buy Keys Button
+        const btnConfirmBuy = document.getElementById('btn-confirm-buy-keys');
+        if (btnConfirmBuy) {
+            btnConfirmBuy.addEventListener('click', () => {
+                const utrInput = document.getElementById('input-payment-utr');
+                const utr = utrInput ? utrInput.value.trim() : '';
+
+                btnConfirmBuy.disabled = true;
+                btnConfirmBuy.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating Keys...';
+
+                fetch('/api/keys/buy', {
+                    method: 'POST',
+                    headers: this.getAuthHeaders(),
+                    body: JSON.stringify({ count: currentSelectedQty, utr })
+                })
+                .then(r => r.json())
+                .then(res => {
+                    btnConfirmBuy.disabled = false;
+                    btnConfirmBuy.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>I Have Paid • Generate ${currentSelectedQty} Key${currentSelectedQty > 1 ? 's' : ''}</span>`;
+
+                    if (res.success && Array.isArray(res.keys)) {
+                        if (utrInput) utrInput.value = '';
+                        this.showToast(`🎉 Success! ${res.keys.length} Activation Key(s) generated!`, 'success');
+                        this.loadLicenseKeysAndRender();
+                    } else {
+                        this.showToast(res.message || 'Key generation failed.', 'danger');
+                    }
+                })
+                .catch(err => {
+                    btnConfirmBuy.disabled = false;
+                    btnConfirmBuy.innerHTML = '<i class="fa-solid fa-circle-check"></i> Try Again';
+                    console.error('Buy keys error:', err);
+                    this.showToast('Network error during key purchase.', 'danger');
+                });
+            });
+        }
+
+        // Quick Buy link from Add Device tab
+        const quickBuyBtn = document.getElementById('btn-quick-buy-key');
+        if (quickBuyBtn) {
+            quickBuyBtn.addEventListener('click', () => {
+                document.querySelectorAll('.seller-nav .nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                const keysNav = document.querySelector('[data-tab="tab-license-keys"]');
+                const keysTab = document.getElementById('tab-license-keys');
+                if (keysNav) keysNav.classList.add('active');
+                if (keysTab) keysTab.classList.add('active');
+                this.loadLicenseKeysAndRender();
+            });
+        }
+
+        // Dropdown select from unused keys in Add Device Form
+        const selectUnused = document.getElementById('select-my-unused-keys');
+        const keyInput = document.getElementById('input-activation-key');
+        if (selectUnused && keyInput) {
+            selectUnused.addEventListener('change', () => {
+                if (selectUnused.value) {
+                    keyInput.value = selectUnused.value;
+                    keyInput.style.borderColor = '#10b981';
+                }
+            });
+        }
+
+        // Super Admin Promo Generator Form
+        const promoForm = document.getElementById('form-superadmin-promo');
+        if (promoForm) {
+            promoForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const shopSelect = document.getElementById('promo-target-shop');
+                const countInput = document.getElementById('promo-key-count');
+                const retailerId = shopSelect ? shopSelect.value : '';
+                const count = countInput ? parseInt(countInput.value) || 5 : 5;
+
+                if (!retailerId) return this.showToast('Select a shop first!', 'warning');
+
+                fetch('/api/admin/keys/promo', {
+                    method: 'POST',
+                    headers: this.getAuthHeaders(),
+                    body: JSON.stringify({ retailerId, count })
+                })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        this.showToast(`🎁 ${count} Promo Keys issued!`, 'success');
+                        this.loadLicenseKeysAndRender();
+                    } else {
+                        this.showToast(res.message || 'Promo generation failed.', 'danger');
+                    }
+                })
+                .catch(err => console.error('Promo keys error:', err));
+            });
+        }
+    }
+
+    renderPaymentUPIQR(amount) {
+        const container = document.getElementById('payment-upi-qr-canvas');
+        if (!container) return;
+
+        if (typeof QRCode === 'undefined') {
+            setTimeout(() => this.renderPaymentUPIQR(amount), 1000);
+            return;
+        }
+
+        container.innerHTML = '';
+
+        // Clean UPI payment URI string
+        const upiString = `upi://pay?pa=smartdevicelocker@upi&pn=Smart%20Device%20Locker&am=${amount}&cu=INR&tn=Device%20Key`;
+
+        try {
+            new QRCode(container, {
+                text: upiString,
+                width: 160,
+                height: 160,
+                colorDark: "#0f172a",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        } catch (e) {
+            console.error('Error generating UPI QR:', e);
+        }
+    }
+
+    loadLicenseKeysAndRender() {
+        if (!this.currentUser) return;
+
+        fetch('/api/keys/my-keys', {
+            headers: this.getAuthHeaders()
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success && res.summary && Array.isArray(res.keys)) {
+                this.renderKeysSummaryAndLists(res.summary, res.keys);
+            }
+        })
+        .catch(err => console.error('Error loading keys:', err));
+    }
+
+    renderKeysSummaryAndLists(summary, keys) {
+        // Update summary metrics
+        const statUnused = document.getElementById('stat-unused-keys');
+        const statUsed = document.getElementById('stat-used-keys');
+        const statTotal = document.getElementById('stat-total-spent');
+        const navCount = document.getElementById('nav-unused-keys-count');
+        const availBadge = document.getElementById('available-keys-badge');
+
+        if (statUnused) statUnused.textContent = summary.unusedCount || 0;
+        if (statUsed) statUsed.textContent = summary.usedCount || 0;
+        if (statTotal) statTotal.textContent = `₹${(summary.totalRevenue || 0).toLocaleString('en-IN')}`;
+
+        if (navCount) {
+            if (summary.unusedCount > 0) {
+                navCount.textContent = summary.unusedCount;
+                navCount.style.display = 'inline-block';
+            } else {
+                navCount.style.display = 'none';
+            }
+        }
+        if (availBadge) availBadge.textContent = `${summary.unusedCount} Available`;
+
+        // Render Unused Keys Grid
+        const unusedKeys = keys.filter(k => k.status === 'UNUSED');
+        const unusedGrid = document.getElementById('unused-keys-grid');
+        if (unusedGrid) {
+            if (!unusedKeys.length) {
+                unusedGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align:center; padding:30px; color:var(--text-muted);">
+                        <i class="fa-solid fa-key" style="font-size:32px; color:#475569; margin-bottom:10px; display:block;"></i>
+                        <strong>No Available Keys</strong>
+                        <p style="font-size:13px; margin-top:4px;">Buy keys above (₹100/device) to register new customer phones.</p>
+                    </div>
+                `;
+            } else {
+                unusedGrid.innerHTML = unusedKeys.map(k => `
+                    <div style="background:#0f172a; border:1px solid rgba(16,185,129,0.4); border-radius:12px; padding:16px; position:relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span class="badge badge-success" style="font-size:10px; padding:3px 8px;">🟢 UNUSED</span>
+                            <small style="color:var(--text-muted); font-size:11px;">₹100</small>
+                        </div>
+                        <div style="font-family:var(--font-mono); font-size:22px; font-weight:800; color:#38bdf8; letter-spacing:3px; text-align:center; padding:8px 0; background:rgba(15,23,42,0.8); border-radius:8px; border:1px dashed #334155; margin-bottom:12px;">
+                            ${k.key}
+                        </div>
+                        <div style="display:flex; gap:6px;">
+                            <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="sellerPortal.copyKey('${k.key}')" title="Copy Key to Clipboard">
+                                <i class="fa-solid fa-copy"></i> Copy
+                            </button>
+                            <button class="btn btn-primary btn-sm" style="flex:1.4; background:#10b981; border:none; font-weight:700;" onclick="sellerPortal.useKeyForDevice('${k.key}')">
+                                <i class="fa-solid fa-plus"></i> Use Key
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Render Used Keys History Table
+        const usedKeys = keys.filter(k => k.status === 'USED');
+        const usedTbody = document.getElementById('used-keys-table-body');
+        if (usedTbody) {
+            if (!usedKeys.length) {
+                usedTbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-dim); padding:20px;">No activated keys history yet.</td></tr>';
+            } else {
+                usedTbody.innerHTML = usedKeys.map(k => `
+                    <tr>
+                        <td><code style="font-size:14px; font-weight:700; color:#cbd5e1; letter-spacing:1px;">${k.key}</code></td>
+                        <td><span class="badge badge-secondary">🔴 USED</span></td>
+                        <td><strong style="color:var(--primary);">${k.usedForDeviceId || '-'}</strong></td>
+                        <td><strong>${k.usedForCustomerName || '-'}</strong></td>
+                        <td><small class="font-mono">${k.usedAt ? new Date(k.usedAt).toLocaleString() : 'N/A'}</small></td>
+                        <td>₹${k.cost || 100}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // Populate Unused Keys Dropdown in Add Device Form
+        const selectUnused = document.getElementById('select-my-unused-keys');
+        if (selectUnused) {
+            if (unusedKeys.length > 0) {
+                selectUnused.style.display = 'inline-block';
+                selectUnused.innerHTML = `<option value="">-- Choose My Key (${unusedKeys.length}) --</option>` +
+                    unusedKeys.map(k => `<option value="${k.key}">${k.key}</option>`).join('');
+            } else {
+                selectUnused.style.display = 'none';
+            }
+        }
+
+        // Super Admin Target Shop Dropdown
+        if (this.currentUser && this.currentUser.role === 'super_admin' && this.retailersList.length > 0) {
+            const promoShopSelect = document.getElementById('promo-target-shop');
+            if (promoShopSelect) {
+                promoShopSelect.innerHTML = this.retailersList.map(r => `<option value="${r.id}">${r.shopName} (${r.username})</option>`).join('');
+            }
+        }
+    }
+
+    copyKey(key) {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(key).then(() => {
+                this.showToast(`📋 Key "${key}" copied to clipboard!`, 'info');
+            });
+        } else {
+            prompt('Copy your Activation Key:', key);
+        }
+    }
+
+    useKeyForDevice(key) {
+        document.querySelectorAll('.seller-nav .nav-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        const addNav = document.querySelector('[data-tab="tab-add-device"]');
+        const addTab = document.getElementById('tab-add-device');
+        if (addNav) addNav.classList.add('active');
+        if (addTab) addTab.classList.add('active');
+
+        const keyInput = document.getElementById('input-activation-key');
+        if (keyInput) {
+            keyInput.value = key;
+            keyInput.style.borderColor = '#10b981';
+            keyInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        this.showToast(`🔑 Key "${key}" filled in Add Device form!`, 'success');
     }
 }
 

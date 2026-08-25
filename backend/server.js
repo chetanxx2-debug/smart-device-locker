@@ -114,6 +114,7 @@ function loadDb() {
         }
         if (!parsed.devices) parsed.devices = [];
         if (!parsed.logs) parsed.logs = [];
+        if (!parsed.keys) parsed.keys = [];
         return parsed;
     } catch (e) {
         console.error('Error reading database:', e);
@@ -127,6 +128,16 @@ function saveDb(data) {
     } catch (e) {
         console.error('Error saving database:', e);
     }
+}
+
+// Helper: Generate 7-Character Alphanumeric Activation Key (e.g. X7K9M2P)
+function generateActivationKey() {
+    const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+    let key = '';
+    for (let i = 0; i < 7; i++) {
+        key += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return key;
 }
 
 // In-Memory Token Sessions: token -> user
@@ -481,6 +492,144 @@ app.delete('/api/admin/retailers/:id', (req, res) => {
     res.json({ success: true, message: `Retailer ${removed.shopName} (${removed.username}) deleted and logged out.` });
 });
 
+// ===== LICENSE & ACTIVATION KEY MANAGEMENT (₹100 / KEY) =====
+
+// Buy / Generate Keys (Shopkeeper pays ₹100/key, generates 7-character keys)
+app.post('/api/keys/buy', requireAuth, (req, res) => {
+    const db = loadDb();
+    if (!db.keys) db.keys = [];
+
+    const count = Math.max(1, Math.min(50, parseInt(req.body.count) || 1));
+    const utr = req.body.utr ? String(req.body.utr).trim() : `UPI-${Date.now()}`;
+    const retailerId = req.user.id;
+    const shopName = req.user.shopName || req.user.name;
+
+    const generatedKeys = [];
+    for (let i = 0; i < count; i++) {
+        let newKey = generateActivationKey();
+        while (db.keys.some(k => k.key === newKey)) {
+            newKey = generateActivationKey();
+        }
+
+        const keyObj = {
+            id: `KEY-${Date.now()}-${i + 1}`,
+            key: newKey,
+            retailerId: retailerId,
+            shopName: shopName,
+            cost: 100,
+            status: 'UNUSED',
+            createdAt: new Date().toISOString(),
+            utr: utr,
+            usedAt: null,
+            usedForDeviceId: null,
+            usedForCustomerName: null
+        };
+
+        db.keys.unshift(keyObj);
+        generatedKeys.push(keyObj);
+    }
+
+    db.logs.unshift({
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        deviceId: "SYSTEM",
+        retailerId: retailerId,
+        action: "KEYS_PURCHASED",
+        details: `${count} Activation Key(s) generated for "${shopName}" (Total: ₹${count * 100}). Ref: ${utr}`,
+        status: "SUCCESS"
+    });
+
+    saveDb(db);
+    res.status(201).json({
+        success: true,
+        message: `${count} Activation Key(s) generated successfully!`,
+        keys: generatedKeys
+    });
+});
+
+// Get My Keys (Filtered for Shopkeeper, All for Super Admin)
+app.get('/api/keys/my-keys', requireAuth, (req, res) => {
+    const db = loadDb();
+    if (!db.keys) db.keys = [];
+
+    let keys = db.keys;
+    if (req.user.role === 'retailer') {
+        keys = keys.filter(k => k.retailerId === req.user.id);
+    }
+
+    const unusedCount = keys.filter(k => k.status === 'UNUSED').length;
+    const usedCount = keys.filter(k => k.status === 'USED').length;
+    const totalRevenue = keys.length * 100;
+
+    res.json({
+        success: true,
+        summary: {
+            totalKeys: keys.length,
+            unusedCount: unusedCount,
+            usedCount: usedCount,
+            totalRevenue: totalRevenue
+        },
+        keys: keys
+    });
+});
+
+// Super Admin: Generate Promo Keys for a Shop
+app.post('/api/admin/keys/promo', requireSuperAdmin, (req, res) => {
+    const db = loadDb();
+    if (!db.keys) db.keys = [];
+
+    const { retailerId, count } = req.body;
+    const targetRetailer = (db.users || []).find(u => u.id === retailerId);
+    if (!targetRetailer) {
+        return res.status(404).json({ success: false, message: "Retailer not found." });
+    }
+
+    const keyCount = Math.max(1, Math.min(100, parseInt(count) || 1));
+    const generatedKeys = [];
+
+    for (let i = 0; i < keyCount; i++) {
+        let newKey = generateActivationKey();
+        while (db.keys.some(k => k.key === newKey)) {
+            newKey = generateActivationKey();
+        }
+
+        const keyObj = {
+            id: `KEY-PROMO-${Date.now()}-${i + 1}`,
+            key: newKey,
+            retailerId: targetRetailer.id,
+            shopName: targetRetailer.shopName || targetRetailer.name,
+            cost: 0,
+            isPromo: true,
+            status: 'UNUSED',
+            createdAt: new Date().toISOString(),
+            utr: 'SUPERADMIN_GIFT',
+            usedAt: null,
+            usedForDeviceId: null,
+            usedForCustomerName: null
+        };
+
+        db.keys.unshift(keyObj);
+        generatedKeys.push(keyObj);
+    }
+
+    db.logs.unshift({
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        deviceId: "ADMIN",
+        retailerId: targetRetailer.id,
+        action: "PROMO_KEYS_ISSUED",
+        details: `Super Admin issued ${keyCount} free Promo Keys to "${targetRetailer.shopName}".`,
+        status: "SUCCESS"
+    });
+
+    saveDb(db);
+    res.status(201).json({
+        success: true,
+        message: `${keyCount} Promo Key(s) issued to ${targetRetailer.shopName}!`,
+        keys: generatedKeys
+    });
+});
+
 // ===== DEVICE MANAGEMENT (ISOLATED BY SHOP) =====
 
 // Get all devices (Filtered by Shop / Retailer)
@@ -506,20 +655,57 @@ app.get('/api/devices', (req, res) => {
 // Register a new customer / device
 app.post('/api/devices/register', (req, res) => {
     const db = loadDb();
+    if (!db.keys) db.keys = [];
+
     const {
         customerName, customerPhone, model, imei,
-        totalAmount, downPayment, monthlyEmi, tenureMonths
+        totalAmount, downPayment, monthlyEmi, tenureMonths,
+        activationKey
     } = req.body;
-
-    const deviceId = `DEV-${Math.floor(100 + Math.random() * 900)}`;
-    const pairCode = req.body.pairCode || Math.floor(100000 + Math.random() * 900000).toString();
 
     // Assign to logged-in Retailer or Super Admin
     const retailerId = req.user ? req.user.id : "USR-SUPERADMIN";
     const shopName = req.user ? (req.user.shopName || req.user.name) : "Smart Device Locker HQ";
     const retailerPhone = req.user ? (req.user.phone || "") : "+91 98765 43210";
 
+    // ── Activation Key Validation for Shopkeepers ──
+    let usedKeyRecord = null;
+    if (req.user && req.user.role === 'retailer') {
+        const cleanKey = String(activationKey || '').trim().toUpperCase();
+        if (!cleanKey || cleanKey.length !== 7) {
+            return res.status(400).json({
+                success: false,
+                message: "A valid 7-character Activation Key (e.g. X7K9M2P) is required to register a device. Please purchase a key for ₹100."
+            });
+        }
+
+        usedKeyRecord = db.keys.find(k => k.key.toUpperCase() === cleanKey && (k.retailerId === req.user.id || k.isPromo));
+        if (!usedKeyRecord) {
+            return res.status(400).json({
+                success: false,
+                message: "Activation Key is invalid or does not belong to your shop."
+            });
+        }
+
+        if (usedKeyRecord.status !== 'UNUSED') {
+            return res.status(400).json({
+                success: false,
+                message: `This Activation Key (${cleanKey}) was already used for device [${usedKeyRecord.usedForDeviceId || 'Previous'}] on ${new Date(usedKeyRecord.usedAt).toLocaleDateString()}. Each key can only be used once.`
+            });
+        }
+    }
+
+    const deviceId = `DEV-${Math.floor(100 + Math.random() * 900)}`;
+    const pairCode = req.body.pairCode || Math.floor(100000 + Math.random() * 900000).toString();
     const platform = req.body.platform || ((model && model.toLowerCase().includes('iphone')) ? 'ios' : 'android');
+
+    // Mark key as USED if shopkeeper
+    if (usedKeyRecord) {
+        usedKeyRecord.status = 'USED';
+        usedKeyRecord.usedAt = new Date().toISOString();
+        usedKeyRecord.usedForDeviceId = deviceId;
+        usedKeyRecord.usedForCustomerName = customerName || "Customer";
+    }
 
     const newDevice = {
         id: deviceId,
@@ -539,6 +725,7 @@ app.post('/api/devices/register', (req, res) => {
         dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         status: "active",
         isLocked: false,
+        activationKey: usedKeyRecord ? usedKeyRecord.key : "SUPERADMIN_FREE",
         pairCode: pairCode,
         offlineMasterCode: Math.floor(100000 + Math.random() * 900000).toString(),
         isPaired: false,
@@ -556,12 +743,12 @@ app.post('/api/devices/register', (req, res) => {
         deviceId: deviceId,
         retailerId: retailerId,
         action: "DEVICE_REGISTERED",
-        details: `Device ${model} registered for ${customerName} at ${shopName}. Pair Code: ${pairCode}`,
+        details: `Device ${model} registered for ${customerName} at ${shopName} using Key: ${newDevice.activationKey}. Pair Code: ${pairCode}`,
         status: "SUCCESS"
     });
 
     saveDb(db);
-    res.status(201).json({ success: true, device: newDevice });
+    res.status(201).json({ success: true, device: newDevice, activationKey: newDevice.activationKey });
 });
 
 // Pair device from Android App (using Pair Code or QR)

@@ -520,3 +520,26 @@
     gap: 8px;
 }
 
+/* License Keys Selector */
+.btn-key-qty {
+    background: #1e293b;
+    border: 1.5px solid #334155;
+    color: #cbd5e1;
+    padding: 10px;
+    border-radius: 10px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-key-qty:hover {
+    border-color: var(--primary);
+    color: #fff;
+}
+
+.btn-key-qty.active {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(234, 88, 12, 0.2) 100%);
+    border-color: var(--primary);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
+}
+
