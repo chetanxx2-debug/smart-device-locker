@@ -1385,7 +1385,7 @@ class SellerPortal {
             });
         });
 
-        // Submit Payment Request (with Mandatory UTR)
+        // Submit Payment Request & Get Instant Keys (with Mandatory UTR)
         const btnConfirmBuy = document.getElementById('btn-confirm-buy-keys');
         if (btnConfirmBuy) {
             btnConfirmBuy.addEventListener('click', () => {
@@ -1402,7 +1402,7 @@ class SellerPortal {
                 }
 
                 btnConfirmBuy.disabled = true;
-                btnConfirmBuy.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting Request...';
+                btnConfirmBuy.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating Keys...';
 
                 fetch('/api/keys/request', {
                     method: 'POST',
@@ -1412,24 +1412,24 @@ class SellerPortal {
                 .then(r => r.json())
                 .then(res => {
                     btnConfirmBuy.disabled = false;
-                    btnConfirmBuy.innerHTML = `<i class="fa-solid fa-paper-plane"></i> <span>Submit Payment Request • ${currentSelectedQty} Key${currentSelectedQty > 1 ? 's' : ''} (₹${currentSelectedQty * 100})</span>`;
+                    btnConfirmBuy.innerHTML = `<i class="fa-solid fa-bolt"></i> <span>I Have Paid • Generate ${currentSelectedQty} Key${currentSelectedQty > 1 ? 's' : ''} Instantly (₹${currentSelectedQty * 100})</span>`;
 
-                    if (res.success) {
+                    if (res.success && Array.isArray(res.keys)) {
                         if (utrInput) {
                             utrInput.value = '';
                             utrInput.style.borderColor = '';
                         }
-                        this.showToast(`✅ Payment request submitted! Admin will verify UTR [${utr}] and approve your keys.`, 'success');
+                        this.showToast(`🎉 Payment verified! ${res.keys.length} Activation Key(s) generated instantly!`, 'success');
                         this.loadLicenseKeysAndRender();
                     } else {
-                        this.showToast(res.message || 'Payment request failed.', 'danger');
+                        this.showToast(res.message || 'Key generation failed.', 'danger');
                     }
                 })
                 .catch(err => {
                     btnConfirmBuy.disabled = false;
-                    btnConfirmBuy.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Try Again';
+                    btnConfirmBuy.innerHTML = '<i class="fa-solid fa-bolt"></i> Try Again';
                     console.error('Key request error:', err);
-                    this.showToast('Network error during request submission.', 'danger');
+                    this.showToast('Network error during key purchase.', 'danger');
                 });
             });
         }
@@ -1570,130 +1570,71 @@ class SellerPortal {
             if (queueCard) queueCard.style.display = 'block';
             if (retailerCard) retailerCard.style.display = 'none';
 
-            const pending = requests.filter(r => r.status === 'PENDING');
             const badgeCount = document.getElementById('badge-pending-requests-count');
-            if (badgeCount) badgeCount.textContent = `${pending.length} Pending`;
+            if (badgeCount) badgeCount.textContent = `${requests.length} Transactions`;
 
             const tbody = document.getElementById('superadmin-pending-requests-tbody');
             if (tbody) {
-                if (pending.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:18px;">✅ No pending payment requests. All caught up!</td></tr>';
+                if (requests.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:18px;">No payment transactions recorded yet.</td></tr>';
                 } else {
-                    tbody.innerHTML = pending.map(r => `
-                        <tr style="background:rgba(245, 158, 11, 0.06);">
+                    tbody.innerHTML = requests.map(r => `
+                        <tr>
                             <td>
                                 <strong style="color:var(--primary);">${r.shopName}</strong><br>
                                 <small style="color:var(--text-muted);"><i class="fa-solid fa-phone"></i> ${r.phone || 'N/A'}</small>
                             </td>
-                            <td><strong style="color:#38bdf8; font-size:15px;">${r.count} Key${r.count > 1 ? 's' : ''}</strong></td>
-                            <td><strong style="color:#10b981; font-size:15px;">₹${r.amount}</strong></td>
+                            <td><strong style="color:#38bdf8; font-size:14px;">${r.count} Key${r.count > 1 ? 's' : ''}</strong></td>
+                            <td><strong style="color:#10b981; font-size:14px;">₹${r.amount}</strong></td>
                             <td>
                                 <code style="font-size:13px; font-weight:700; background:#0f172a; padding:4px 8px; border-radius:6px; color:#f59e0b; letter-spacing:1px;">${r.utr}</code>
                                 <button class="btn btn-secondary btn-sm" style="padding:2px 6px; font-size:11px; margin-left:4px;" onclick="sellerPortal.copyKey('${r.utr}')" title="Copy UTR">
                                     <i class="fa-solid fa-copy"></i>
                                 </button>
                             </td>
+                            <td>
+                                <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                                    ${(r.generatedKeys || []).map(k => `
+                                        <span class="badge" style="background:#1e293b; color:#38bdf8; font-family:var(--font-mono); font-size:11px; font-weight:700; border:1px solid #334155;">${k}</span>
+                                    `).join('')}
+                                </div>
+                            </td>
                             <td><small class="font-mono">${new Date(r.createdAt).toLocaleString()}</small></td>
                             <td>
-                                <div style="display:flex; gap:6px;">
-                                    <button class="btn btn-sm btn-success" style="font-weight:700;" onclick="sellerPortal.approveKeyRequest('${r.id}', '${(r.shopName || '').replace(/'/g, "\\'")}', ${r.count})">
-                                        <i class="fa-solid fa-check"></i> Approve
+                                ${(r.generatedKeys || []).map(k => `
+                                    <button class="btn btn-sm btn-danger" style="font-size:11px; padding:3px 8px; font-weight:700;" onclick="sellerPortal.revokeKey('${k}', '${(r.shopName || '').replace(/'/g, "\\'")}')" title="Revoke Key & Lock Device">
+                                        <i class="fa-solid fa-ban"></i> Revoke ${k}
                                     </button>
-                                    <button class="btn btn-sm btn-danger" style="font-weight:700;" onclick="sellerPortal.rejectKeyRequest('${r.id}', '${(r.shopName || '').replace(/'/g, "\\'")}')">
-                                        <i class="fa-solid fa-xmark"></i> Reject
-                                    </button>
-                                </div>
+                                `).join(' ')}
                             </td>
                         </tr>
                     `).join('');
                 }
             }
-        } else {
-            // Retailer View
-            if (queueCard) queueCard.style.display = 'none';
-            if (retailerCard) retailerCard.style.display = 'block';
-
-            const listEl = document.getElementById('retailer-requests-list');
-            if (listEl) {
-                if (requests.length === 0) {
-                    listEl.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:16px;">No payment requests submitted yet.</div>';
-                } else {
-                    listEl.innerHTML = requests.slice(0, 5).map(r => {
-                        const isPending = r.status === 'PENDING';
-                        const isApproved = r.status === 'APPROVED';
-                        const statusBadge = isPending 
-                            ? '<span class="badge badge-warning"><i class="fa-solid fa-clock"></i> Pending Admin Verification</span>'
-                            : isApproved 
-                            ? '<span class="badge badge-success"><i class="fa-solid fa-check-circle"></i> Approved & Keys Unlocked</span>'
-                            : '<span class="badge badge-danger"><i class="fa-solid fa-times-circle"></i> Rejected</span>';
-
-                        return `
-                            <div style="background:#0f172a; border:1px solid ${isPending ? '#f59e0b' : isApproved ? 'rgba(16,185,129,0.4)' : '#ef4444'}; border-radius:10px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                                <div>
-                                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
-                                        <strong>${r.count} Key${r.count > 1 ? 's' : ''} (₹${r.amount})</strong>
-                                        ${statusBadge}
-                                    </div>
-                                    <small style="color:var(--text-muted);">
-                                        UTR: <code style="color:#cbd5e1; font-weight:700;">${r.utr}</code> &bull; Submitted: ${new Date(r.createdAt).toLocaleString()}
-                                    </small>
-                                </div>
-                                ${isApproved && r.generatedKeys && r.generatedKeys.length > 0 ? `
-                                    <div style="display:flex; gap:4px; flex-wrap:wrap;">
-                                        ${r.generatedKeys.map(k => `<span class="badge" style="background:#1e293b; color:#38bdf8; font-family:var(--font-mono); font-size:12px; font-weight:700; border:1px solid #334155;">${k}</span>`).join('')}
-                                    </div>
-                                ` : ''}
-                            </div>
-                        `;
-                    }).join('');
-                }
-            }
         }
     }
 
-    approveKeyRequest(requestId, shopName, count) {
-        if (!confirm(`Verify Bank Receipt & Issue ${count} Key(s) to "${shopName}"?`)) return;
+    revokeKey(key, shopName) {
+        if (!confirm(`⚠️ Are you sure you want to REVOKE Activation Key "${key}" from "${shopName}"?\n\nIf this key is currently used on any customer phone, that device will be IMMEDIATELY LOCKED!`)) {
+            return;
+        }
 
-        fetch(`/api/admin/keys/requests/${encodeURIComponent(requestId)}/approve`, {
+        fetch(`/api/admin/keys/${encodeURIComponent(key)}/revoke`, {
             method: 'POST',
             headers: this.getAuthHeaders()
         })
         .then(r => r.json())
         .then(res => {
             if (res.success) {
-                this.showToast(`🎉 Approved! ${count} Key(s) generated for ${shopName}.`, 'success');
+                this.showToast(res.message, 'warning');
                 this.loadLicenseKeysAndRender();
             } else {
-                this.showToast(res.message || 'Approval failed.', 'danger');
+                this.showToast(res.message || 'Key revocation failed.', 'danger');
             }
         })
         .catch(err => {
-            console.error('Approve request error:', err);
-            this.showToast('Network error during approval.', 'danger');
-        });
-    }
-
-    rejectKeyRequest(requestId, shopName) {
-        const reason = prompt(`Reason for rejecting payment request from "${shopName}":`, 'UTR not found in bank statement');
-        if (reason === null) return;
-
-        fetch(`/api/admin/keys/requests/${encodeURIComponent(requestId)}/reject`, {
-            method: 'POST',
-            headers: this.getAuthHeaders(),
-            body: JSON.stringify({ reason })
-        })
-        .then(r => r.json())
-        .then(res => {
-            if (res.success) {
-                this.showToast(`❌ Request from ${shopName} has been rejected.`, 'info');
-                this.loadLicenseKeysAndRender();
-            } else {
-                this.showToast(res.message || 'Rejection failed.', 'danger');
-            }
-        })
-        .catch(err => {
-            console.error('Reject request error:', err);
-            this.showToast('Network error during rejection.', 'danger');
+            console.error('Revoke key error:', err);
+            this.showToast('Network error during key revocation.', 'danger');
         });
     }
 

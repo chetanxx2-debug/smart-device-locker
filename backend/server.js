@@ -518,11 +518,12 @@ app.delete('/api/admin/retailers/:id', (req, res) => {
     res.json({ success: true, message: `Retailer ${removed.shopName} (${removed.username}) deleted and logged out.` });
 });
 
-// ===== LICENSE & ACTIVATION KEY MANAGEMENT (₹100 / KEY - UTR VERIFICATION FLOW) =====
+// ===== LICENSE & ACTIVATION KEY MANAGEMENT (₹100 / KEY - INSTANT AUTO-GENERATION) =====
 
-// 1. Retailer submits Payment Request with UTR Number
+// 1. Retailer submits UTR & gets 7-Character Activation Keys INSTANTLY (0 delay)
 app.post('/api/keys/request', requireAuth, (req, res) => {
     const db = loadDb();
+    if (!db.keys) db.keys = [];
     if (!db.keyRequests) db.keyRequests = [];
 
     const count = Math.max(1, Math.min(50, parseInt(req.body.count) || 1));
@@ -531,31 +532,60 @@ app.post('/api/keys/request', requireAuth, (req, res) => {
     if (!utr || utr.length < 4) {
         return res.status(400).json({ 
             success: false, 
-            message: "12-digit UTR / UPI Reference Number is mandatory. Please enter the transaction ID from your PhonePe/GPay/Paytm receipt." 
+            message: "12-digit UTR / UPI Reference Number is mandatory. Please enter the transaction ID from your PhonePe/GPay/Paytm payment receipt." 
         });
     }
 
-    // Anti-duplicate check: verify if UTR was already submitted for an active request
-    const existing = db.keyRequests.find(r => r.utr.toLowerCase() === utr.toLowerCase() && r.status !== 'REJECTED');
+    // Anti-duplicate check: verify if UTR was already submitted
+    const existing = db.keyRequests.find(r => r.utr.toLowerCase() === utr.toLowerCase());
     if (existing) {
         return res.status(400).json({
             success: false,
-            message: `This UTR (${utr}) has already been submitted on ${new Date(existing.createdAt).toLocaleDateString()}. Duplicate requests are not allowed.`
+            message: `This UTR (${utr}) has already been used on ${new Date(existing.createdAt).toLocaleDateString()}. Please enter your new payment transaction UTR.`
         });
+    }
+
+    const retailerId = req.user.id;
+    const shopName = req.user.shopName || req.user.name;
+    const generatedKeys = [];
+
+    // Instantly generate 7-character unique keys
+    for (let i = 0; i < count; i++) {
+        let newKey = generateActivationKey();
+        while (db.keys.some(k => k.key === newKey)) {
+            newKey = generateActivationKey();
+        }
+
+        const keyObj = {
+            id: `KEY-${Date.now()}-${i + 1}`,
+            key: newKey,
+            retailerId: retailerId,
+            shopName: shopName,
+            cost: 100,
+            status: 'UNUSED',
+            createdAt: new Date().toISOString(),
+            utr: utr,
+            usedAt: null,
+            usedForDeviceId: null,
+            usedForCustomerName: null
+        };
+
+        db.keys.unshift(keyObj);
+        generatedKeys.push(keyObj);
     }
 
     const reqObj = {
         id: `REQ-${Date.now()}`,
-        retailerId: req.user.id,
-        shopName: req.user.shopName || req.user.name,
+        retailerId: retailerId,
+        shopName: shopName,
         phone: req.user.phone || '',
         count: count,
         amount: count * 100,
         utr: utr,
-        status: 'PENDING', // 'PENDING' | 'APPROVED' | 'REJECTED'
+        status: 'APPROVED',
         createdAt: new Date().toISOString(),
-        approvedAt: null,
-        generatedKeys: []
+        approvedAt: new Date().toISOString(),
+        generatedKeys: generatedKeys.map(k => k.key)
     };
 
     db.keyRequests.unshift(reqObj);
@@ -564,21 +594,22 @@ app.post('/api/keys/request', requireAuth, (req, res) => {
         id: Date.now(),
         timestamp: new Date().toISOString(),
         deviceId: "PAYMENT",
-        retailerId: req.user.id,
-        action: "KEY_PAYMENT_REQUEST_SUBMITTED",
-        details: `Shop "${reqObj.shopName}" submitted payment verification request for ${count} keys (₹${reqObj.amount}). UTR: ${utr}`,
-        status: "PENDING"
+        retailerId: retailerId,
+        action: "KEYS_INSTANT_PURCHASED",
+        details: `Shop "${shopName}" paid ₹${reqObj.amount} (UTR: ${utr}) and received ${count} Activation Key(s): ${generatedKeys.map(k => k.key).join(', ')}`,
+        status: "SUCCESS"
     });
 
     saveDb(db);
     res.status(201).json({
         success: true,
-        message: `Payment request submitted for ${count} key(s)! Super Admin will verify your UTR (${utr}) and activate your keys shortly.`,
+        message: `🎉 Payment verified! ${count} Activation Key(s) generated instantly!`,
+        keys: generatedKeys,
         request: reqObj
     });
 });
 
-// 2. Get Key Requests (Retailer gets own, Super Admin gets all)
+// 2. Get Key Requests / Audit Transactions
 app.get('/api/keys/requests', requireAuth, (req, res) => {
     const db = loadDb();
     if (!db.keyRequests) db.keyRequests = [];
@@ -594,100 +625,46 @@ app.get('/api/keys/requests', requireAuth, (req, res) => {
     });
 });
 
-// 3. Super Admin: Approve Payment Request & Generate 7-Character Keys
-app.post('/api/admin/keys/requests/:id/approve', requireSuperAdmin, (req, res) => {
+// 3. Super Admin: Revoke Fraud Key & Lock Device
+app.post('/api/admin/keys/:key/revoke', requireSuperAdmin, (req, res) => {
     const db = loadDb();
-    if (!db.keyRequests) db.keyRequests = [];
     if (!db.keys) db.keys = [];
 
-    const reqId = req.params.id;
-    const reqObj = db.keyRequests.find(r => r.id === reqId);
+    const targetKey = String(req.params.key).toUpperCase().trim();
+    const keyObj = db.keys.find(k => k.key === targetKey);
 
-    if (!reqObj) {
-        return res.status(404).json({ success: false, message: "Payment request not found." });
+    if (!keyObj) {
+        return res.status(404).json({ success: false, message: "Key not found." });
     }
 
-    if (reqObj.status === 'APPROVED') {
-        return res.status(400).json({ success: false, message: "This request has already been approved." });
-    }
+    keyObj.status = 'REVOKED';
+    keyObj.revokedAt = new Date().toISOString();
 
-    const generatedKeys = [];
-    for (let i = 0; i < reqObj.count; i++) {
-        let newKey = generateActivationKey();
-        while (db.keys.some(k => k.key === newKey)) {
-            newKey = generateActivationKey();
+    // If key was already used on a device, lock that device
+    let lockedDevice = null;
+    if (keyObj.usedForDeviceId) {
+        const dev = (db.devices || []).find(d => d.id === keyObj.usedForDeviceId);
+        if (dev) {
+            dev.status = 'LOCKED';
+            dev.lockReason = 'Activation Key Revoked due to Invalid Payment';
+            lockedDevice = dev;
         }
-
-        const keyObj = {
-            id: `KEY-${Date.now()}-${i + 1}`,
-            key: newKey,
-            retailerId: reqObj.retailerId,
-            shopName: reqObj.shopName,
-            cost: 100,
-            status: 'UNUSED',
-            createdAt: new Date().toISOString(),
-            utr: reqObj.utr,
-            usedAt: null,
-            usedForDeviceId: null,
-            usedForCustomerName: null
-        };
-
-        db.keys.unshift(keyObj);
-        generatedKeys.push(keyObj);
     }
-
-    reqObj.status = 'APPROVED';
-    reqObj.approvedAt = new Date().toISOString();
-    reqObj.generatedKeys = generatedKeys.map(k => k.key);
 
     db.logs.unshift({
         id: Date.now(),
         timestamp: new Date().toISOString(),
-        deviceId: "ADMIN",
-        retailerId: reqObj.retailerId,
-        action: "PAYMENT_REQUEST_APPROVED",
-        details: `Super Admin verified UTR [${reqObj.utr}] and issued ${reqObj.count} keys to "${reqObj.shopName}".`,
-        status: "SUCCESS"
+        deviceId: keyObj.usedForDeviceId || "ADMIN",
+        retailerId: keyObj.retailerId,
+        action: "KEY_REVOKED",
+        details: `Super Admin REVOKED Activation Key "${targetKey}" (Shop: ${keyObj.shopName}, UTR: ${keyObj.utr}). ${lockedDevice ? `Device ${lockedDevice.id} LOCKED.` : ''}`,
+        status: "WARNING"
     });
 
     saveDb(db);
     res.json({
         success: true,
-        message: `Payment verified! ${reqObj.count} Activation Key(s) generated for ${reqObj.shopName}.`,
-        keys: generatedKeys
-    });
-});
-
-// 4. Super Admin: Reject Payment Request
-app.post('/api/admin/keys/requests/:id/reject', requireSuperAdmin, (req, res) => {
-    const db = loadDb();
-    if (!db.keyRequests) db.keyRequests = [];
-
-    const reqId = req.params.id;
-    const reqObj = db.keyRequests.find(r => r.id === reqId);
-
-    if (!reqObj) {
-        return res.status(404).json({ success: false, message: "Payment request not found." });
-    }
-
-    reqObj.status = 'REJECTED';
-    reqObj.rejectedAt = new Date().toISOString();
-    reqObj.reason = req.body.reason || 'Invalid or unverified UTR';
-
-    db.logs.unshift({
-        id: Date.now(),
-        timestamp: new Date().toISOString(),
-        deviceId: "ADMIN",
-        retailerId: reqObj.retailerId,
-        action: "PAYMENT_REQUEST_REJECTED",
-        details: `Super Admin rejected key request [${reqId}] from "${reqObj.shopName}" (UTR: ${reqObj.utr}). Reason: ${reqObj.reason}`,
-        status: "FAILED"
-    });
-
-    saveDb(db);
-    res.json({
-        success: true,
-        message: `Request for ${reqObj.shopName} has been rejected.`
+        message: `Key "${targetKey}" has been REVOKED! ${lockedDevice ? `Associated device ${lockedDevice.id} is now LOCKED.` : ''}`
     });
 });
 
