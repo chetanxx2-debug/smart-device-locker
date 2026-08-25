@@ -6,78 +6,35 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const crypto = require('crypto');
+const dns = require('dns');
+
+// Configure robust DNS resolution for cloud MongoDB SRV lookup
+try {
+    dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
+} catch (e) {}
 
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
+const { MongoClient } = require('mongodb');
+
 const PORT = process.env.PORT || 3000;
-const DB_FILE = path.join(__dirname, 'database.json');
+const DEFAULT_MONGO_URI = 'mongodb+srv://chetanxx2_db_user:nE17T2kM1bhkWOel@cluster0.2luuwd5.mongodb.net/smartdevicelocker?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI || DEFAULT_MONGO_URI;
 
-// Middleware
-app.use(cors());
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use((req, res, next) => {
-    let raw = '';
-    req.setEncoding('utf8');
-    req.on('data', chunk => { raw += chunk; });
-    req.on('end', () => {
-        if (raw && raw.trim()) {
-            try {
-                req.body = JSON.parse(raw.trim());
-            } catch (e) {
-                try {
-                    const parsed = {};
-                    new URLSearchParams(raw).forEach((v, k) => { parsed[k] = v; });
-                    req.body = parsed;
-                } catch (_) {
-                    req.body = {};
-                }
-            }
-        } else {
-            req.body = req.body || {};
-        }
-        next();
-    });
-});
-// ── PWA: Service Worker — serve BEFORE static (correct MIME + no-cache) ──
-app.get('/sw.js', (req, res) => {
-    res.setHeader('Content-Type', 'application/javascript');
-    res.setHeader('Service-Worker-Allowed', '/');
-    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-    res.sendFile(path.join(__dirname, '..', 'sw.js'));
-});
+// ── PERSISTENT DATABASE USING MONGODB ATLAS ──────────────────────────────────
+// Data loads from MongoDB at startup into memory (fast reads, no file resets!)
+// Every saveDb() instantly syncs back to MongoDB cloud (permanent storage).
+// Even if MongoDB is temporarily unreachable, app continues with in-memory data.
+// ─────────────────────────────────────────────────────────────────────────────
 
-// ── PWA: Manifest — serve BEFORE static (correct MIME type) ──────────
-app.get('/manifest.json', (req, res) => {
-    res.setHeader('Content-Type', 'application/manifest+json');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.sendFile(path.join(__dirname, '..', 'manifest.json'));
-});
-
-app.use(express.static(path.join(__dirname, '..')));
-
-
-// Helper to get Local IP Address
-function getLocalIpAddress() {
-    const interfaces = os.networkInterfaces();
-    for (const name of Object.keys(interfaces)) {
-        for (const iface of interfaces[name]) {
-            if (iface.family === 'IPv4' && !iface.internal) {
-                return iface.address;
-            }
-        }
-    }
-    return '127.0.0.1';
-}
-
-// Initial Database Schema
 const initialDb = {
     users: [
         {
             id: "USR-SUPERADMIN",
             username: "superadmin",
-            password: "superadmin.xx2", // Master Super Admin Password
+            password: "superadmin.xx2",
             role: "super_admin",
             name: "Master Super Admin",
             shopName: "Smart Device Locker HQ",
@@ -96,39 +53,69 @@ const initialDb = {
             details: "Smart Device Locker Multi-Tenant Server initialized successfully.",
             status: "SUCCESS"
         }
-    ]
+    ],
+    keys: []
 };
 
-// Load or initialize Database
-function loadDb() {
+// In-memory cache — always up to date, serves all routes synchronously
+let dbCache = JSON.parse(JSON.stringify(initialDb));
+let mongoCollection = null;
+
+// Connect to MongoDB Atlas and load existing data into cache
+async function initMongoDB() {
+    if (!MONGODB_URI) {
+        console.warn('[DB] MONGODB_URI not set — using in-memory only (data will reset on restart)');
+        return;
+    }
     try {
-        if (!fs.existsSync(DB_FILE)) {
-            fs.writeFileSync(DB_FILE, JSON.stringify(initialDb, null, 2));
-            return initialDb;
+        const client = new MongoClient(MONGODB_URI, { serverSelectionTimeoutMS: 8000 });
+        await client.connect();
+        mongoCollection = client.db('smartdevicelocker').collection('appdata');
+
+        // Load saved data from MongoDB into memory
+        const saved = await mongoCollection.findOne({ _id: 'appdata' });
+        if (saved) {
+            const { _id, ...data } = saved;
+            // Ensure super admin always exists
+            if (!data.users || !Array.isArray(data.users) || data.users.length === 0) {
+                data.users = initialDb.users;
+            }
+            if (!data.devices) data.devices = [];
+            if (!data.logs) data.logs = [];
+            if (!data.keys) data.keys = [];
+            dbCache = data;
+            console.log(`[DB] ✅ MongoDB connected — loaded ${data.devices.length} devices, ${data.users.length} users, ${(data.keys||[]).length} keys`);
+        } else {
+            // First run: save initial schema to MongoDB
+            await mongoCollection.replaceOne(
+                { _id: 'appdata' },
+                { _id: 'appdata', ...initialDb },
+                { upsert: true }
+            );
+            console.log('[DB] ✅ MongoDB connected — fresh database initialized');
         }
-        const data = fs.readFileSync(DB_FILE, 'utf8');
-        const parsed = JSON.parse(data);
-        if (!parsed.users || !Array.isArray(parsed.users) || parsed.users.length === 0) {
-            parsed.users = initialDb.users;
-            saveDb(parsed);
-        }
-        if (!parsed.devices) parsed.devices = [];
-        if (!parsed.logs) parsed.logs = [];
-        if (!parsed.keys) parsed.keys = [];
-        return parsed;
     } catch (e) {
-        console.error('Error reading database:', e);
-        return initialDb;
+        console.error('[DB] ⚠️ MongoDB connection failed — using in-memory fallback:', e.message);
     }
 }
 
+// Synchronous load — returns in-memory cache instantly (no route changes needed)
+function loadDb() {
+    return dbCache;
+}
+
+// Synchronous save — updates cache immediately, persists to MongoDB in background
 function saveDb(data) {
-    try {
-        fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
-    } catch (e) {
-        console.error('Error saving database:', e);
+    dbCache = data;
+    if (mongoCollection) {
+        mongoCollection.replaceOne(
+            { _id: 'appdata' },
+            { _id: 'appdata', ...data },
+            { upsert: true }
+        ).catch(e => console.error('[DB] Save error:', e.message));
     }
 }
+
 
 // Helper: Generate 7-Character Alphanumeric Activation Key (e.g. X7K9M2P)
 function generateActivationKey() {
@@ -1380,13 +1367,15 @@ app.all('/ios/mdm/server', (req, res) => {
 </plist>`);
 });
 
-// Start Server
-server.listen(PORT, '0.0.0.0', () => {
-    const localIp = getLocalIpAddress();
-    console.log(`\n======================================================`);
-    console.log(`🛡️ SMART DEVICE LOCKER MULTI-TENANT BACKEND RUNNING!`);
-    console.log(`🔗 Web Dashboard URL:    http://localhost:${PORT}`);
-    console.log(`📱 Mobile Network IP:    http://${localIp}:${PORT}`);
-    console.log(`⚡ WebSocket Server:     ws://${localIp}:${PORT}`);
-    console.log(`======================================================\n`);
+// Start Server — MongoDB first, then HTTP
+initMongoDB().then(() => {
+    server.listen(PORT, '0.0.0.0', () => {
+        const localIp = getLocalIpAddress();
+        console.log(`\n======================================================`);
+        console.log(`🛡️ SMART DEVICE LOCKER MULTI-TENANT BACKEND RUNNING!`);
+        console.log(`🔗 Web Dashboard URL:    http://localhost:${PORT}`);
+        console.log(`📱 Mobile Network IP:    http://${localIp}:${PORT}`);
+        console.log(`⚡ WebSocket Server:     ws://${localIp}:${PORT}`);
+        console.log(`======================================================\n`);
+    });
 });
