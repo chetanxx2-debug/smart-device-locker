@@ -483,6 +483,9 @@ class SellerPortal {
                     this.generateIosEnrollmentQR();
                 } else if (targetId === 'tab-license-keys') {
                     this.loadLicenseKeysAndRender();
+                } else if (targetId === 'tab-add-device') {
+                    // Refresh unused keys dropdown whenever Add Device tab is opened
+                    this.loadLicenseKeysAndRender();
                 }
             });
         });
@@ -1487,8 +1490,8 @@ class SellerPortal {
 
         container.innerHTML = '';
 
-        // Clean UPI payment URI string
-        const upiString = `upi://pay?pa=smartdevicelocker@upi&pn=Smart%20Device%20Locker&am=${amount}&cu=INR&tn=Device%20Key`;
+        // Clean UPI payment URI string — Shopkeeper's real UPI ID
+        const upiString = `upi://pay?pa=9326205462@ybl&pn=Smart%20Device%20Locker&am=${amount}&cu=INR&tn=Device%20Activation%20Key`;
 
         try {
             new QRCode(container, {
