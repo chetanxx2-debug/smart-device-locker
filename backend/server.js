@@ -19,9 +19,46 @@ const wss = new WebSocket.Server({ server });
 
 const { MongoClient } = require('mongodb');
 
+// Middleware
+app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// ── PWA: Service Worker — serve BEFORE static (correct MIME + no-cache) ──
+app.get('/sw.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript');
+    res.setHeader('Service-Worker-Allowed', '/');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(path.join(__dirname, '..', 'sw.js'));
+});
+
+// ── PWA: Manifest — serve BEFORE static (correct MIME type) ──────────
+app.get('/manifest.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/manifest+json');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.sendFile(path.join(__dirname, '..', 'manifest.json'));
+});
+
+app.use(express.static(path.join(__dirname, '..')));
+
 const PORT = process.env.PORT || 3000;
 const DEFAULT_MONGO_URI = 'mongodb+srv://chetanxx2_db_user:nE17T2kM1bhkWOel@cluster0.2luuwd5.mongodb.net/smartdevicelocker?retryWrites=true&w=majority';
 const MONGODB_URI = process.env.MONGODB_URI || DEFAULT_MONGO_URI;
+
+// Helper to get Local IP Address
+function getLocalIpAddress() {
+    try {
+        const interfaces = os.networkInterfaces();
+        for (const name of Object.keys(interfaces)) {
+            for (const iface of interfaces[name]) {
+                if (iface.family === 'IPv4' && !iface.internal) {
+                    return iface.address;
+                }
+            }
+        }
+    } catch (e) {}
+    return '127.0.0.1';
+}
 
 // ── PERSISTENT DATABASE USING MONGODB ATLAS ──────────────────────────────────
 // Data loads from MongoDB at startup into memory (fast reads, no file resets!)
