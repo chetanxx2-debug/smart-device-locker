@@ -21,8 +21,25 @@ const { MongoClient } = require('mongodb');
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+// Accept application/json AND "application/json; utf-8" (Android app sends the latter)
+app.use(express.json({ limit: '10mb', type: ['application/json', '*/json', '*/*'] }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Fallback: parse raw text body as JSON (for non-standard Content-Type from Android)
+app.use((req, res, next) => {
+    if (req.body && Object.keys(req.body).length > 0) return next(); // Already parsed
+    if (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') {
+        let raw = '';
+        req.on('data', chunk => raw += chunk);
+        req.on('end', () => {
+            if (raw) {
+                try { req.body = JSON.parse(raw); } catch (e) {}
+            }
+            next();
+        });
+    } else {
+        next();
+    }
+});
 
 // ── PWA: Service Worker — serve BEFORE static (correct MIME + no-cache) ──
 app.get('/sw.js', (req, res) => {
