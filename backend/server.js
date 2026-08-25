@@ -890,17 +890,25 @@ app.post('/api/devices/pair', (req, res) => {
     const deviceModel = body.deviceModel || body.model || req.query.deviceModel || "Android Smartphone";
 
     if (!pairCode) {
-        return res.status(400).json({ success: false, message: "Pair Code is required." });
+        return res.status(400).json({ success: false, message: "Pair Code or Activation Key is required." });
     }
 
-    // STRICT: Only allow pairing if this code was generated on the Dashboard
-    const device = db.devices.find(d => String(d.pairCode).trim() === pairCode);
+    const cleanInput = pairCode.toUpperCase().trim();
+
+    // Universal Pairing Lookup: Matches 6-digit Pair Code, 7-char Activation Key, Device ID (DEV-XXX), or IMEI
+    const device = db.devices.find(d => 
+        String(d.pairCode).trim() === pairCode ||
+        String(d.pairCode).trim() === cleanInput ||
+        (d.activationKey && String(d.activationKey).toUpperCase().trim() === cleanInput) ||
+        String(d.id).toUpperCase().trim() === cleanInput ||
+        (d.imei && String(d.imei).trim() === pairCode)
+    );
     
     if (!device) {
-        console.log(`[PAIR REJECTED] Unregistered code entered: "${pairCode}"`);
+        console.log(`[PAIR REJECTED] Code not matched: "${pairCode}"`);
         return res.status(400).json({
             success: false,
-            message: `Invalid Pair Code (${pairCode})! Please enter the 6-digit code generated on the Seller Dashboard.`
+            message: `Invalid Code (${pairCode})! Please enter the 6-digit Pair Code or Activation Key generated for your device on the dashboard.`
         });
     }
 
