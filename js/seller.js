@@ -181,8 +181,12 @@ class SellerPortal {
         if (this.currentUser) {
             const superAdminPromoCard = document.getElementById('superadmin-promo-card');
             const superAdminFreeBadge = document.getElementById('superadmin-free-badge');
+            const superAdminKeysBanner = document.getElementById('superadmin-keys-free-banner');
+            const buyKeysCard = document.getElementById('card-buy-license-keys');
             const keyInput = document.getElementById('input-activation-key');
             const keyGroup = document.getElementById('group-activation-key');
+            const quickBuyLink = document.getElementById('btn-quick-buy-key');
+            const keyHelpText = document.getElementById('key-help-text');
 
             if (userBadge && userDisplayName) {
                 userBadge.style.display = 'inline-flex';
@@ -192,10 +196,17 @@ class SellerPortal {
                     if (userRoleIcon) userRoleIcon.className = 'fa-solid fa-crown';
                     if (shopsTab) shopsTab.style.display = 'inline-flex';
                     if (superAdminPromoCard) superAdminPromoCard.style.display = 'block';
+                    if (superAdminKeysBanner) superAdminKeysBanner.style.display = 'block';
+                    if (buyKeysCard) buyKeysCard.style.display = 'none'; // Super Admin does NOT need to buy keys
+
+                    // Add Device Form: Super Admin is 100% FREE
                     if (superAdminFreeBadge) superAdminFreeBadge.style.display = 'block';
+                    if (quickBuyLink) quickBuyLink.style.display = 'none';
+                    if (keyHelpText) keyHelpText.style.display = 'none';
                     if (keyInput) {
+                        keyInput.style.display = 'none';
                         keyInput.required = false;
-                        keyInput.placeholder = 'Super Admin Mode: Free (Optional)';
+                        keyInput.value = '';
                     }
                     this.loadRetailersList();
                 } else {
@@ -204,8 +215,15 @@ class SellerPortal {
                     if (userRoleIcon) userRoleIcon.className = 'fa-solid fa-store';
                     if (shopsTab) shopsTab.style.display = 'none';
                     if (superAdminPromoCard) superAdminPromoCard.style.display = 'none';
+                    if (superAdminKeysBanner) superAdminKeysBanner.style.display = 'none';
+                    if (buyKeysCard) buyKeysCard.style.display = 'block'; // Shopkeeper sees payment QR
+
+                    // Add Device Form: Shopkeeper requires Key
                     if (superAdminFreeBadge) superAdminFreeBadge.style.display = 'none';
+                    if (quickBuyLink) quickBuyLink.style.display = 'inline';
+                    if (keyHelpText) keyHelpText.style.display = 'block';
                     if (keyInput) {
+                        keyInput.style.display = 'block';
                         keyInput.required = true;
                         keyInput.placeholder = 'e.g. X7K9M2P';
                     }
