@@ -1507,6 +1507,11 @@ class SellerPortal {
     loadLicenseKeysAndRender() {
         if (!this.currentUser) return;
 
+        // Always render QR for the currently selected quantity (default = 1 key = ₹100)
+        const activeQtyBtn = document.querySelector('.btn-key-qty.active');
+        const qty = activeQtyBtn ? parseInt(activeQtyBtn.dataset.qty) || 1 : 1;
+        this.renderPaymentUPIQR(qty * 100);
+
         fetch('/api/keys/my-keys', {
             headers: this.getAuthHeaders()
         })
