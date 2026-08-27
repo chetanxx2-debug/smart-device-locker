@@ -60,13 +60,11 @@ app.get('/manifest.json', (req, res) => {
 app.get(['/download-apk', '/downloads/SmartDeviceLocker.apk', '/SmartDeviceLocker.apk'], (req, res) => {
     const p1 = path.join(__dirname, '..', 'downloads', 'SmartDeviceLocker.apk');
     const p2 = path.join(__dirname, '..', 'SmartDeviceLocker.apk');
-    if (fs.existsSync(p1)) {
+    const targetPath = fs.existsSync(p1) ? p1 : (fs.existsSync(p2) ? p2 : null);
+    if (targetPath) {
         res.setHeader('Content-Type', 'application/vnd.android.package-archive');
-        return res.download(p1, 'SmartDeviceLocker.apk');
-    }
-    if (fs.existsSync(p2)) {
-        res.setHeader('Content-Type', 'application/vnd.android.package-archive');
-        return res.download(p2, 'SmartDeviceLocker.apk');
+        res.setHeader('Accept-Ranges', 'bytes');
+        return res.sendFile(targetPath);
     }
     res.status(404).send('APK file not found.');
 });

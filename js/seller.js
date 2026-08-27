@@ -1287,8 +1287,10 @@ class SellerPortal {
         const payload = {
             "android.app.extra.PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME": "com.smartlocker.client/com.smartlocker.client.LockerAdminReceiver",
             "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION": apkUrl,
-            "android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM": "MrfZL_Tm-tH6w49K5i-y4BrYQJu29bwThohADOkI-Xc",
+            "android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM": "s8xCFm8_umf3I25U24KnwWsUiQXkS-za9t3MqzLIraU",
+            "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME": "com.smartlocker.client",
             "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED": true,
+            "android.app.extra.PROVISIONING_SKIP_ENCRYPT": true,
             "android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE": {
                 "server_url": serverOrigin
             }
