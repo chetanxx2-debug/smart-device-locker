@@ -1289,7 +1289,6 @@ class SellerPortal {
             "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_NAME": "com.smartlocker.client",
             "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_DOWNLOAD_LOCATION": apkUrl,
             "android.app.extra.PROVISIONING_DEVICE_ADMIN_SIGNATURE_CHECKSUM": "Yd8zcgqngK7qNlnG7KiTuKkU5IgIGn8BoEIxUuIXkxA",
-            "android.app.extra.PROVISIONING_DEVICE_ADMIN_PACKAGE_CHECKSUM": "0ZKTl3Z5j2D4F7bDKr61L6NHP7CjyfF776b-5dIRjFU",
             "android.app.extra.PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED": true,
             "android.app.extra.PROVISIONING_SKIP_ENCRYPT": true,
             "android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE": {

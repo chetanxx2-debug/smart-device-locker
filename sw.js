@@ -1,25 +1,18 @@
-﻿// =====================================================================
+// =====================================================================
 // Smart Device Locker - Service Worker (PWA)
 // Shopkeeper dashboard ko home screen par install karo
 // =====================================================================
 
-const CACHE_NAME = "sdl-cache-v4.5";
+const CACHE_NAME = "sdl-cache-v5.0";
 const OFFLINE_URL = "/offline.html";
 
 // Cache karne wali files (Shell - app ka dhanccha)
 const SHELL_ASSETS = [
   "/",
   "/index.html",
-  "/css/main.css?v=4.5",
-  "/css/seller.css?v=4.5",
-  "/css/device.css?v=4.5",
-  "/js/seller.js",
-  "/js/api.js",
   "/manifest.json",
   "/icons/icon-192.jpg",
-  "/icons/icon-512.jpg",
-  "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap",
-  "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+  "/icons/icon-512.jpg"
 ];
 
 // ── Install: Shell cache karo ──────────────────────────────────────
