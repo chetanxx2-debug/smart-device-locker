@@ -512,86 +512,72 @@
                         <div>
                             <h3 style="color: #10b981; margin: 0 0 4px 0;">👑 Master Super Admin: 100% FREE Device Enrollments</h3>
                             <p style="margin: 0; color: #cbd5e1; font-size: 13px;">
-                                As Super Admin, you can add unlimited customer devices for <strong>FREE (No Payment or Keys Required)</strong>. The ₹100/key payment QR is only shown to shopkeepers.
+                                As Super Admin, you can add unlimited customer devices for <strong>FREE (No Payment or Keys Required)</strong>. You can allocate keys directly to any shopkeeper below.
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Buy Keys Box with Dynamic UPI QR Code (Shopkeepers Only) -->
-                <div id="card-buy-license-keys" class="card" style="margin-bottom: 24px; border: 1.5px solid var(--primary); background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);">
+                <!-- SUPER ADMIN: ALLOCATE KEYS TO SHOPKEEPER CARD -->
+                <div id="superadmin-allocate-keys-card" class="card" style="display:none; margin-bottom: 24px; border: 1.5px solid #10b981; background: linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, rgba(15, 23, 42, 0.95) 100%);">
                     <div class="card-header flex-between">
                         <div>
-                            <h3><i class="fa-solid fa-cart-shopping" style="color:var(--primary);"></i> Buy Device Activation Keys (₹100 / Key)</h3>
+                            <h3 style="color:#10b981;"><i class="fa-solid fa-key"></i> Allocate License Keys to Shopkeeper</h3>
                             <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">
-                                Select quantity &bull; Scan UPI QR Code &bull; Get instant 7-character activation keys.
+                                Select shopkeeper, enter number of keys, and click allocate to instantly add keys to their account.
                             </p>
                         </div>
-                        <span class="badge badge-success" style="font-size:12px; padding:6px 12px; font-weight:700;">₹100 / Device</span>
+                        <span class="badge badge-success" style="font-size:12px; padding:6px 12px; font-weight:700;">Super Admin Tool</span>
                     </div>
                     <div class="card-body">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; align-items: center;">
-                            <!-- Left: Selector and Details -->
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; align-items: flex-end;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label style="font-weight:700; font-size:13px;">Select Shopkeeper *:</label>
+                                <select id="select-allocate-shop" class="form-control" style="font-size:14px; font-weight:600;">
+                                    <option value="">-- Choose Shop --</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label style="font-weight:700; font-size:13px;">Number of Keys to Allocate *:</label>
+                                <div style="display:flex; gap:6px;">
+                                    <input type="number" id="input-allocate-key-count" class="form-control font-mono" value="5" min="1" max="200" style="font-weight:800; font-size:16px; width:100px;">
+                                    <button type="button" class="btn btn-secondary btn-sm btn-quick-qty" data-qty="5">5</button>
+                                    <button type="button" class="btn btn-secondary btn-sm btn-quick-qty" data-qty="10">10</button>
+                                    <button type="button" class="btn btn-secondary btn-sm btn-quick-qty" data-qty="25">25</button>
+                                    <button type="button" class="btn btn-secondary btn-sm btn-quick-qty" data-qty="50">50</button>
+                                </div>
+                            </div>
                             <div>
-                                <label style="font-weight:700; font-size:14px; margin-bottom:8px; display:block;">Select Number of Device Keys:</label>
-                                <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px;">
-                                    <button type="button" class="btn btn-secondary btn-key-qty active" data-qty="1" style="flex:1; min-width:80px; font-weight:700;">1 Key<br><small>₹100</small></button>
-                                    <button type="button" class="btn btn-secondary btn-key-qty" data-qty="2" style="flex:1; min-width:80px; font-weight:700;">2 Keys<br><small>₹200</small></button>
-                                    <button type="button" class="btn btn-secondary btn-key-qty" data-qty="5" style="flex:1; min-width:80px; font-weight:700;">5 Keys<br><small>₹500</small></button>
-                                    <button type="button" class="btn btn-secondary btn-key-qty" data-qty="10" style="flex:1; min-width:80px; font-weight:700;">10 Keys<br><small>₹1,000</small></button>
-                                </div>
-
-                                <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 18px;">
-                                    <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:13px;">
-                                        <span style="color:var(--text-muted);">Quantity:</span>
-                                        <strong id="buy-key-qty-label">1 Device Key</strong>
-                                    </div>
-                                    <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:13px;">
-                                        <span style="color:var(--text-muted);">Price per Key:</span>
-                                        <strong>₹100</strong>
-                                    </div>
-                                    <hr style="border:0; border-top:1px solid var(--border-color); margin:8px 0;">
-                                    <div style="display:flex; justify-content:space-between; font-size:16px;">
-                                        <span style="font-weight:700;">Total Payable:</span>
-                                        <strong id="buy-key-total-label" style="color:var(--primary); font-size:18px;">₹100</strong>
-                                    </div>
-                                </div>
-
-                                <div class="form-group" style="margin-bottom:14px;">
-                                    <label style="font-size:12px; color:var(--text-muted); font-weight:700;">
-                                        <i class="fa-solid fa-receipt" style="color:var(--primary);"></i> 12-Digit UTR / UPI Reference Number <span style="color:#ef4444;">* (Mandatory)</span>:
-                                    </label>
-                                    <input type="text" id="input-payment-utr" class="form-control font-mono" placeholder="e.g. 423891029381 (from PhonePe/GPay receipt)" style="font-size:14px; font-weight:700; letter-spacing:1px;" required maxlength="24">
-                                    <small style="color:#94a3b8; font-size:11px; margin-top:3px; display:block;">
-                                        Payment ke baad PhonePe/GPay/Paytm se 12-digit UTR yahan enter karein.
-                                    </small>
-                                </div>
-
-                                <button id="btn-confirm-buy-keys" class="btn btn-primary btn-lg" style="width:100%; font-weight:700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border:none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);">
-                                    <i class="fa-solid fa-bolt"></i> <span id="btn-buy-keys-text">I Have Paid &bull; Generate 1 Key Instantly (₹100)</span>
+                                <button id="btn-submit-allocate-keys" class="btn btn-primary btn-lg" style="width:100%; font-weight:700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border:none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);">
+                                    <i class="fa-solid fa-bolt"></i> Generate &amp; Add Keys to Shop
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
 
-                            <!-- Right: Clean Dynamic UPI QR Code (Only QR as requested) -->
-                            <div style="background: #0f172a; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                <div style="font-size:12px; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px;">
-                                    <i class="fa-solid fa-qrcode"></i> Scan to Pay via Any UPI App
+                <!-- RETAILER / SHOPKEEPER: CONTACT ADMIN TO BUY KEYS CARD -->
+                <div id="retailer-buy-keys-contact-card" class="card" style="margin-bottom: 24px; border: 1.5px solid var(--primary); background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);">
+                    <div class="card-body" style="padding: 24px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+                            <div style="max-width: 580px;">
+                                <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(249, 115, 22, 0.15); border: 1px solid rgba(249, 115, 22, 0.4); padding: 6px 14px; border-radius: 20px; color: #f97316; font-size: 13px; font-weight: 700; margin-bottom: 12px;">
+                                    <i class="fa-solid fa-headset"></i> Direct Admin Key Purchase
                                 </div>
-                                <div style="background:#ffffff; padding:14px; border-radius:12px; display:inline-block; box-shadow:0 8px 25px rgba(0,0,0,0.5);">
-                                    <div id="payment-upi-qr-canvas" style="display:flex; justify-content:center;"></div>
-                                </div>
-                                <div style="margin-top:14px; display:flex; align-items:center; gap:6px; justify-content:center;">
-                                    <span class="badge" style="background:#1e293b; color:#cbd5e1; border:1px solid #334155; font-size:10px;">GPay</span>
-                                    <span class="badge" style="background:#1e293b; color:#cbd5e1; border:1px solid #334155; font-size:10px;">PhonePe</span>
-                                    <span class="badge" style="background:#1e293b; color:#cbd5e1; border:1px solid #334155; font-size:10px;">Paytm</span>
-                                    <span class="badge" style="background:#1e293b; color:#cbd5e1; border:1px solid #334155; font-size:10px;">BHIM UPI</span>
-                                </div>
-                                <div style="margin-top:8px; font-size:12px; color:#94a3b8;">
-                                    Pay: <strong id="qr-amount-text" style="color:#a7f3d0; font-size:14px;">₹100</strong>
-                                </div>
-                                <div style="margin-top:6px; font-size:11px; color:#64748b; font-family:var(--font-mono);">
-                                    UPI: <strong style="color:#93c5fd;">9326205462@ybl</strong>
-                                </div>
+                                <h2 style="font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 8px;">
+                                    Shopkeeper Activation Keys (₹100 / Device)
+                                </h2>
+                                <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6; margin: 0;">
+                                    Aapko jitni bhi device activation keys chahiye, sidha <strong>Super Admin se contact karein</strong>. Admin aapke shop account mein turant keys add kar dega, aur wo keys neeche <strong>"My Available Keys"</strong> mein dikhne lagengi.
+                                </p>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 10px; min-width: 220px;">
+                                <a href="https://wa.me/919326205462?text=Hello%20Super%20Admin,%20mujhe%20apne%20shop%20ke%20liye%20Smart%20Device%20Locker%20activation%20keys%20chahiye." target="_blank" class="btn btn-success btn-lg" style="font-weight: 800; background: #25D366; border-color: #25D366; color: #fff; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.35);">
+                                    <i class="fa-brands fa-whatsapp" style="font-size: 20px;"></i> WhatsApp Admin
+                                </a>
+                                <a href="tel:+919326205462" class="btn btn-primary btn-lg" style="font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                                    <i class="fa-solid fa-phone"></i> Call: 9326205462
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -601,12 +587,12 @@
                 <div id="superadmin-payment-queue-card" class="card" style="display:none; margin-bottom: 24px; border: 1.5px solid #0284c7; background: rgba(2, 132, 199, 0.04);">
                     <div class="card-header flex-between">
                         <div>
-                            <h3 style="color:#38bdf8;"><i class="fa-solid fa-list-check"></i> Super Admin: Live Payment Transactions Audit</h3>
+                            <h3 style="color:#38bdf8;"><i class="fa-solid fa-list-check"></i> Super Admin: All Keys Audit Log</h3>
                             <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">
-                                Real-time received UPI payments &bull; Match with your PhonePe/Bank SMS &bull; Option to revoke key &amp; lock device if fake UTR.
+                                View all allocated keys across shops &bull; Revoke any key if needed.
                             </p>
                         </div>
-                        <span id="badge-pending-requests-count" class="badge badge-primary" style="font-size:12px;">0 Transactions</span>
+                        <span id="badge-pending-requests-count" class="badge badge-primary" style="font-size:12px;">0 Keys</span>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -614,11 +600,10 @@
                                 <thead>
                                     <tr>
                                         <th>Shop Name</th>
-                                        <th>Keys</th>
-                                        <th>Amount (₹)</th>
-                                        <th>UTR / Reference No.</th>
-                                        <th>Generated Keys</th>
-                                        <th>Time</th>
+                                        <th>Key</th>
+                                        <th>Status</th>
+                                        <th>Device / Customer</th>
+                                        <th>Created Time</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>

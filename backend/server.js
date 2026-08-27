@@ -726,6 +726,65 @@ app.get('/api/keys/my-keys', requireAuth, (req, res) => {
     });
 });
 
+// Super Admin: Direct Key Allocation to Shopkeeper
+app.post('/api/admin/keys/assign', requireSuperAdmin, (req, res) => {
+    const db = loadDb();
+    if (!db.keys) db.keys = [];
+
+    const { retailerId, count, note } = req.body;
+    const targetRetailer = (db.users || []).find(u => (u.id === retailerId || u.username === retailerId) && u.role === 'retailer');
+    if (!targetRetailer) {
+        return res.status(404).json({ success: false, message: "Shopkeeper / Retailer not found." });
+    }
+
+    const keyCount = Math.max(1, Math.min(200, parseInt(count) || 1));
+    const generatedKeys = [];
+
+    for (let i = 0; i < keyCount; i++) {
+        let newKey = generateActivationKey();
+        while (db.keys.some(k => k.key === newKey)) {
+            newKey = generateActivationKey();
+        }
+
+        const keyObj = {
+            id: `KEY-${Date.now()}-${i + 1}`,
+            key: newKey,
+            retailerId: targetRetailer.id,
+            shopName: targetRetailer.shopName || targetRetailer.name,
+            cost: 100,
+            status: 'UNUSED',
+            createdAt: new Date().toISOString(),
+            assignedBy: 'SUPER_ADMIN',
+            note: note || 'Direct Super Admin Allocation',
+            usedAt: null,
+            usedForDeviceId: null,
+            usedForCustomerName: null
+        };
+
+        db.keys.unshift(keyObj);
+        generatedKeys.push(keyObj);
+    }
+
+    db.logs.unshift({
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        deviceId: "ADMIN",
+        retailerId: targetRetailer.id,
+        action: "KEYS_ALLOCATED",
+        details: `Super Admin allocated ${keyCount} Activation Key(s) to Shop "${targetRetailer.shopName}" (${targetRetailer.phone || targetRetailer.username}): ${generatedKeys.map(k => k.key).join(', ')}`,
+        status: "SUCCESS"
+    });
+
+    saveDb(db);
+    res.status(201).json({
+        success: true,
+        message: `🎉 Successfully allocated ${keyCount} key(s) to "${targetRetailer.shopName}"!`,
+        keys: generatedKeys,
+        count: keyCount,
+        shopName: targetRetailer.shopName
+    });
+});
+
 // Super Admin: Generate Promo Keys for a Shop
 app.post('/api/admin/keys/promo', requireSuperAdmin, (req, res) => {
     const db = loadDb();

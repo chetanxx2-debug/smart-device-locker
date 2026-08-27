@@ -182,7 +182,8 @@ class SellerPortal {
             const superAdminPromoCard = document.getElementById('superadmin-promo-card');
             const superAdminFreeBadge = document.getElementById('superadmin-free-badge');
             const superAdminKeysBanner = document.getElementById('superadmin-keys-free-banner');
-            const buyKeysCard = document.getElementById('card-buy-license-keys');
+            const superAdminAllocateCard = document.getElementById('superadmin-allocate-keys-card');
+            const retailerContactCard = document.getElementById('retailer-buy-keys-contact-card');
             const keyInput = document.getElementById('input-activation-key');
             const keyGroup = document.getElementById('group-activation-key');
             const quickBuyLink = document.getElementById('btn-quick-buy-key');
@@ -197,7 +198,8 @@ class SellerPortal {
                     if (shopsTab) shopsTab.style.display = 'inline-flex';
                     if (superAdminPromoCard) superAdminPromoCard.style.display = 'block';
                     if (superAdminKeysBanner) superAdminKeysBanner.style.display = 'block';
-                    if (buyKeysCard) buyKeysCard.style.display = 'none'; // Super Admin does NOT need to buy keys
+                    if (superAdminAllocateCard) superAdminAllocateCard.style.display = 'block';
+                    if (retailerContactCard) retailerContactCard.style.display = 'none';
 
                     // Add Device Form: Super Admin is 100% FREE
                     if (superAdminFreeBadge) superAdminFreeBadge.style.display = 'block';
@@ -216,7 +218,8 @@ class SellerPortal {
                     if (shopsTab) shopsTab.style.display = 'none';
                     if (superAdminPromoCard) superAdminPromoCard.style.display = 'none';
                     if (superAdminKeysBanner) superAdminKeysBanner.style.display = 'none';
-                    if (buyKeysCard) buyKeysCard.style.display = 'block'; // Shopkeeper sees payment QR
+                    if (superAdminAllocateCard) superAdminAllocateCard.style.display = 'none';
+                    if (retailerContactCard) retailerContactCard.style.display = 'block';
 
                     // Add Device Form: Shopkeeper requires Key
                     if (superAdminFreeBadge) superAdminFreeBadge.style.display = 'none';
@@ -1373,149 +1376,163 @@ class SellerPortal {
         }
     }
 
-    // ===== LICENSE & ACTIVATION KEYS CONTROLLER (₹100 / KEY - UTR VERIFICATION) =====
+    // ===== LICENSE & ACTIVATION KEYS CONTROLLER (DIRECT SUPER ADMIN ALLOCATION) =====
     setupLicenseKeys() {
-        let currentSelectedQty = 1;
-
-        // Quantity Buttons Click
-        const qtyButtons = document.querySelectorAll('.btn-key-qty');
-        const qtyLabel = document.getElementById('buy-key-qty-label');
-        const totalLabel = document.getElementById('buy-key-total-label');
-        const qrAmountText = document.getElementById('qr-amount-text');
-        const btnBuyText = document.getElementById('btn-buy-keys-text');
-
-        const updatePaymentDetails = (qty) => {
-            currentSelectedQty = qty;
-            const total = qty * 100;
-            if (qtyLabel) qtyLabel.textContent = `${qty} Device Key${qty > 1 ? 's' : ''}`;
-            if (totalLabel) totalLabel.textContent = `₹${total.toLocaleString('en-IN')}`;
-            if (qrAmountText) qrAmountText.textContent = `₹${total.toLocaleString('en-IN')}`;
-            if (btnBuyText) btnBuyText.textContent = `Submit Payment Request • ${qty} Key${qty > 1 ? 's' : ''} (₹${total.toLocaleString('en-IN')})`;
-            this.renderPaymentUPIQR(total);
-        };
-
-        qtyButtons.forEach(btn => {
+        // Quick Quantity Buttons for Super Admin Allocation
+        const quickQtyButtons = document.querySelectorAll('.btn-quick-qty');
+        quickQtyButtons.forEach(btn => {
             btn.addEventListener('click', () => {
-                qtyButtons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                const qty = parseInt(btn.dataset.qty) || 1;
-                updatePaymentDetails(qty);
+                const qty = btn.dataset.qty;
+                const inputCount = document.getElementById('input-allocate-key-count');
+                if (inputCount) inputCount.value = qty;
             });
         });
 
-        // Submit Payment Request & Get Instant Keys (with Mandatory UTR)
-        const btnConfirmBuy = document.getElementById('btn-confirm-buy-keys');
-        if (btnConfirmBuy) {
-            btnConfirmBuy.addEventListener('click', () => {
-                const utrInput = document.getElementById('input-payment-utr');
-                const utr = utrInput ? utrInput.value.trim() : '';
+        // Super Admin: Direct Key Allocation Submit Button
+        const btnSubmitAllocate = document.getElementById('btn-submit-allocate-keys');
+        if (btnSubmitAllocate) {
+            btnSubmitAllocate.addEventListener('click', () => {
+                const selectShop = document.getElementById('select-allocate-shop');
+                const retailerId = selectShop ? selectShop.value : '';
+                const inputCount = document.getElementById('input-allocate-key-count');
+                const count = inputCount ? parseInt(inputCount.value) || 1 : 1;
 
-                if (!utr) {
-                    this.showToast('⚠️ Please enter the 12-digit UTR from your PhonePe/GPay receipt.', 'warning');
-                    if (utrInput) {
-                        utrInput.focus();
-                        utrInput.style.borderColor = '#ef4444';
-                    }
+                if (!retailerId) {
+                    this.showToast('⚠️ Please select a Shopkeeper to allocate keys.', 'warning');
+                    if (selectShop) selectShop.focus();
                     return;
                 }
 
-                btnConfirmBuy.disabled = true;
-                btnConfirmBuy.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating Keys...';
-
-                fetch('/api/keys/request', {
-                    method: 'POST',
-                    headers: this.getAuthHeaders(),
-                    body: JSON.stringify({ count: currentSelectedQty, utr })
-                })
-                .then(r => r.json())
-                .then(res => {
-                    btnConfirmBuy.disabled = false;
-                    btnConfirmBuy.innerHTML = `<i class="fa-solid fa-bolt"></i> <span>I Have Paid • Generate ${currentSelectedQty} Key${currentSelectedQty > 1 ? 's' : ''} Instantly (₹${currentSelectedQty * 100})</span>`;
-
-                    if (res.success && Array.isArray(res.keys)) {
-                        if (utrInput) {
-                            utrInput.value = '';
-                            utrInput.style.borderColor = '';
-                        }
-                        this.showToast(`🎉 Payment verified! ${res.keys.length} Activation Key(s) generated instantly!`, 'success');
-                        this.loadLicenseKeysAndRender();
-                    } else {
-                        this.showToast(res.message || 'Key generation failed.', 'danger');
-                    }
-                })
-                .catch(err => {
-                    btnConfirmBuy.disabled = false;
-                    btnConfirmBuy.innerHTML = '<i class="fa-solid fa-bolt"></i> Try Again';
-                    console.error('Key request error:', err);
-                    this.showToast('Network error during key purchase.', 'danger');
-                });
-            });
-        }
-
-        // Refresh My Requests Button
-        const refreshReqBtn = document.getElementById('btn-refresh-my-requests');
-        if (refreshReqBtn) {
-            refreshReqBtn.addEventListener('click', () => {
-                this.loadLicenseKeysAndRender();
-                this.showToast('Payment requests refreshed.', 'info');
-            });
-        }
-
-        // Quick Buy link from Add Device tab
-        const quickBuyBtn = document.getElementById('btn-quick-buy-key');
-        if (quickBuyBtn) {
-            quickBuyBtn.addEventListener('click', () => {
-                document.querySelectorAll('.seller-nav .nav-tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                const keysNav = document.querySelector('[data-tab="tab-license-keys"]');
-                const keysTab = document.getElementById('tab-license-keys');
-                if (keysNav) keysNav.classList.add('active');
-                if (keysTab) keysTab.classList.add('active');
-                this.loadLicenseKeysAndRender();
-            });
-        }
-
-        // Dropdown select from unused keys in Add Device Form
-        const selectUnused = document.getElementById('select-my-unused-keys');
-        const keyInput = document.getElementById('input-activation-key');
-        if (selectUnused && keyInput) {
-            selectUnused.addEventListener('change', () => {
-                if (selectUnused.value) {
-                    keyInput.value = selectUnused.value;
-                    keyInput.style.borderColor = '#10b981';
+                if (count < 1) {
+                    this.showToast('⚠️ Please enter a valid number of keys (at least 1).', 'warning');
+                    return;
                 }
-            });
-        }
 
-        // Super Admin Promo Generator Form
-        const promoForm = document.getElementById('form-superadmin-promo');
-        if (promoForm) {
-            promoForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const shopSelect = document.getElementById('promo-target-shop');
-                const countInput = document.getElementById('promo-key-count');
-                const retailerId = shopSelect ? shopSelect.value : '';
-                const count = countInput ? parseInt(countInput.value) || 5 : 5;
+                btnSubmitAllocate.disabled = true;
+                btnSubmitAllocate.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Allocating Keys...';
 
-                if (!retailerId) return this.showToast('Select a shop first!', 'warning');
-
-                fetch('/api/admin/keys/promo', {
+                fetch('/api/admin/keys/assign', {
                     method: 'POST',
                     headers: this.getAuthHeaders(),
                     body: JSON.stringify({ retailerId, count })
                 })
                 .then(r => r.json())
                 .then(res => {
+                    btnSubmitAllocate.disabled = false;
+                    btnSubmitAllocate.innerHTML = '<i class="fa-solid fa-bolt"></i> Generate & Add Keys to Shop';
+
                     if (res.success) {
-                        this.showToast(`🎁 ${count} Promo Keys issued!`, 'success');
+                        this.showToast(`🎉 ${res.count} Key(s) successfully added to ${res.shopName}!`, 'success');
                         this.loadLicenseKeysAndRender();
+                        this.loadRetailersList();
                     } else {
-                        this.showToast(res.message || 'Promo generation failed.', 'danger');
+                        this.showToast(res.message || 'Key allocation failed.', 'danger');
                     }
                 })
-                .catch(err => console.error('Promo keys error:', err));
+                .catch(err => {
+                    btnSubmitAllocate.disabled = false;
+                    btnSubmitAllocate.innerHTML = '<i class="fa-solid fa-bolt"></i> Generate & Add Keys to Shop';
+                    console.error('Key allocation error:', err);
+                    this.showToast('Network error during key allocation.', 'danger');
+                });
             });
         }
+    }
+
+    loadLicenseKeysAndRender() {
+        if (!this.currentUser) return;
+
+        const isSuperAdmin = this.currentUser.role === 'super_admin';
+
+        // 1. If Super Admin, populate shopkeeper dropdown
+        if (isSuperAdmin) {
+            fetch('/api/admin/retailers', {
+                headers: this.getAuthHeaders()
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success && Array.isArray(res.users)) {
+                    const select = document.getElementById('select-allocate-shop');
+                    if (select) {
+                        const currentVal = select.value;
+                        const shops = res.users.filter(u => u.role === 'retailer');
+                        if (shops.length === 0) {
+                            select.innerHTML = '<option value="">-- No Shopkeepers Found (Create one in Manage Shops) --</option>';
+                        } else {
+                            select.innerHTML = '<option value="">-- Select Shopkeeper --</option>' + 
+                                shops.map(s => `<option value="${s.id}" ${s.id === currentVal ? 'selected' : ''}>🏪 ${s.shopName} (${s.name || s.username} • ${s.phone || 'No phone'})</option>`).join('');
+                        }
+                    }
+                }
+            })
+            .catch(err => console.error('Error loading shops for allocation:', err));
+        }
+
+        // 2. Fetch Keys
+        fetch('/api/keys/my-keys', {
+            headers: this.getAuthHeaders()
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success && res.summary && Array.isArray(res.keys)) {
+                this.renderKeysSummaryAndLists(res.summary, res.keys);
+                if (isSuperAdmin) {
+                    this.renderAllKeysAuditTable(res.keys);
+                }
+            }
+        })
+        .catch(err => console.error('Error loading keys:', err));
+    }
+
+    renderAllKeysAuditTable(keys) {
+        const tbody = document.getElementById('superadmin-pending-requests-tbody');
+        const badgeCount = document.getElementById('badge-pending-requests-count');
+        if (badgeCount) badgeCount.textContent = `${keys.length} Keys Total`;
+
+        if (!tbody) return;
+
+        if (keys.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted); padding:18px;">No activation keys generated yet. Allocate keys above.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = keys.map(k => {
+            const isUnused = k.status === 'UNUSED';
+            const isUsed = k.status === 'USED';
+            const isRevoked = k.status === 'REVOKED';
+
+            const statusBadge = isUnused
+                ? '<span class="badge badge-success">🟢 UNUSED</span>'
+                : isUsed
+                ? '<span class="badge badge-danger">🔴 USED</span>'
+                : '<span class="badge badge-warning">🚫 REVOKED</span>';
+
+            return `
+                <tr>
+                    <td>
+                        <strong style="color:var(--primary);">${k.shopName || 'Admin'}</strong>
+                    </td>
+                    <td>
+                        <code style="font-size:14px; font-weight:800; background:#0f172a; padding:4px 8px; border-radius:6px; color:#38bdf8; letter-spacing:1.5px;">${k.key}</code>
+                        <button class="btn btn-secondary btn-sm" style="padding:2px 6px; font-size:11px; margin-left:4px;" onclick="sellerPortal.copyKey('${k.key}')" title="Copy Key">
+                            <i class="fa-solid fa-copy"></i>
+                        </button>
+                    </td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        ${k.usedForDeviceId ? `<strong style="color:#a7f3d0;">${k.usedForDeviceId}</strong> (${k.usedForCustomerName || 'Customer'})` : '<span style="color:var(--text-muted); font-size:12px;">Not used yet</span>'}
+                    </td>
+                    <td><small class="font-mono">${new Date(k.createdAt).toLocaleString()}</small></td>
+                    <td>
+                        ${!isRevoked ? `
+                            <button class="btn btn-sm btn-danger" style="font-size:11px; padding:3px 8px; font-weight:700;" onclick="sellerPortal.revokeKey('${k.key}', '${(k.shopName || '').replace(/'/g, "\\'")}')" title="Revoke Key">
+                                <i class="fa-solid fa-ban"></i> Revoke
+                            </button>
+                        ` : `<span style="color:var(--text-muted); font-size:11px;">Revoked</span>`}
+                    </td>
+                </tr>
+            `;
+        }).join('');
     }
 
     renderPaymentUPIQR(amount) {
@@ -1546,90 +1563,6 @@ class SellerPortal {
         }
     }
 
-    loadLicenseKeysAndRender() {
-        if (!this.currentUser) return;
-
-        // Always render QR for the currently selected quantity (default = 1 key = ₹100)
-        const activeQtyBtn = document.querySelector('.btn-key-qty.active');
-        const qty = activeQtyBtn ? parseInt(activeQtyBtn.dataset.qty) || 1 : 1;
-        this.renderPaymentUPIQR(qty * 100);
-
-        // 1. Fetch Keys
-        fetch('/api/keys/my-keys', {
-            headers: this.getAuthHeaders()
-        })
-        .then(r => r.json())
-        .then(res => {
-            if (res.success && res.summary && Array.isArray(res.keys)) {
-                this.renderKeysSummaryAndLists(res.summary, res.keys);
-            }
-        })
-        .catch(err => console.error('Error loading keys:', err));
-
-        // 2. Fetch Payment Requests (Pending verification queue)
-        fetch('/api/keys/requests', {
-            headers: this.getAuthHeaders()
-        })
-        .then(r => r.json())
-        .then(res => {
-            if (res.success && Array.isArray(res.requests)) {
-                this.renderPaymentRequests(res.requests);
-            }
-        })
-        .catch(err => console.error('Error loading key requests:', err));
-    }
-
-    renderPaymentRequests(requests) {
-        const isSuperAdmin = this.currentUser && this.currentUser.role === 'super_admin';
-        const queueCard = document.getElementById('superadmin-payment-queue-card');
-        const retailerCard = document.getElementById('retailer-requests-status-card');
-
-        if (isSuperAdmin) {
-            if (queueCard) queueCard.style.display = 'block';
-            if (retailerCard) retailerCard.style.display = 'none';
-
-            const badgeCount = document.getElementById('badge-pending-requests-count');
-            if (badgeCount) badgeCount.textContent = `${requests.length} Transactions`;
-
-            const tbody = document.getElementById('superadmin-pending-requests-tbody');
-            if (tbody) {
-                if (requests.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:18px;">No payment transactions recorded yet.</td></tr>';
-                } else {
-                    tbody.innerHTML = requests.map(r => `
-                        <tr>
-                            <td>
-                                <strong style="color:var(--primary);">${r.shopName}</strong><br>
-                                <small style="color:var(--text-muted);"><i class="fa-solid fa-phone"></i> ${r.phone || 'N/A'}</small>
-                            </td>
-                            <td><strong style="color:#38bdf8; font-size:14px;">${r.count} Key${r.count > 1 ? 's' : ''}</strong></td>
-                            <td><strong style="color:#10b981; font-size:14px;">₹${r.amount}</strong></td>
-                            <td>
-                                <code style="font-size:13px; font-weight:700; background:#0f172a; padding:4px 8px; border-radius:6px; color:#f59e0b; letter-spacing:1px;">${r.utr}</code>
-                                <button class="btn btn-secondary btn-sm" style="padding:2px 6px; font-size:11px; margin-left:4px;" onclick="sellerPortal.copyKey('${r.utr}')" title="Copy UTR">
-                                    <i class="fa-solid fa-copy"></i>
-                                </button>
-                            </td>
-                            <td>
-                                <div style="display:flex; gap:4px; flex-wrap:wrap;">
-                                    ${(r.generatedKeys || []).map(k => `
-                                        <span class="badge" style="background:#1e293b; color:#38bdf8; font-family:var(--font-mono); font-size:11px; font-weight:700; border:1px solid #334155;">${k}</span>
-                                    `).join('')}
-                                </div>
-                            </td>
-                            <td><small class="font-mono">${new Date(r.createdAt).toLocaleString()}</small></td>
-                            <td>
-                                ${(r.generatedKeys || []).map(k => `
-                                    <button class="btn btn-sm btn-danger" style="font-size:11px; padding:3px 8px; font-weight:700;" onclick="sellerPortal.revokeKey('${k}', '${(r.shopName || '').replace(/'/g, "\\'")}')" title="Revoke Key & Lock Device">
-                                        <i class="fa-solid fa-ban"></i> Revoke ${k}
-                                    </button>
-                                `).join(' ')}
-                            </td>
-                        </tr>
-                    `).join('');
-                }
-            }
-        }
     }
 
     revokeKey(key, shopName) {
