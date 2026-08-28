@@ -1327,11 +1327,11 @@ class SellerPortal {
         try {
             new QRCode(container, {
                 text: jsonStr,
-                width: 220,
-                height: 220,
+                width: 300,
+                height: 300,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.M
+                correctLevel: QRCode.CorrectLevel.L
             });
         } catch (e) {
             console.error('Error generating enterprise QR:', e);
@@ -1354,11 +1354,11 @@ class SellerPortal {
         try {
             new QRCode(container, {
                 text: apkUrl,
-                width: 140,
-                height: 140,
+                width: 180,
+                height: 180,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.M
+                correctLevel: QRCode.CorrectLevel.L
             });
         } catch (e) {
             console.error('Error generating direct download QR:', e);
@@ -1385,7 +1385,7 @@ class SellerPortal {
                 height: 220,
                 colorDark: "#0071e3",
                 colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.M
+                correctLevel: QRCode.CorrectLevel.L
             });
         } catch (e) {
             console.error('Error generating iOS enrollment QR:', e);
