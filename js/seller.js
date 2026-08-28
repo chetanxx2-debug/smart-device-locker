@@ -117,6 +117,13 @@ class SellerPortal {
             });
         }
 
+        const loginHeaderBtn = document.getElementById('btn-auth-login-header');
+        if (loginHeaderBtn) {
+            loginHeaderBtn.addEventListener('click', () => {
+                this.showLoginModal();
+            });
+        }
+
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => {
                 if (confirm('Are you sure you want to sign out?')) {
@@ -132,14 +139,13 @@ class SellerPortal {
             return;
         }
 
-        // ── Instantly hide modal if token already exists (no blink) ──────
-        const modal = document.getElementById('auth-modal-container');
-        if (modal) modal.style.display = 'none';
-
         fetch('/api/auth/me', {
             headers: this.getAuthHeaders()
         })
-        .then(r => r.json())
+        .then(r => {
+            if (r.ok) return r.json();
+            throw new Error('Auth invalid');
+        })
         .then(res => {
             if (res.success && res.user) {
                 this.currentUser = res.user;
@@ -151,7 +157,10 @@ class SellerPortal {
             }
         })
         .catch(() => {
-            // Network/server error — keep modal hidden, retry on next load
+            // Token expired or invalid
+            this.token = '';
+            localStorage.removeItem('sdl_auth_token');
+            this.showLoginModal();
         });
     }
 
@@ -159,10 +168,12 @@ class SellerPortal {
         const modal = document.getElementById('auth-modal-container');
         if (modal) modal.style.display = 'flex';
 
+        const loginHeaderBtn = document.getElementById('btn-auth-login-header');
         const userBadge = document.getElementById('user-badge-display');
         const logoutBtn = document.getElementById('btn-auth-logout');
         const shopsTab = document.getElementById('nav-tab-shops');
 
+        if (loginHeaderBtn) loginHeaderBtn.style.display = 'inline-flex';
         if (userBadge) userBadge.style.display = 'none';
         if (logoutBtn) logoutBtn.style.display = 'none';
         if (shopsTab) shopsTab.style.display = 'none';
@@ -172,11 +183,14 @@ class SellerPortal {
         const modal = document.getElementById('auth-modal-container');
         if (modal) modal.style.display = 'none';
 
+        const loginHeaderBtn = document.getElementById('btn-auth-login-header');
         const userBadge = document.getElementById('user-badge-display');
         const userDisplayName = document.getElementById('user-display-name');
         const userRoleIcon = document.getElementById('user-role-icon');
         const logoutBtn = document.getElementById('btn-auth-logout');
         const shopsTab = document.getElementById('nav-tab-shops');
+
+        if (loginHeaderBtn) loginHeaderBtn.style.display = 'none';
 
         if (this.currentUser) {
             const superAdminPromoCard = document.getElementById('superadmin-promo-card');
