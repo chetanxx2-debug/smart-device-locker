@@ -63,7 +63,9 @@ app.get(['/download-apk', '/downloads/SmartDeviceLocker.apk', '/SmartDeviceLocke
     const targetPath = fs.existsSync(p1) ? p1 : (fs.existsSync(p2) ? p2 : null);
     if (targetPath) {
         res.setHeader('Content-Type', 'application/vnd.android.package-archive');
+        res.setHeader('Content-Disposition', 'attachment; filename="SmartDeviceLocker.apk"');
         res.setHeader('Accept-Ranges', 'bytes');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         return res.sendFile(targetPath);
     }
     res.status(404).send('APK file not found.');
