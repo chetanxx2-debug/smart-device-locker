@@ -16,17 +16,17 @@ class SellerPortal {
     }
 
     init() {
-        this.setupAuth();
-        this.setupTabs();
-        this.setupForm();
-        this.setupSearch();
-        this.setupCommandConsole();
-        this.setupShopManagement();
-        this.setupQrProvisioning();
-        this.setupLicenseKeys();
+        try { this.setupAuth(); } catch (e) { console.error('setupAuth error:', e); }
+        try { this.setupTabs(); } catch (e) { console.error('setupTabs error:', e); }
+        try { this.setupForm(); } catch (e) { console.error('setupForm error:', e); }
+        try { this.setupSearch(); } catch (e) { console.error('setupSearch error:', e); }
+        try { this.setupCommandConsole(); } catch (e) { console.error('setupCommandConsole error:', e); }
+        try { this.setupShopManagement(); } catch (e) { console.error('setupShopManagement error:', e); }
+        try { this.setupQrProvisioning(); } catch (e) { console.error('setupQrProvisioning error:', e); }
+        try { this.setupLicenseKeys(); } catch (e) { console.error('setupLicenseKeys error:', e); }
 
         // Check authentication state
-        this.checkAuth();
+        try { this.checkAuth(); } catch (e) { console.error('checkAuth error:', e); }
 
         // Auto-refresh backend devices every 4 seconds
         setInterval(() => {
@@ -759,7 +759,7 @@ class SellerPortal {
     }
 
     setupCommandConsole() {
-        const getSelectedDeviceId = () => document.getElementById('active-device-select').value;
+        const getSelectedDeviceId = () => document.getElementById('active-device-select')?.value || '';
 
         const btnLock = document.getElementById('cmd-lock');
         const btnUnlock = document.getElementById('cmd-unlock');
