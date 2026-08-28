@@ -1579,8 +1579,6 @@ class SellerPortal {
         }
     }
 
-    }
-
     revokeKey(key, shopName) {
         if (!confirm(`⚠️ Are you sure you want to REVOKE Activation Key "${key}" from "${shopName}"?\n\nIf this key is currently used on any customer phone, that device will be IMMEDIATELY LOCKED!`)) {
             return;
