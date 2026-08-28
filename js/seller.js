@@ -1731,4 +1731,10 @@ class SellerPortal {
     }
 }
 
-window.sellerPortal = new SellerPortal();
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        window.sellerPortal = new SellerPortal();
+    });
+} else {
+    window.sellerPortal = new SellerPortal();
+}
