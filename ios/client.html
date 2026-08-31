@@ -14,6 +14,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Plus Jakarta Sans", sans-serif; background: #0b1120; color: #f8fafc; min-height: 100vh; overflow-x: hidden; }
 
+        /* LOCK SCREEN */
         #lock-screen {
             display: none; position: fixed; inset: 0; z-index: 99999;
             background: linear-gradient(160deg, #0f0a0a 0%, #1a0606 50%, #0b0f1a 100%);
@@ -92,6 +93,24 @@
         .btn-pay  { background:linear-gradient(135deg,#10b981,#059669); color:#fff; box-shadow:0 4px 15px rgba(16,185,129,0.4); }
         .btn-call { background:linear-gradient(135deg,#f97316,#ea580c); color:#fff; box-shadow:0 4px 15px rgba(249,115,22,0.35); }
         .footer-note { text-align:center; font-size:11px; color:#64748b; line-height:1.5; margin-top:8px; }
+
+        /* PAIR BOX IF UNPAIRED */
+        .pair-input-card {
+            background: rgba(249, 115, 22, 0.1);
+            border: 1px dashed rgba(249, 115, 22, 0.4);
+            border-radius: 16px; padding: 16px; text-align: center;
+        }
+        .pair-input-card input {
+            width: 100%; max-width: 220px; padding: 10px; font-size: 20px;
+            font-weight: 800; letter-spacing: 4px; text-align: center;
+            border-radius: 10px; border: 1.5px solid #f97316;
+            background: #0f172a; color: #fff; margin: 10px 0;
+            outline: none;
+        }
+        .pair-input-card button {
+            background: #f97316; color: #fff; border: none; font-weight: 700;
+            padding: 8px 18px; border-radius: 8px; cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -130,10 +149,19 @@
             <p>Apple iOS Device Protection &amp; EMI Client</p>
         </div>
 
+        <!-- PAIR CODE INPUT (Shows only if phone not linked yet) -->
+        <div id="pair-input-box" class="pair-input-card" style="display:none;">
+            <div style="font-size:12px; color:#f97316; font-weight:700;">🔗 ENTER DASHBOARD PAIR CODE</div>
+            <div style="font-size:11px; color:#94a3b8; margin-top:2px;">Enter 6-digit Pair Code generated on Retailer Dashboard:</div>
+            <input type="text" id="manual-pair-code" placeholder="849201" maxlength="10">
+            <br>
+            <button type="button" onclick="linkPairCode()">Link iPhone Now</button>
+        </div>
+
         <div class="glass-card">
             <div class="status-badge active">
                 <i class="fa-solid fa-circle-check"></i>
-                <span>Protected &amp; Active</span>
+                <span id="status-text">Protected &amp; Active</span>
             </div>
             <div class="emi-box">
                 <span>Next EMI Due Date</span>
@@ -141,10 +169,10 @@
                 <span id="emi-due-date">Due on: &#8212;</span>
             </div>
             <div style="margin-top:14px;">
-                <div class="info-row"><span class="info-label">Customer Name</span><span class="info-value" id="cust-name">Loading...</span></div>
+                <div class="info-row"><span class="info-label">Customer Name</span><span class="info-value" id="cust-name">Active Client</span></div>
                 <div class="info-row"><span class="info-label">Device Model</span><span class="info-value" id="dev-model">Apple iPhone</span></div>
-                <div class="info-row"><span class="info-label">Device ID</span><span class="info-value" id="dev-id">DEV-XXX</span></div>
-                <div class="info-row"><span class="info-label">Tenure / Completed</span><span class="info-value" id="emi-progress">0 / 6 Months</span></div>
+                <div class="info-row"><span class="info-label">Device ID</span><span class="info-value" id="dev-id">DEV-PAIRED</span></div>
+                <div class="info-row"><span class="info-label">Status</span><span class="info-value" id="emi-progress" style="color:#34d399;">Active</span></div>
             </div>
         </div>
 
@@ -164,15 +192,30 @@
 </div>
 
 <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const deviceId  = urlParams.get('id') || urlParams.get('deviceId') || '';
-    const UPI_ID    = '9326205462@ybl';
+    var urlParams = new URLSearchParams(window.location.search);
+    var deviceId  = urlParams.get('id') || urlParams.get('deviceId') || localStorage.getItem('sdl_ios_device_id') || '';
+    var UPI_ID    = '9326205462@ybl';
+
+    if (deviceId && !deviceId.includes('GENERIC') && !deviceId.includes('XXX')) {
+        localStorage.setItem('sdl_ios_device_id', deviceId);
+    } else {
+        document.getElementById('pair-input-box').style.display = 'block';
+    }
+
+    function linkPairCode() {
+        var code = (document.getElementById('manual-pair-code').value || '').trim();
+        if (!code) return alert('Please enter 6-digit Pair Code!');
+        deviceId = code;
+        localStorage.setItem('sdl_ios_device_id', code);
+        document.getElementById('pair-input-box').style.display = 'none';
+        poll();
+    }
 
     function showLock(dev) {
-        const amt   = dev.emiAmount || dev.monthlyAmount || '';
-        const phone = (dev.retailerPhone || '9326205462').replace(/\D/g,'');
-        const shop  = dev.shopName || 'Your Retailer';
-        const msg   = dev.lastMessage || 'Aapka EMI payment overdue hai.';
+        var amt   = dev.emiAmount || dev.monthlyAmount || '';
+        var phone = (dev.retailerPhone || '9326205462').replace(/\D/g,'');
+        var shop  = dev.shopName || 'Your Retailer';
+        var msg   = dev.lastMessage || 'Aapka EMI payment overdue hai.';
 
         document.getElementById('lock-amount').textContent   = amt ? '\u20B9' + Number(amt).toLocaleString('en-IN') : '\u20B9\u2014';
         document.getElementById('lock-due').textContent      = dev.dueDate ? 'Due on: ' + dev.dueDate : 'Due Date: \u2014';
@@ -215,18 +258,20 @@
     }
 
     function poll() {
-        if (!deviceId) return;
-        fetch('/api/devices/' + encodeURIComponent(deviceId) + '/poll')
+        var idToPoll = deviceId || localStorage.getItem('sdl_ios_device_id') || '';
+        if (!idToPoll) return;
+        fetch('/api/devices/' + encodeURIComponent(idToPoll) + '/poll')
             .then(function(r) { return r.json(); })
             .then(function(dev) {
                 if (!dev || dev.success === false) return;
+                document.getElementById('pair-input-box').style.display = 'none';
                 dev.isLocked ? showLock(dev) : showNormal(dev);
             })
             .catch(function() {});
     }
 
     poll();
-    setInterval(poll, 8000);
+    setInterval(poll, 6000);
     document.addEventListener('visibilitychange', function() {
         if (document.visibilityState === 'visible') poll();
     });

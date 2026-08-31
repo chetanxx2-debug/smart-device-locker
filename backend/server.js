@@ -342,12 +342,19 @@ function sendCommandToDevice(deviceId, commandPayload) {
 // GET /api/devices/:id/poll — iPhone WebClip polls this every 8s to check lock state
 app.get('/api/devices/:id/poll', (req, res) => {
     const db = loadDb();
-    const dev = db.devices.find(d => d.id === req.params.id);
+    const queryId = String(req.params.id || '').trim();
+    const dev = db.devices.find(d => 
+        d.id === queryId || 
+        String(d.pairCode).trim() === queryId || 
+        d.imei === queryId || 
+        d.id === 'DEV-' + queryId
+    );
     if (!dev) return res.status(404).json({ success: false, message: 'Device not found.' });
 
-    // Update lastSeen for iOS devices that have no WebSocket (they use HTTP poll)
-    if (dev.platform === 'ios') {
+    // Update lastSeen and mark paired for iOS devices
+    if (dev.platform === 'ios' || dev.platform === 'apple') {
         dev.lastSeen = new Date().toISOString();
+        dev.isPaired = true;
         saveDb(db);
     }
 
