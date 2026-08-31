@@ -1337,10 +1337,8 @@ function generateIosProfile(device, origin) {
     const orgName = device ? (device.shopName || "Smart Device Locker") : "Smart Device Locker";
     const devId = device ? device.id : "DEV-GENERIC";
     const custName = device ? (device.customerName || "Customer") : "Customer";
-    const retailerPhone = device ? (device.retailerPhone || "+91 98765 43210") : "+91 98765 43210";
     const profileUuid = crypto.randomUUID ? crypto.randomUUID() : `SDL-UUID-${Date.now()}`;
     const webClipUuid = `SDL-WEBCLIP-${Date.now()}`;
-    const mdmUuid = `SDL-MDM-${Date.now()}`;
     const accessUuid = `SDL-ACCESS-${Date.now()}`;
 
     return `<?xml version="1.0" encoding="UTF-8"?>
@@ -1348,15 +1346,13 @@ function generateIosProfile(device, origin) {
 <plist version="1.0">
 <dict>
     <key>PayloadDescription</key>
-    <string>Enforces authorized EMI device protection, due reminders, and remote lost mode management.</string>
+    <string>Enforces authorized EMI device protection, due reminders, and remote support for ${orgName}.</string>
     <key>PayloadDisplayName</key>
-    <string>Smart Locker EMI Protection (${orgName})</string>
+    <string>Smart Locker - ${orgName}</string>
     <key>PayloadIdentifier</key>
     <string>com.smartlocker.ios.profile.${devId}</string>
     <key>PayloadOrganization</key>
     <string>${orgName}</string>
-    <key>PayloadRemovalDisallowed</key>
-    <true/>
     <key>PayloadType</key>
     <string>Configuration</string>
     <key>PayloadUUID</key>
@@ -1376,7 +1372,7 @@ function generateIosProfile(device, origin) {
             <key>PayloadDescription</key>
             <string>Access your monthly EMI schedule, payment gateway, and shopkeeper support.</string>
             <key>PayloadDisplayName</key>
-            <string>Smart Locker EMI Portal</string>
+            <string>Smart Locker Client</string>
             <key>PayloadIdentifier</key>
             <string>com.apple.webClip.managed.${devId}</string>
             <key>PayloadType</key>
@@ -1390,39 +1386,10 @@ function generateIosProfile(device, origin) {
             <key>URL</key>
             <string>${origin}/ios/client.html?id=${encodeURIComponent(devId)}</string>
         </dict>
-        <!-- 2. Apple MDM Configuration Payload -->
-        <dict>
-            <key>AccessRights</key>
-            <integer>8191</integer>
-            <key>CheckInURL</key>
-            <string>${origin}/ios/mdm/checkin?id=${encodeURIComponent(devId)}</string>
-            <key>CheckOutWhenRemoved</key>
-            <true/>
-            <key>IdentityCertificateUUID</key>
-            <string>${profileUuid}</string>
-            <key>PayloadDescription</key>
-            <string>Configures Apple Managed Lost Mode, remote lockdown, and security policies.</string>
-            <key>PayloadDisplayName</key>
-            <string>Apple MDM Service</string>
-            <key>PayloadIdentifier</key>
-            <string>com.apple.mdm.${devId}</string>
-            <key>PayloadType</key>
-            <string>com.apple.mdm</string>
-            <key>PayloadUUID</key>
-            <string>${mdmUuid}</string>
-            <key>PayloadVersion</key>
-            <integer>1</integer>
-            <key>ServerURL</key>
-            <string>${origin}/ios/mdm/server?id=${encodeURIComponent(devId)}</string>
-            <key>SignMessage</key>
-            <false/>
-            <key>Topic</key>
-            <string>com.apple.mgmt.external.${devId}</string>
-        </dict>
-        <!-- 3. Security Restrictions Payload -->
+        <!-- 2. Security Restrictions Payload -->
         <dict>
             <key>PayloadDescription</key>
-            <string>Protects device against unauthorized removal or diagnostic changes.</string>
+            <string>Protects device against unauthorized diagnostic tampering.</string>
             <key>PayloadDisplayName</key>
             <string>Security Restrictions</string>
             <key>PayloadIdentifier</key>
