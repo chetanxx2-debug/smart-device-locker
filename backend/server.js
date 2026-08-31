@@ -373,8 +373,92 @@ app.get('/api/devices/:id/poll', (req, res) => {
     });
 });
 
-// POST /api/devices/:id/ios-lock — Dashboard sends LOCK/UNLOCK to iOS device via flag
-app.post('/api/devices/:id/ios-lock', (req, res) => {
+// ===== CLOUD MDM INTEGRATION FOR APPLE REMOTE LOST MODE =====
+async function sendMdmLostMode(dev, message, phoneNumber) {
+    const db = loadDb();
+    const mdmConfig = db.mdmConfig || {};
+    if (!mdmConfig.apiKey) {
+        return { success: false, reason: 'NO_API_KEY' };
+    }
+
+    const provider = mdmConfig.provider || 'simplemdm';
+    const mdmDeviceId = dev.mdmDeviceId || dev.imei || dev.id;
+
+    try {
+        if (provider === 'simplemdm') {
+            const response = await fetch(`https://a.simplemdm.com/api/v1/devices/${encodeURIComponent(mdmDeviceId)}/lost_mode`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Basic ${Buffer.from(mdmConfig.apiKey + ':').toString('base64')}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: message || 'Aapka EMI overdue hai. Retailer se contact karein.',
+                    phone_number: phoneNumber || mdmConfig.defaultPhone || '+919326205462',
+                    footnote: 'Smart Device Locker Security'
+                })
+            });
+            const data = await response.json().catch(() => ({}));
+            console.log(`[MDM SimpleMDM] Lost mode response for ${dev.id}:`, data);
+            return { success: response.ok, data };
+        } else if (provider === 'manageengine') {
+            const response = await fetch(`https://mdm.manageengine.com/api/v1/mdm/devices/${encodeURIComponent(mdmDeviceId)}/lostmode`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Zoho-oauthtoken ${mdmConfig.apiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    lock_message: message || 'Aapka EMI overdue hai. Retailer se contact karein.',
+                    phone_number: phoneNumber || mdmConfig.defaultPhone || '+919326205462'
+                })
+            });
+            const data = await response.json().catch(() => ({}));
+            console.log(`[MDM ManageEngine] Lost mode response for ${dev.id}:`, data);
+            return { success: response.ok, data };
+        }
+    } catch (err) {
+        console.error(`[MDM] Error sending Lost Mode:`, err);
+        return { success: false, error: err.message };
+    }
+    return { success: false, reason: 'UNKNOWN_PROVIDER' };
+}
+
+async function sendMdmUnlock(dev) {
+    const db = loadDb();
+    const mdmConfig = db.mdmConfig || {};
+    if (!mdmConfig.apiKey) return { success: false, reason: 'NO_API_KEY' };
+
+    const provider = mdmConfig.provider || 'simplemdm';
+    const mdmDeviceId = dev.mdmDeviceId || dev.imei || dev.id;
+
+    try {
+        if (provider === 'simplemdm') {
+            const response = await fetch(`https://a.simplemdm.com/api/v1/devices/${encodeURIComponent(mdmDeviceId)}/lost_mode`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Basic ${Buffer.from(mdmConfig.apiKey + ':').toString('base64')}`
+                }
+            });
+            return { success: response.ok };
+        } else if (provider === 'manageengine') {
+            const response = await fetch(`https://mdm.manageengine.com/api/v1/mdm/devices/${encodeURIComponent(mdmDeviceId)}/lostmode/disable`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Zoho-oauthtoken ${mdmConfig.apiKey}`
+                }
+            });
+            return { success: response.ok };
+        }
+    } catch (err) {
+        console.error(`[MDM] Error disabling Lost Mode:`, err);
+        return { success: false, error: err.message };
+    }
+    return { success: false, reason: 'UNKNOWN_PROVIDER' };
+}
+
+// POST /api/devices/:id/ios-lock — Dashboard sends LOCK/UNLOCK to iOS device
+app.post('/api/devices/:id/ios-lock', async (req, res) => {
     if (!req.user) return res.status(401).json({ success: false, message: 'Unauthorized.' });
     const db = loadDb();
     const dev = db.devices.find(d => d.id === req.params.id);
@@ -407,10 +491,55 @@ app.post('/api/devices/:id/ios-lock', (req, res) => {
     });
     saveDb(db);
 
-    // Also try WebSocket if somehow connected (fallback for future)
+    // If Cloud MDM is active, trigger Apple Remote Lost Mode
+    let mdmResult = null;
+    if (action === 'LOCK') {
+        mdmResult = await sendMdmLostMode(dev, dev.lastMessage, req.user.phone || dev.retailerPhone);
+    } else {
+        mdmResult = await sendMdmUnlock(dev);
+    }
+
+    // Also try WebSocket if somehow connected
     sendCommandToDevice(dev.id, { type: action, message: dev.lastMessage });
 
-    res.json({ success: true, message: `iOS device ${action.toLowerCase()}ed. Will apply within 8 seconds.`, isLocked: dev.isLocked });
+    res.json({
+        success: true,
+        message: `iOS device ${action.toLowerCase()}ed successfully.`,
+        isLocked: dev.isLocked,
+        mdmStatus: mdmResult ? (mdmResult.success ? 'APNS_PUSH_SENT' : mdmResult.reason || 'CLIENT_POLL_ACTIVE') : 'CLIENT_POLL_ACTIVE'
+    });
+});
+
+// GET /api/admin/mdm-settings (Super Admin view MDM configuration)
+app.get('/api/admin/mdm-settings', (req, res) => {
+    if (!req.user || req.user.role !== 'super_admin') {
+        return res.status(403).json({ success: false, message: 'Super Admin only.' });
+    }
+    const db = loadDb();
+    const config = db.mdmConfig || {};
+    res.json({
+        success: true,
+        provider: config.provider || 'simplemdm',
+        hasApiKey: !!config.apiKey,
+        apiKeyMasked: config.apiKey ? `${config.apiKey.substring(0, 4)}••••••••` : '',
+        defaultPhone: config.defaultPhone || '+919326205462'
+    });
+});
+
+// POST /api/admin/mdm-settings (Super Admin save MDM API key)
+app.post('/api/admin/mdm-settings', (req, res) => {
+    if (!req.user || req.user.role !== 'super_admin') {
+        return res.status(403).json({ success: false, message: 'Super Admin only.' });
+    }
+    const { provider, apiKey, defaultPhone } = req.body;
+    const db = loadDb();
+    db.mdmConfig = db.mdmConfig || {};
+    if (provider) db.mdmConfig.provider = provider;
+    if (apiKey) db.mdmConfig.apiKey = String(apiKey).trim();
+    if (defaultPhone) db.mdmConfig.defaultPhone = String(defaultPhone).trim();
+    saveDb(db);
+
+    res.json({ success: true, message: 'Cloud MDM settings updated successfully!' });
 });
 
 // Server Info & Health
@@ -1117,7 +1246,7 @@ app.post('/api/devices/pair', (req, res) => {
 });
 
 // Send Remote Command (LOCK, UNLOCK, SIREN, MESSAGE, WIPE, UNINSTALL_APP)
-app.post('/api/devices/:id/command', (req, res) => {
+app.post('/api/devices/:id/command', async (req, res) => {
     const db = loadDb();
     const deviceId = req.params.id;
     const { action, message, sound } = req.body;
@@ -1144,10 +1273,20 @@ app.post('/api/devices/:id/command', (req, res) => {
         device.status = "locked";
         commandPayload.message = message || "This device is locked due to pending EMI. Contact seller to unlock.";
         device.lastMessage = commandPayload.message;
+
+        // If iOS device, trigger Apple Remote Lost Mode via Cloud MDM
+        if (device.platform === 'ios' || device.platform === 'apple') {
+            await sendMdmLostMode(device, device.lastMessage, req.user ? req.user.phone : device.retailerPhone);
+        }
     } else if (action === 'UNLOCK') {
         device.isLocked = false;
         device.status = "active";
         commandPayload.message = "Device Unlocked Successfully.";
+
+        // If iOS device, disable Apple Remote Lost Mode via Cloud MDM
+        if (device.platform === 'ios' || device.platform === 'apple') {
+            await sendMdmUnlock(device);
+        }
     } else if (action === 'SIREN' || action === 'PLAY_SOUND' || action === 'SIREN_ON') {
         device.sirenActive = true;
         commandPayload.type = "SIREN";

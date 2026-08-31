@@ -24,6 +24,7 @@ class SellerPortal {
         try { this.setupShopManagement(); } catch (e) { console.error('setupShopManagement error:', e); }
         try { this.setupQrProvisioning(); } catch (e) { console.error('setupQrProvisioning error:', e); }
         try { this.setupLicenseKeys(); } catch (e) { console.error('setupLicenseKeys error:', e); }
+        try { this.setupMdmSettings(); } catch (e) { console.error('setupMdmSettings error:', e); }
 
         // Check authentication state
         try { this.checkAuth(); } catch (e) { console.error('checkAuth error:', e); }
@@ -1776,6 +1777,64 @@ class SellerPortal {
             keyInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
         this.showToast(`🔑 Key "${key}" filled in Add Device form!`, 'success');
+    }
+
+    // ===== CLOUD MDM SETTINGS (SUPER ADMIN REMOTE LOST MODE) =====
+    setupMdmSettings() {
+        const form = document.getElementById('form-mdm-settings');
+        if (!form) return;
+
+        const loadMdmSettings = () => {
+            if (!this.currentUser || this.currentUser.role !== 'super_admin') {
+                const card = document.getElementById('superadmin-mdm-card');
+                if (card) card.style.display = 'none';
+                return;
+            }
+            const card = document.getElementById('superadmin-mdm-card');
+            if (card) card.style.display = 'block';
+
+            fetch('/api/admin/mdm-settings', { headers: this.getAuthHeaders() })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.success) {
+                        const selectProv = document.getElementById('select-mdm-provider');
+                        const inputKey = document.getElementById('input-mdm-api-key');
+                        const inputPhone = document.getElementById('input-mdm-phone');
+                        if (selectProv && res.provider) selectProv.value = res.provider;
+                        if (inputKey && res.hasApiKey) inputKey.placeholder = res.apiKeyMasked || '•••••••• (Configured & Active)';
+                        if (inputPhone && res.defaultPhone) inputPhone.value = res.defaultPhone;
+                    }
+                })
+                .catch(() => {});
+        };
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const provider = document.getElementById('select-mdm-provider')?.value || 'simplemdm';
+            const apiKey = document.getElementById('input-mdm-api-key')?.value || '';
+            const defaultPhone = document.getElementById('input-mdm-phone')?.value || '+919326205462';
+
+            fetch('/api/admin/mdm-settings', {
+                method: 'POST',
+                headers: this.getAuthHeaders(),
+                body: JSON.stringify({ provider, apiKey, defaultPhone })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    this.showToast('✅ Cloud MDM Settings Saved! Apple Remote Lost Mode is Ready.', 'success');
+                    loadMdmSettings();
+                } else {
+                    this.showToast(res.message || 'Failed to save MDM settings', 'warning');
+                }
+            })
+            .catch(() => {
+                this.showToast('Error saving MDM settings.', 'danger');
+            });
+        });
+
+        // Trigger load after auth check completes
+        setTimeout(loadMdmSettings, 1200);
     }
 }
 

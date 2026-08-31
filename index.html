@@ -958,6 +958,48 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- CLOUD MDM SETTINGS CARD (Super Admin Remote Lock Engine) -->
+                <div id="superadmin-mdm-card" class="card" style="margin-top: 24px; border: 1.5px solid #10b981; background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.95) 100%);">
+                    <div class="card-header flex-between">
+                        <div>
+                            <h3 style="color: #34d399;"><i class="fa-solid fa-cloud-bolt"></i> Apple Cloud MDM API (Instant Remote Lost Mode)</h3>
+                            <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+                                Connect your Cloud MDM (SimpleMDM / ManageEngine) to trigger <strong>Apple Remote Lost Mode</strong> even when customer is using Instagram/YouTube at home.
+                            </p>
+                        </div>
+                        <span class="badge badge-success" style="font-size: 11px; padding: 6px 12px; font-weight: 700;">
+                            ⚡ Remote Lost Mode Engine
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <form id="form-mdm-settings" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; align-items: flex-end;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-weight: 700; font-size: 13px;">Cloud MDM Provider *:</label>
+                                <select id="select-mdm-provider" class="form-control" style="font-weight: 600;">
+                                    <option value="simplemdm" selected>SimpleMDM API (Instant Apple Push)</option>
+                                    <option value="manageengine">ManageEngine MDM API (Zoho Cloud)</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-weight: 700; font-size: 13px;">MDM API Key / Token *:</label>
+                                <input type="password" id="input-mdm-api-key" class="form-control font-mono" placeholder="Enter API Key from MDM dashboard..." style="font-size: 14px;">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-weight: 700; font-size: 13px;">Default Emergency Phone *:</label>
+                                <input type="tel" id="input-mdm-phone" class="form-control font-mono" value="+919326205462" style="font-size: 14px; font-weight: 700;">
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary" style="width: 100%; font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
+                                    <i class="fa-solid fa-floppy-disk"></i> Save MDM Cloud Settings
+                                </button>
+                            </div>
+                        </form>
+                        <div id="mdm-status-box" style="margin-top: 14px; font-size: 12px; color: #a7f3d0; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 10px 14px; border-radius: 10px;">
+                            <i class="fa-solid fa-circle-check"></i> <strong>Apple MDM Remote Engine Active:</strong> When you click "Lock" on any iPhone, it sends an Apple Lost Mode signal to interrupt all running apps.
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
