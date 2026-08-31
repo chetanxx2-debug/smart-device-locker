@@ -338,6 +338,74 @@ function sendCommandToDevice(deviceId, commandPayload) {
 
 // ---------------- REST API ENDPOINTS ----------------
 
+// ===== iOS CLIENT POLL ENDPOINT (no auth required — device-side) =====
+// GET /api/devices/:id/poll — iPhone WebClip polls this every 8s to check lock state
+app.get('/api/devices/:id/poll', (req, res) => {
+    const db = loadDb();
+    const dev = db.devices.find(d => d.id === req.params.id);
+    if (!dev) return res.status(404).json({ success: false, message: 'Device not found.' });
+
+    // Update lastSeen for iOS devices that have no WebSocket (they use HTTP poll)
+    if (dev.platform === 'ios') {
+        dev.lastSeen = new Date().toISOString();
+        saveDb(db);
+    }
+
+    res.json({
+        success: true,
+        deviceId: dev.id,
+        customerName: dev.customerName || '',
+        deviceModel: dev.model || 'Apple iPhone',
+        shopName: dev.shopName || '',
+        retailerPhone: dev.retailerPhone || dev.shopPhone || '',
+        emiAmount: dev.emiAmount || dev.monthlyAmount || '',
+        dueDate: dev.dueDate || '',
+        isLocked: !!dev.isLocked,
+        lastMessage: dev.lastMessage || '',
+        platform: dev.platform || 'ios'
+    });
+});
+
+// POST /api/devices/:id/ios-lock — Dashboard sends LOCK/UNLOCK to iOS device via flag
+app.post('/api/devices/:id/ios-lock', (req, res) => {
+    if (!req.user) return res.status(401).json({ success: false, message: 'Unauthorized.' });
+    const db = loadDb();
+    const dev = db.devices.find(d => d.id === req.params.id);
+    if (!dev) return res.status(404).json({ success: false, message: 'Device not found.' });
+
+    // Access control — retailer can only lock own devices
+    if (req.user.role !== 'super_admin' && dev.retailerId !== req.user.id) {
+        return res.status(403).json({ success: false, message: 'Access denied.' });
+    }
+
+    const action = String(req.body.action || '').toUpperCase();
+    if (!['LOCK', 'UNLOCK'].includes(action)) {
+        return res.status(400).json({ success: false, message: 'Action must be LOCK or UNLOCK.' });
+    }
+
+    dev.isLocked = (action === 'LOCK');
+    dev.lastMessage = req.body.message || (action === 'LOCK'
+        ? 'Aapka EMI payment overdue hai. Retailer se contact karein.'
+        : 'Payment received. Device unlocked. Thank you!');
+    dev.lastSeen = new Date().toISOString();
+
+    db.logs.unshift({
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        deviceId: dev.id,
+        retailerId: req.user.id,
+        action: `IOS_${action}`,
+        details: `iOS device ${action.toLowerCase()}ed by ${req.user.shopName || req.user.name}. Msg: ${dev.lastMessage}`,
+        status: 'SUCCESS'
+    });
+    saveDb(db);
+
+    // Also try WebSocket if somehow connected (fallback for future)
+    sendCommandToDevice(dev.id, { type: action, message: dev.lastMessage });
+
+    res.json({ success: true, message: `iOS device ${action.toLowerCase()}ed. Will apply within 8 seconds.`, isLocked: dev.isLocked });
+});
+
 // Server Info & Health
 app.get('/api/info', (req, res) => {
     const localIp = getLocalIpAddress();
