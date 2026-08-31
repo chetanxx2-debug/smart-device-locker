@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -193,13 +193,22 @@
 
 <script>
     var urlParams = new URLSearchParams(window.location.search);
-    var deviceId  = urlParams.get('id') || urlParams.get('deviceId') || localStorage.getItem('sdl_ios_device_id') || '';
+    var urlId     = urlParams.get('id') || urlParams.get('deviceId') || '';
+    var savedId   = localStorage.getItem('sdl_ios_device_id') || '';
     var UPI_ID    = '9326205462@ybl';
 
-    if (deviceId && !deviceId.includes('GENERIC') && !deviceId.includes('XXX')) {
+    var deviceId = '';
+    if (urlId && !urlId.includes('GENERIC') && !urlId.includes('XXX')) {
+        deviceId = urlId;
         localStorage.setItem('sdl_ios_device_id', deviceId);
-    } else {
+    } else if (savedId && !savedId.includes('GENERIC') && !savedId.includes('XXX')) {
+        deviceId = savedId;
+    }
+
+    if (!deviceId) {
         document.getElementById('pair-input-box').style.display = 'block';
+    } else {
+        document.getElementById('pair-input-box').style.display = 'none';
     }
 
     function linkPairCode() {
@@ -259,7 +268,7 @@
 
     function poll() {
         var idToPoll = deviceId || localStorage.getItem('sdl_ios_device_id') || '';
-        if (!idToPoll) return;
+        if (!idToPoll || idToPoll.includes('GENERIC') || idToPoll.includes('XXX')) return;
         fetch('/api/devices/' + encodeURIComponent(idToPoll) + '/poll')
             .then(function(r) { return r.json(); })
             .then(function(dev) {
