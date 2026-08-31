@@ -419,6 +419,61 @@ class SellerPortal {
         .catch(err => console.error('Delete retailer error:', err));
     }
 
+    // ===== TAB NAVIGATION & METRIC CARD CLICKS =====
+    setupTabs() {
+        const navTabs = document.querySelectorAll('.seller-nav .nav-tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        const switchTab = (targetTabId) => {
+            navTabs.forEach(t => t.classList.toggle('active', t.getAttribute('data-tab') === targetTabId));
+            tabContents.forEach(c => c.classList.toggle('active', c.id === targetTabId));
+
+            if (targetTabId === 'tab-devices-list') {
+                this.loadBackendDevicesAndRender();
+            } else if (targetTabId === 'tab-license-keys') {
+                if (typeof this.loadLicenseKeysAndRender === 'function') this.loadLicenseKeysAndRender();
+            } else if (targetTabId === 'tab-shops') {
+                this.loadRetailersList();
+            } else if (targetTabId === 'tab-dashboard') {
+                this.loadBackendDevicesAndRender();
+            }
+        };
+
+        navTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTabId = tab.getAttribute('data-tab');
+                if (targetTabId) switchTab(targetTabId);
+            });
+        });
+
+        // Dashboard Metric Cards click to navigate
+        const metricTotal = document.querySelector('.metric-card.primary');
+        const metricActive = document.querySelector('.metric-card.success');
+        const metricLocked = document.querySelector('.metric-card.danger');
+        const metricPending = document.querySelector('.metric-card.warning');
+
+        if (metricTotal) {
+            metricTotal.style.cursor = 'pointer';
+            metricTotal.setAttribute('title', 'Click to view Managed Devices');
+            metricTotal.addEventListener('click', () => switchTab('tab-devices-list'));
+        }
+        if (metricActive) {
+            metricActive.style.cursor = 'pointer';
+            metricActive.setAttribute('title', 'Click to view Active Devices');
+            metricActive.addEventListener('click', () => switchTab('tab-devices-list'));
+        }
+        if (metricLocked) {
+            metricLocked.style.cursor = 'pointer';
+            metricLocked.setAttribute('title', 'Click to view Locked Devices');
+            metricLocked.addEventListener('click', () => switchTab('tab-devices-list'));
+        }
+        if (metricPending) {
+            metricPending.style.cursor = 'pointer';
+            metricPending.setAttribute('title', 'Click to view EMI & Payments');
+            metricPending.addEventListener('click', () => switchTab('tab-emi-payments'));
+        }
+    }
+
     // ===== SEARCH & CONSOLE SETUP =====
     setupSearch() {
         const quickInput = document.getElementById('quick-search-device');
