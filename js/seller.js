@@ -940,53 +940,54 @@ class SellerPortal {
 
         // Photo Upload & Live Camera Capture Handlers
         let customerPhotoBase64 = '';
-        const photoFileInput = document.getElementById('input-cust-photo-file');
-        const btnUploadPhoto = document.getElementById('btn-trigger-photo-upload');
-        const btnCamera = document.getElementById('btn-trigger-camera');
+        const photoUploadInput = document.getElementById('input-cust-photo-upload');
+        const photoCameraInput = document.getElementById('input-cust-photo-camera');
         const btnRemovePhoto = document.getElementById('btn-remove-photo');
         const imgPreview = document.getElementById('cust-photo-img');
         const placeholderIcon = document.getElementById('cust-photo-placeholder');
 
-        if (btnUploadPhoto && photoFileInput) {
-            btnUploadPhoto.addEventListener('click', () => {
-                photoFileInput.removeAttribute('capture');
-                photoFileInput.click();
-            });
-        }
-        if (btnCamera && photoFileInput) {
-            btnCamera.addEventListener('click', () => {
-                photoFileInput.setAttribute('capture', 'environment');
-                photoFileInput.click();
-            });
-        }
-        if (photoFileInput) {
-            photoFileInput.addEventListener('change', (e) => {
-                const file = e.target.files && e.target.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = (evt) => {
-                        customerPhotoBase64 = evt.target.result;
-                        if (imgPreview) {
-                            imgPreview.src = customerPhotoBase64;
-                            imgPreview.style.display = 'block';
-                        }
-                        if (placeholderIcon) placeholderIcon.style.display = 'none';
-                        if (btnRemovePhoto) btnRemovePhoto.style.display = 'inline-flex';
-                    };
-                    reader.readAsDataURL(file);
+        const handleImageFile = (file) => {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                customerPhotoBase64 = evt.target.result;
+                if (imgPreview) {
+                    imgPreview.src = customerPhotoBase64;
+                    imgPreview.style.display = 'block';
                 }
+                if (placeholderIcon) placeholderIcon.style.display = 'none';
+                if (btnRemovePhoto) btnRemovePhoto.style.display = 'inline-flex';
+                this.showToast('📸 Customer photo captured successfully!', 'success');
+            };
+            reader.readAsDataURL(file);
+        };
+
+        if (photoUploadInput) {
+            photoUploadInput.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                handleImageFile(file);
             });
         }
+
+        if (photoCameraInput) {
+            photoCameraInput.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                handleImageFile(file);
+            });
+        }
+
         if (btnRemovePhoto) {
             btnRemovePhoto.addEventListener('click', () => {
                 customerPhotoBase64 = '';
-                if (photoFileInput) photoFileInput.value = '';
+                if (photoUploadInput) photoUploadInput.value = '';
+                if (photoCameraInput) photoCameraInput.value = '';
                 if (imgPreview) {
                     imgPreview.src = '';
                     imgPreview.style.display = 'none';
                 }
                 if (placeholderIcon) placeholderIcon.style.display = 'block';
                 btnRemovePhoto.style.display = 'none';
+                this.showToast('Customer photo removed.', 'info');
             });
         }
 
@@ -1021,6 +1022,9 @@ class SellerPortal {
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+
             const custName = document.getElementById('input-cust-name').value.trim();
             const custPhone = document.getElementById('input-cust-phone').value.trim();
             const custAltPhone = document.getElementById('input-cust-alt-phone')?.value.trim() || '';
@@ -1039,7 +1043,12 @@ class SellerPortal {
             const monthlyEmi = this.emiEngine.calculateMonthlyEmi(totalPrice, downPayment, tenure);
 
             const keyInput = document.getElementById('input-activation-key');
-            const activationKey = keyInput ? keyInput.value.trim().toUpperCase() : '';
+            const activationKey = (keyInput && keyInput.value) ? keyInput.value.trim().toUpperCase() : '';
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Registering Device & Generating Code...';
+            }
 
             // Call Backend /api/devices/register with Auth Headers
             fetch('/api/devices/register', {
@@ -1064,6 +1073,11 @@ class SellerPortal {
             })
             .then(r => r.json())
             .then(res => {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnHtml;
+                }
+
                 if (res.success && res.device) {
                     if (keyInput) keyInput.value = '';
                     const otpCode = res.device.pairCode;
@@ -1071,26 +1085,46 @@ class SellerPortal {
                     const codeDisplay = document.getElementById('generated-otp-code');
                     const qrDisplay = document.getElementById('generated-qr-code');
 
-                    if (modalResult) modalResult.classList.remove('hidden');
-                    if (codeDisplay) codeDisplay.textContent = otpCode;
+                    if (modalResult) {
+                        modalResult.classList.remove('hidden');
+                        modalResult.style.display = 'block';
+                        modalResult.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    if (codeDisplay) {
+                        codeDisplay.textContent = otpCode;
+                    }
                     if (qrDisplay) {
-                        qrDisplay.innerHTML = `
-                            <svg viewBox="0 0 100 100" width="120" height="120">
-                                <rect width="100" height="100" fill="white"/>
-                                <path d="M10 10h30v30h-30z M15 15h20v20h-20z M60 10h30v30h-30z M65 15h20v20h-20z M10 60h30v30h-30z M15 65h20v20h-20z M45 10h10v10h-10z M45 30h10v10h-10z M45 60h10v10h-10z M60 60h15v15h-15z M75 75h15v15h-15z M60 80h10v10h-10z" fill="black"/>
-                            </svg>
-                        `;
+                        qrDisplay.innerHTML = '';
+                        try {
+                            if (typeof QRCode !== 'undefined') {
+                                new QRCode(qrDisplay, {
+                                    text: `${window.location.origin}/pair?code=${otpCode}`,
+                                    width: 140,
+                                    height: 140,
+                                    colorDark: "#000000",
+                                    colorLight: "#ffffff",
+                                    correctLevel: QRCode.CorrectLevel.M
+                                });
+                            }
+                        } catch (qrErr) {
+                            console.error('QR code render error:', qrErr);
+                        }
                     }
 
-                    this.showToast(`New Device Enrolled! Pairing Code: ${otpCode}`, 'success');
+                    this.showToast(`🎉 Device Registered! Pairing Code: ${otpCode}`, 'success');
                     this.loadBackendDevicesAndRender();
+                    this.loadLicenseKeysAndRender();
                 } else {
-                    this.showToast(`Failed: ${res.message || 'Error registering device'}`, 'warning');
+                    this.showToast(`⚠️ Registration Failed: ${res.message || 'Error registering device'}`, 'danger');
                 }
             })
             .catch(err => {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnHtml;
+                }
                 console.error('Register error:', err);
-                this.showToast('Network error while registering device.', 'danger');
+                this.showToast('Network error while registering device. Please try again.', 'danger');
             });
         });
     }
