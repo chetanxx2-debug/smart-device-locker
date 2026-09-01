@@ -304,29 +304,59 @@
             <!-- TAB 2: ADD DEVICE & CUSTOMER -->
             <div id="tab-add-device" class="tab-content">
                 <div class="card">
-                    <div class="card-header">
-                        <h3><i class="fa-solid fa-user-plus"></i> <span data-i18n="form_title">Register New Customer & Device</span></h3>
+                    <div class="card-header flex-between">
+                        <div>
+                            <h3><i class="fa-solid fa-user-plus"></i> <span data-i18n="form_title">Register New Customer & Device</span></h3>
+                            <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Fill customer details, dual IMEI, select finance partner, and generate instant enrollment QR.</p>
+                        </div>
+                        <span class="badge badge-success" style="font-size:12px; padding:6px 12px; font-weight:700;">EMI Customer Onboarding</span>
                     </div>
                     <div class="card-body">
                         <form id="add-device-form" class="form-grid">
+                            <!-- 1. CUSTOMER INFO & PHOTO -->
                             <div class="form-section-title">
-                                <i class="fa-solid fa-id-card"></i> <span data-i18n="form_sec_1">1. Customer Info & KYC Details</span>
+                                <i class="fa-solid fa-id-card"></i> <span>1. Customer Details & Photo</span>
                             </div>
                             <div class="form-group">
-                                <label data-i18n="cust_name_input_label">Customer Full Name *</label>
+                                <label data-i18n="cust_name_input_label">Customer Full Name <span style="color:#ef4444;">*</span></label>
                                 <input type="text" id="input-cust-name" class="form-control" placeholder="e.g. Rahul Sharma" required>
                             </div>
                             <div class="form-group">
-                                <label data-i18n="cust_phone_input_label">Mobile Number *</label>
-                                <input type="tel" id="input-cust-phone" class="form-control" placeholder="9876543210" required>
+                                <label data-i18n="cust_phone_input_label">Primary Mobile Number <span style="color:#ef4444;">*</span></label>
+                                <input type="tel" id="input-cust-phone" class="form-control" placeholder="9876543210" maxlength="10" required>
                             </div>
                             <div class="form-group">
-                                <label data-i18n="cust_kyc_input_label">Aadhaar / PAN (KYC Number)</label>
-                                <input type="text" id="input-cust-kyc" class="form-control" placeholder="ABCD1234EF / 1234-5678-9012">
+                                <label><i class="fa-solid fa-phone-volume" style="color:#38bdf8;"></i> Alternate Mobile Number</label>
+                                <input type="tel" id="input-cust-alt-phone" class="form-control" placeholder="Optional alternate number" maxlength="10">
+                            </div>
+                            <div class="form-group full-width">
+                                <label><i class="fa-solid fa-camera" style="color:#f59e0b;"></i> Customer Photo / Image</label>
+                                <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap; background:rgba(15,23,42,0.6); padding:12px 16px; border-radius:12px; border:1px dashed #334155;">
+                                    <div id="cust-photo-preview-box" style="width:64px; height:64px; border-radius:50%; background:#1e293b; border:2px solid #f59e0b; display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0;">
+                                        <i class="fa-solid fa-user" id="cust-photo-placeholder" style="font-size:26px; color:#64748b;"></i>
+                                        <img id="cust-photo-img" src="" alt="Customer Photo" style="display:none; width:100%; height:100%; object-fit:cover;">
+                                    </div>
+                                    <div style="flex:1; min-width:200px;">
+                                        <input type="file" id="input-cust-photo-file" accept="image/*" capture="environment" style="display:none;">
+                                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                            <button type="button" class="btn btn-secondary btn-sm" id="btn-trigger-photo-upload" style="background:#1e293b; color:#fff; border-color:#475569;">
+                                                <i class="fa-solid fa-upload"></i> Upload Photo
+                                            </button>
+                                            <button type="button" class="btn btn-primary btn-sm" id="btn-trigger-camera" style="background:linear-gradient(135deg,#f59e0b,#d97706); border:none; font-weight:700;">
+                                                <i class="fa-solid fa-camera"></i> Take Photo
+                                            </button>
+                                            <button type="button" class="btn btn-danger btn-sm" id="btn-remove-photo" style="display:none;">
+                                                <i class="fa-solid fa-trash"></i> Remove
+                                            </button>
+                                        </div>
+                                        <small style="color:var(--text-muted); font-size:11px; display:block; margin-top:4px;">Customer live photo / passport photo for EMI KYC verification</small>
+                                    </div>
+                                </div>
                             </div>
 
+                            <!-- 2. DEVICE HARDWARE, DUAL IMEI & FINANCE -->
                             <div class="form-section-title">
-                                <i class="fa-solid fa-mobile-retro"></i> <span data-i18n="form_sec_2">2. Device Hardware & Activation Key</span>
+                                <i class="fa-solid fa-mobile-screen-button"></i> <span>2. Device Hardware, Dual IMEI & Finance Type</span>
                             </div>
                             <div class="form-group" id="group-activation-key">
                                 <label style="display:flex; justify-content:space-between; align-items:center;">
@@ -339,54 +369,76 @@
                                         <option value="">-- Choose My Key --</option>
                                     </select>
                                 </div>
-                                <small id="key-help-text" style="color:var(--text-muted); font-size:11px;">1 Key = 1 Device registration. Each 7-char key is single-use only.</small>
+                                <small id="key-help-text" style="color:var(--text-muted); font-size:11px;">1 Key = 1 Device registration. Single-use activation token.</small>
                                 <div id="superadmin-free-badge" style="display:none; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); padding:8px 12px; border-radius:8px; color:#a7f3d0; font-size:12px; font-weight:700; margin-top:6px;">
                                     <i class="fa-solid fa-crown"></i> 👑 Super Admin Mode: 100% Free (No Key Required)
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label>Device Platform / Operating System *</label>
-                                <select id="input-dev-platform" class="form-control">
+                                <label>Device Platform / Operating System <span style="color:#ef4444;">*</span></label>
+                                <select id="input-dev-platform" class="form-control" style="font-weight:600;">
                                     <option value="android" selected>🤖 Android Smartphone (Samsung, Vivo, Oppo, Xiaomi, etc.)</option>
                                     <option value="ios">🍏 Apple iPhone (iOS 15, 16, 17, 18+)</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label data-i18n="dev_model_input_label">Device Model Name *</label>
-                                <input type="text" id="input-dev-model" class="form-control" placeholder="e.g. Samsung Galaxy M34 / Apple iPhone 15 Pro" required>
+                                <label><i class="fa-solid fa-barcode" style="color:#38bdf8;"></i> IMEI Number 1 (15 Digits) <span style="color:#ef4444;">*</span></label>
+                                <input type="text" id="input-dev-imei" class="form-control font-mono" placeholder="e.g. 864521049281734" maxlength="15" style="font-weight:700; letter-spacing:1px;" required>
                             </div>
                             <div class="form-group">
-                                <label data-i18n="dev_imei_input_label">IMEI / Serial Number (15 Digits) *</label>
-                                <input type="text" id="input-dev-imei" class="form-control" placeholder="864521049281734" maxlength="15" required>
+                                <label><i class="fa-solid fa-barcode" style="color:#a78bfa;"></i> IMEI Number 2 (15 Digits)</label>
+                                <input type="text" id="input-dev-imei2" class="form-control font-mono" placeholder="Optional 2nd IMEI" maxlength="15" style="letter-spacing:1px;">
+                            </div>
+                            <div class="form-group">
+                                <label><i class="fa-solid fa-building-columns" style="color:#10b981;"></i> Finance Partner / Type <span style="color:#ef4444;">*</span></label>
+                                <select id="input-finance-provider" class="form-control" style="font-weight:700;">
+                                    <option value="Bajaj Finserv" selected>🏦 Bajaj Finserv</option>
+                                    <option value="TVS Credit">💳 TVS Credit</option>
+                                    <option value="Home Credit">🏠 Home Credit</option>
+                                    <option value="DMI Finance">📱 DMI Finance</option>
+                                    <option value="IDFC First Bank">🏛️ IDFC FIRST Bank</option>
+                                    <option value="HDB Financial Services">🏢 HDB Financial Services</option>
+                                    <option value="ZestMoney">⚡ ZestMoney / Paytail</option>
+                                    <option value="Shopkeeper In-House EMI">🏪 Shop In-House EMI (Personal Finance)</option>
+                                    <option value="Cash">💵 Cash (Full Cash Sale / No Finance)</option>
+                                    <option value="Other">📝 Other Finance (Custom)</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="group-finance-other" style="display:none;">
+                                <label>Specify Other Finance Name <span style="color:#ef4444;">*</span></label>
+                                <input type="text" id="input-finance-other" class="form-control" placeholder="e.g. Kotak Smart EMI / Shop Credit">
                             </div>
 
+                            <!-- 3. EMI & PAYMENT PLAN -->
                             <div class="form-section-title">
                                 <i class="fa-solid fa-calculator"></i> <span data-i18n="form_sec_3">3. EMI & Payment Plan</span>
                             </div>
                             <div class="form-group">
-                                <label data-i18n="total_price_label">Total Device Price (₹) *</label>
-                                <input type="number" id="input-total-price" class="form-control" value="18000" required>
+                                <label data-i18n="total_price_label">Total Device Price (₹) <span style="color:#ef4444;">*</span></label>
+                                <input type="number" id="input-total-price" class="form-control font-mono" value="18000" style="font-weight:700;" required>
                             </div>
                             <div class="form-group">
-                                <label data-i18n="down_payment_label">Down Payment (₹) *</label>
-                                <input type="number" id="input-down-payment" class="form-control" value="3000" required>
+                                <label data-i18n="down_payment_label">Down Payment (₹) <span style="color:#ef4444;">*</span></label>
+                                <input type="number" id="input-down-payment" class="form-control font-mono" value="3000" style="font-weight:700;" required>
                             </div>
                             <div class="form-group">
-                                <label data-i18n="tenure_label">EMI Tenure (Months) *</label>
-                                <select id="input-emi-tenure" class="form-control">
+                                <label data-i18n="tenure_label">EMI Tenure (Months) <span style="color:#ef4444;">*</span></label>
+                                <select id="input-emi-tenure" class="form-control" style="font-weight:700;">
                                     <option value="3">3 Months</option>
                                     <option value="6" selected>6 Months</option>
                                     <option value="9">9 Months</option>
                                     <option value="12">12 Months</option>
+                                    <option value="18">18 Months</option>
+                                    <option value="24">24 Months</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label data-i18n="monthly_emi_label">Calculated Monthly EMI</label>
-                                <input type="text" id="input-monthly-emi" class="form-control readonly" readonly value="₹2,500 / month">
+                                <input type="text" id="input-monthly-emi" class="form-control readonly font-mono" readonly value="₹2,500 / month" style="font-weight:800; color:#10b981; font-size:16px;">
                             </div>
 
                             <div class="form-actions full-width">
-                                <button type="submit" class="btn btn-primary btn-lg">
+                                <button type="submit" class="btn btn-primary btn-lg" style="box-shadow: 0 4px 18px rgba(249, 115, 22, 0.4);">
                                     <i class="fa-solid fa-qrcode"></i> <span data-i18n="btn_add_device_submit">Register Device & Generate QR / Pairing Code</span>
                                 </button>
                             </div>

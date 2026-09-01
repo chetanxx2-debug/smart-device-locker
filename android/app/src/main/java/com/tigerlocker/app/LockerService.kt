@@ -150,6 +150,18 @@ class LockerService : Service() {
     private fun applyLock(message: String) {
         isLocked = true
 
+        val prefs = getSharedPreferences("TigerLockerPrefs", Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("is_locked", true).apply()
+
+        // Set lock task packages if device owner
+        try {
+            if (devicePolicyManager.isDeviceOwnerApp(packageName)) {
+                devicePolicyManager.setLockTaskPackages(adminComponent, arrayOf(packageName))
+            }
+        } catch (e: Exception) {
+            // Ignore
+        }
+
         // Lock screen immediately if admin is enabled
         if (devicePolicyManager.isAdminActive(adminComponent)) {
             devicePolicyManager.lockNow()
@@ -166,6 +178,9 @@ class LockerService : Service() {
 
     private fun removeLock() {
         isLocked = false
+        val prefs = getSharedPreferences("TigerLockerPrefs", Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("is_locked", false).apply()
+
         SirenManager.stopSiren()
         val unlockIntent = Intent("com.tigerlocker.app.ACTION_UNLOCK")
         sendBroadcast(unlockIntent)

@@ -1074,9 +1074,10 @@ app.post('/api/devices/register', (req, res) => {
     if (!db.keys) db.keys = [];
 
     const {
-        customerName, customerPhone, model, imei,
+        customerName, customerPhone, alternatePhone, customerPhoto,
+        imei, imei1, imei2, financeProvider, model,
         totalAmount, downPayment, monthlyEmi, tenureMonths,
-        activationKey
+        activationKey, platform
     } = req.body;
 
     // Assign to logged-in Retailer or Super Admin
@@ -1113,7 +1114,8 @@ app.post('/api/devices/register', (req, res) => {
 
     const deviceId = `DEV-${Math.floor(100 + Math.random() * 900)}`;
     const pairCode = req.body.pairCode || Math.floor(100000 + Math.random() * 900000).toString();
-    const platform = req.body.platform || ((model && model.toLowerCase().includes('iphone')) ? 'ios' : 'android');
+    const resolvedPlatform = platform || ((model && model.toLowerCase().includes('iphone')) ? 'ios' : 'android');
+    const primaryImei = imei || imei1 || `86${Math.floor(1000000000000 + Math.random() * 9000000000000)}`;
 
     // Mark key as USED if shopkeeper
     if (usedKeyRecord) {
@@ -1125,14 +1127,19 @@ app.post('/api/devices/register', (req, res) => {
 
     const newDevice = {
         id: deviceId,
-        platform: platform,
+        platform: resolvedPlatform,
         retailerId: retailerId,
         shopName: shopName,
         retailerPhone: retailerPhone,
-        imei: imei || `86${Math.floor(1000000000000 + Math.random() * 9000000000000)}`,
-        model: model || (platform === 'ios' ? "Apple iPhone 15" : "Android Smartphone"),
+        imei: primaryImei,
+        imei1: primaryImei,
+        imei2: imei2 || '',
+        model: model || (resolvedPlatform === 'ios' ? "Apple iPhone" : "Android Smartphone"),
         customerName: customerName || "Customer",
         customerPhone: customerPhone || "+91 9800000000",
+        alternatePhone: alternatePhone || '',
+        customerPhoto: customerPhoto || '',
+        financeProvider: financeProvider || 'Cash',
         totalAmount: Number(totalAmount) || 12000,
         downPayment: Number(downPayment) || 2000,
         monthlyEmi: Number(monthlyEmi) || 1500,
@@ -1146,7 +1153,7 @@ app.post('/api/devices/register', (req, res) => {
         offlineMasterCode: Math.floor(100000 + Math.random() * 900000).toString(),
         isPaired: false,
         sirenActive: false,
-        lastMessage: platform === 'ios' ? "Welcome to Smart Device Locker Apple Protection" : "Welcome to Smart Device Locker Protection",
+        lastMessage: resolvedPlatform === 'ios' ? "Welcome to Smart Device Locker Apple Protection" : "Welcome to Smart Device Locker Protection",
         battery: 100,
         network: "Wi-Fi",
         lastSeen: new Date().toISOString()

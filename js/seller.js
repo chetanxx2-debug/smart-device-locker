@@ -934,8 +934,77 @@ class SellerPortal {
         const downPaymentInput = document.getElementById('input-down-payment');
         const tenureSelect = document.getElementById('input-emi-tenure');
         const monthlyEmiInput = document.getElementById('input-monthly-emi');
+        const platformSelect = document.getElementById('input-dev-platform');
 
         if (!form) return;
+
+        // Photo Upload & Live Camera Capture Handlers
+        let customerPhotoBase64 = '';
+        const photoFileInput = document.getElementById('input-cust-photo-file');
+        const btnUploadPhoto = document.getElementById('btn-trigger-photo-upload');
+        const btnCamera = document.getElementById('btn-trigger-camera');
+        const btnRemovePhoto = document.getElementById('btn-remove-photo');
+        const imgPreview = document.getElementById('cust-photo-img');
+        const placeholderIcon = document.getElementById('cust-photo-placeholder');
+
+        if (btnUploadPhoto && photoFileInput) {
+            btnUploadPhoto.addEventListener('click', () => {
+                photoFileInput.removeAttribute('capture');
+                photoFileInput.click();
+            });
+        }
+        if (btnCamera && photoFileInput) {
+            btnCamera.addEventListener('click', () => {
+                photoFileInput.setAttribute('capture', 'environment');
+                photoFileInput.click();
+            });
+        }
+        if (photoFileInput) {
+            photoFileInput.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (evt) => {
+                        customerPhotoBase64 = evt.target.result;
+                        if (imgPreview) {
+                            imgPreview.src = customerPhotoBase64;
+                            imgPreview.style.display = 'block';
+                        }
+                        if (placeholderIcon) placeholderIcon.style.display = 'none';
+                        if (btnRemovePhoto) btnRemovePhoto.style.display = 'inline-flex';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+        if (btnRemovePhoto) {
+            btnRemovePhoto.addEventListener('click', () => {
+                customerPhotoBase64 = '';
+                if (photoFileInput) photoFileInput.value = '';
+                if (imgPreview) {
+                    imgPreview.src = '';
+                    imgPreview.style.display = 'none';
+                }
+                if (placeholderIcon) placeholderIcon.style.display = 'block';
+                btnRemovePhoto.style.display = 'none';
+            });
+        }
+
+        // Finance Provider "Other" Selector Handler
+        const financeSelect = document.getElementById('input-finance-provider');
+        const financeOtherGroup = document.getElementById('group-finance-other');
+        const financeOtherInput = document.getElementById('input-finance-other');
+
+        if (financeSelect && financeOtherGroup) {
+            financeSelect.addEventListener('change', () => {
+                if (financeSelect.value === 'Other') {
+                    financeOtherGroup.style.display = 'block';
+                    if (financeOtherInput) financeOtherInput.focus();
+                } else {
+                    financeOtherGroup.style.display = 'none';
+                }
+            });
+        }
 
         const updateEmiCalculation = () => {
             const total = Number(totalPriceInput.value) || 0;
@@ -949,35 +1018,20 @@ class SellerPortal {
         if (downPaymentInput) downPaymentInput.addEventListener('input', updateEmiCalculation);
         if (tenureSelect) tenureSelect.addEventListener('change', updateEmiCalculation);
 
-        const platformSelect = document.getElementById('input-dev-platform');
-        const devModelInput = document.getElementById('input-dev-model');
-
-        if (platformSelect && devModelInput) {
-            platformSelect.addEventListener('change', () => {
-                if (platformSelect.value === 'ios') {
-                    devModelInput.placeholder = 'e.g. Apple iPhone 15 Pro (128GB)';
-                    if (!devModelInput.value || devModelInput.value.toLowerCase().includes('samsung')) {
-                        devModelInput.value = 'Apple iPhone 15';
-                    }
-                } else {
-                    devModelInput.placeholder = 'e.g. Samsung Galaxy M34 5G';
-                    if (devModelInput.value.toLowerCase().includes('iphone')) {
-                        devModelInput.value = 'Samsung Galaxy M34 5G';
-                    }
-                }
-            });
-        }
-
         form.addEventListener('submit', (e) => {
             e.preventDefault();
 
-            const custName = document.getElementById('input-cust-name').value;
-            const custPhone = document.getElementById('input-cust-phone').value;
-            const custKyc = document.getElementById('input-cust-kyc').value;
-
+            const custName = document.getElementById('input-cust-name').value.trim();
+            const custPhone = document.getElementById('input-cust-phone').value.trim();
+            const custAltPhone = document.getElementById('input-cust-alt-phone')?.value.trim() || '';
             const devPlatform = platformSelect ? platformSelect.value : 'android';
-            const devModel = devModelInput ? devModelInput.value : '';
-            const devImei = document.getElementById('input-dev-imei').value;
+            const devImei1 = document.getElementById('input-dev-imei').value.trim();
+            const devImei2 = document.getElementById('input-dev-imei2')?.value.trim() || '';
+
+            let financePartner = financeSelect ? financeSelect.value : 'Bajaj Finserv';
+            if (financePartner === 'Other') {
+                financePartner = (financeOtherInput && financeOtherInput.value.trim()) ? financeOtherInput.value.trim() : 'Other Finance';
+            }
 
             const totalPrice = Number(totalPriceInput.value);
             const downPayment = Number(downPaymentInput.value);
@@ -994,9 +1048,13 @@ class SellerPortal {
                 body: JSON.stringify({
                     customerName: custName,
                     customerPhone: custPhone,
+                    alternatePhone: custAltPhone,
+                    customerPhoto: customerPhotoBase64,
                     platform: devPlatform,
-                    model: devModel,
-                    imei: devImei,
+                    imei: devImei1,
+                    imei1: devImei1,
+                    imei2: devImei2,
+                    financeProvider: financePartner,
                     totalAmount: totalPrice,
                     downPayment: downPayment,
                     monthlyEmi: monthlyEmi,
@@ -1115,16 +1173,32 @@ class SellerPortal {
             const isSirenOn = !!d.sirenActive;
             const shopBadge = (this.currentUser && this.currentUser.role === 'super_admin' && d.shopName) ? `<br><small style="color:#38bdf8;"><i class="fa-solid fa-store"></i> ${d.shopName}</small>` : '';
 
+            const avatarHtml = d.customerPhoto
+                ? `<img src="${d.customerPhoto}" style="width:34px; height:34px; border-radius:50%; object-fit:cover; border:1.5px solid #f59e0b; margin-right:8px; vertical-align:middle; display:inline-block;">`
+                : `<div style="width:34px; height:34px; border-radius:50%; background:#1e293b; border:1px solid #334155; display:inline-flex; align-items:center; justify-content:center; margin-right:8px; vertical-align:middle; color:#94a3b8; font-size:14px;"><i class="fa-solid fa-user"></i></div>`;
+
+            const financeBadge = d.financeProvider
+                ? `<span class="badge" style="background:#0f766e; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; margin-top:3px; display:inline-block;"><i class="fa-solid fa-building-columns"></i> ${d.financeProvider}</span>`
+                : '';
+
+            const altPhoneStr = d.alternatePhone ? `<br><small style="color:var(--text-muted);"><i class="fa-solid fa-phone-volume"></i> Alt: ${d.alternatePhone}</small>` : '';
+            const imei2Str = d.imei2 ? `<br><code style="font-size:10px; color:#a78bfa;">IMEI2: ${d.imei2}</code>` : '';
+
             return `
                 <tr>
                     <td>
                         <strong style="color:var(--primary);">${d.id}</strong><br>
                         <code style="font-size:11px;">${d.imei || 'No IMEI'}</code>
+                        ${imei2Str}
                         ${shopBadge}
                     </td>
                     <td>
-                        <strong>${d.customerName || 'N/A'}</strong><br>
-                        <small style="color:var(--text-muted);"><i class="fa-solid fa-phone"></i> ${d.customerPhone || ''}</small><br>
+                        <div style="display:flex; align-items:center; margin-bottom:4px;">
+                            ${avatarHtml}
+                            <strong>${d.customerName || 'N/A'}</strong>
+                        </div>
+                        <small style="color:var(--text-muted);"><i class="fa-solid fa-phone"></i> ${d.customerPhone || ''}</small>
+                        ${altPhoneStr}<br>
                         <small style="color:var(--primary);"><i class="fa-solid fa-key"></i> Code: <strong>${d.pairCode || '-'}</strong></small>
                     </td>
                     <td>
@@ -1132,7 +1206,7 @@ class SellerPortal {
                             ? '<span class="badge" style="background:#0071e3; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; margin-bottom:4px; display:inline-block;"><i class="fa-brands fa-apple"></i> Apple iOS</span><br>'
                             : '<span class="badge" style="background:#16a34a; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; margin-bottom:4px; display:inline-block;"><i class="fa-brands fa-android"></i> Android</span><br>'
                         }
-                        <strong>${d.model || (d.platform === 'ios' ? 'Apple iPhone' : 'Android')}</strong><br>
+                        ${financeBadge}<br>
                         <small class="font-mono">${onlineIcon}</small>
                     </td>
                     <td>₹${(d.monthlyEmi || 0).toLocaleString()}/mo (${d.tenureMonths || '?'}M)</td>
@@ -1378,8 +1452,8 @@ class SellerPortal {
         try {
             new QRCode(container, {
                 text: jsonStr,
-                width: 300,
-                height: 300,
+                width: 240,
+                height: 240,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.L

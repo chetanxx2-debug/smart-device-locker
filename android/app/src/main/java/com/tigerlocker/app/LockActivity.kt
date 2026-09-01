@@ -116,6 +116,32 @@ class LockActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        hideSystemUI()
+        try {
+            val dpm = getSystemService(Context.DEVICE_POLICY_SERVICE) as? android.app.admin.DevicePolicyManager
+            if (dpm != null && dpm.isDeviceOwnerApp(packageName)) {
+                startLockTask()
+            }
+        } catch (e: Exception) {
+            // Ignore if lock task not permitted
+        }
+    }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        // If user tries to press Home/Recents on non-kiosk devices, immediately bring LockActivity back to front
+        val prefs = getSharedPreferences("TigerLockerPrefs", Context.MODE_PRIVATE)
+        val isLocked = prefs.getBoolean("is_locked", true)
+        if (isLocked) {
+            val lockIntent = Intent(this, LockActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            }
+            startActivity(lockIntent)
+        }
+    }
+
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus) {
@@ -125,6 +151,11 @@ class LockActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        try {
+            stopLockTask()
+        } catch (e: Exception) {
+            // Ignore
+        }
         try {
             unregisterReceiver(unlockReceiver)
         } catch (e: Exception) {

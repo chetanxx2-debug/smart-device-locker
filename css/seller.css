@@ -485,16 +485,28 @@
 
 .qr-canvas-wrapper {
     background: #ffffff;
-    padding: 16px;
-    border-radius: 12px;
+    padding: 14px;
+    border-radius: 16px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    display: inline-block;
-    margin-bottom: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px auto 16px;
+    width: auto;
+    max-width: 280px;
 }
 
 .qr-canvas-wrapper img,
 .qr-canvas-wrapper canvas {
     display: block !important;
+    width: 240px !important;
+    height: 240px !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    aspect-ratio: 1 / 1 !important;
+    object-fit: contain !important;
+    margin: 0 auto !important;
+    image-rendering: pixelated;
 }
 
 .qr-footer-actions {
