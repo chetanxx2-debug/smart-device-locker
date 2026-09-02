@@ -275,7 +275,19 @@ class SellerPortal {
                 fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
             }
         } catch(e){}
-        window.location.replace('/');
+        // Clear Service Worker cache then force hard reload
+        const clearCacheAndReload = () => {
+            window.location.replace('/?v=' + Date.now());
+        };
+        if ('caches' in window) {
+            caches.keys().then(keys => {
+                Promise.all(keys.map(k => caches.delete(k))).then(() => {
+                    clearCacheAndReload();
+                });
+            }).catch(() => clearCacheAndReload());
+        } else {
+            clearCacheAndReload();
+        }
     }
 
     // ===== SUPER ADMIN: SHOP / RETAILER MANAGEMENT =====

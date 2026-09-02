@@ -64,7 +64,7 @@
                 <i class="fa-solid fa-crown" id="user-role-icon"></i> 
                 <span id="user-display-name">Master Admin</span>
             </div>
-            <button id="btn-auth-logout" onclick="window.handleGlobalLogout ? window.handleGlobalLogout() : (localStorage.clear(), sessionStorage.clear(), window.location.replace('/'))" class="btn btn-danger btn-sm" style="display:none; background:#dc2626; color:#fff; border:none; font-weight:700; padding:6px 14px; border-radius:8px; cursor:pointer;" title="Sign out of account">
+            <button id="btn-auth-logout" onclick="if(window.handleGlobalLogout){window.handleGlobalLogout()}else{localStorage.clear();sessionStorage.clear();if('caches'in window){caches.keys().then(k=>Promise.all(k.map(c=>caches.delete(c)))).then(()=>window.location.replace('/?v='+Date.now())).catch(()=>window.location.replace('/?v='+Date.now()))}else{window.location.replace('/?v='+Date.now())}}" class="btn btn-danger btn-sm" style="display:none; background:#dc2626; color:#fff; border:none; font-weight:700; padding:6px 14px; border-radius:8px; cursor:pointer;" title="Sign out of account">
                 <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
             </button>
 
