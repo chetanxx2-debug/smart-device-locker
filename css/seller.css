@@ -477,40 +477,51 @@
     padding: 6px 14px;
     border-radius: 20px;
     font-size: 12px;
-    font-weight: 700;
-    margin-bottom: 18px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.qr-canvas-wrapper {
-    background: #ffffff;
-    padding: 12px;
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 10px auto 16px;
-    width: 240px;
-    height: 240px;
-    max-width: 85vw;
-    max-height: 85vw;
-    box-sizing: border-box;
+.qr-canvas-wrapper,
+#enterprise-qr-canvas,
+#ios-enroll-qr-canvas,
+#direct-download-qr-canvas,
+#generated-qr-code {
+    background: #ffffff !important;
+    padding: 12px !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 10px auto 16px !important;
+    width: 240px !important;
+    height: 240px !important;
+    max-width: 240px !important;
+    max-height: 240px !important;
+    min-width: 240px !important;
+    min-height: 240px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
 }
 
 .qr-canvas-wrapper img,
-.qr-canvas-wrapper canvas {
+.qr-canvas-wrapper canvas,
+#enterprise-qr-canvas img,
+#enterprise-qr-canvas canvas,
+#ios-enroll-qr-canvas img,
+#ios-enroll-qr-canvas canvas,
+#direct-download-qr-canvas img,
+#direct-download-qr-canvas canvas,
+#generated-qr-code img,
+#generated-qr-code canvas {
     display: block !important;
     width: 216px !important;
     height: 216px !important;
-    max-width: 100% !important;
-    max-height: 100% !important;
+    max-width: 216px !important;
+    max-height: 216px !important;
+    min-width: 216px !important;
+    min-height: 216px !important;
     aspect-ratio: 1 / 1 !important;
     object-fit: contain !important;
     margin: 0 auto !important;
-    image-rendering: pixelated;
+    image-rendering: -webkit-optimize-contrast !important;
+    image-rendering: pixelated !important;
 }
 
 .qr-footer-actions {
