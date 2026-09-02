@@ -1486,8 +1486,8 @@ class SellerPortal {
         try {
             new QRCode(container, {
                 text: jsonStr,
-                width: 240,
-                height: 240,
+                width: 216,
+                height: 216,
                 colorDark: "#000000",
                 colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.L

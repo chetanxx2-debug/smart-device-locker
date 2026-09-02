@@ -1294,20 +1294,23 @@ app.post('/api/devices/:id/command', async (req, res) => {
         if (device.platform === 'ios' || device.platform === 'apple') {
             await sendMdmUnlock(device);
         }
-    } else if (action === 'SIREN' || action === 'PLAY_SOUND' || action === 'SIREN_ON') {
+    } else if (action === 'SIREN' || action === 'PLAY_SOUND' || action === 'SIREN_ON' || action === 'RING') {
         device.sirenActive = true;
         commandPayload.type = "SIREN";
         commandPayload.sound = true;
-    } else if (action === 'STOP_SIREN' || action === 'STOP_SOUND' || action === 'SIREN_OFF') {
+        device.pendingCommand = 'SIREN_ON';
+    } else if (action === 'STOP_SIREN' || action === 'STOP_SOUND' || action === 'SIREN_OFF' || action === 'STOP_RING') {
         device.sirenActive = false;
         commandPayload.type = "STOP_SIREN";
         commandPayload.sound = false;
+        device.pendingCommand = 'SIREN_OFF';
     } else if (action === 'MESSAGE' || action === 'SHOW_MESSAGE') {
         commandPayload.message = message || "Urgent Notice from Retailer.";
         device.lastMessage = commandPayload.message;
     } else if (action === 'WIPE') {
         commandPayload.action = "WIPE_DATA";
-    } else if (action === 'UNINSTALL_APP') {
+        device.pendingCommand = 'WIPE';
+    } else if (action === 'UNINSTALL_APP' || action === 'ALLOW_UNINSTALL') {
         // Force uninstall: send via WebSocket + set pendingCommand as fallback for poll
         commandPayload.type = "UNINSTALL_APP";
         commandPayload.message = "Shopkeeper ne app uninstall karne ka command bheja hai.";
