@@ -125,11 +125,15 @@ class SellerPortal {
             });
         }
 
+        window.handleGlobalLogout = () => {
+            this.logout();
+        };
+
         if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => {
-                if (confirm('Are you sure you want to sign out?')) {
-                    this.logout();
-                }
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.logout();
             });
         }
     }
@@ -257,19 +261,21 @@ class SellerPortal {
     logout() {
         this.token = '';
         this.currentUser = null;
-        localStorage.removeItem('sdl_auth_token');
-        localStorage.removeItem('tiger_active_device_id');
-        sessionStorage.clear();
+        try { localStorage.clear(); } catch(e){}
+        try { sessionStorage.clear(); } catch(e){}
         try {
-            fetch('/api/auth/logout', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            }).finally(() => {
-                window.location.href = '/';
+            document.cookie.split(";").forEach(c => {
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
             });
-        } catch (e) {
-            window.location.href = '/';
-        }
+        } catch(e){}
+        try {
+            if (navigator.sendBeacon) {
+                navigator.sendBeacon('/api/auth/logout');
+            } else {
+                fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+            }
+        } catch(e){}
+        window.location.replace('/');
     }
 
     // ===== SUPER ADMIN: SHOP / RETAILER MANAGEMENT =====
