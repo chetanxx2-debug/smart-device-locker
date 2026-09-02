@@ -21,6 +21,15 @@ const { MongoClient } = require('mongodb');
 
 // Middleware
 app.use(cors());
+
+// Universal No-Cache Header for instant live updates without requiring hard refresh
+app.use((req, res, next) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+});
+
 // Accept application/json AND "application/json; utf-8" (Android app sends the latter)
 app.use(express.json({ limit: '10mb', type: ['application/json', '*/json', '*/*'] }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));

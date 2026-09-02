@@ -255,16 +255,21 @@ class SellerPortal {
     }
 
     logout() {
-        fetch('/api/auth/logout', {
-            method: 'POST',
-            headers: this.getAuthHeaders()
-        }).finally(() => {
-            this.token = '';
-            this.currentUser = null;
-            localStorage.removeItem('sdl_auth_token');
-            this.showLoginModal();
-            this.showToast('Logged out successfully.', 'info');
-        });
+        this.token = '';
+        this.currentUser = null;
+        localStorage.removeItem('sdl_auth_token');
+        localStorage.removeItem('tiger_active_device_id');
+        sessionStorage.clear();
+        try {
+            fetch('/api/auth/logout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            }).finally(() => {
+                window.location.href = '/';
+            });
+        } catch (e) {
+            window.location.href = '/';
+        }
     }
 
     // ===== SUPER ADMIN: SHOP / RETAILER MANAGEMENT =====
@@ -991,10 +996,33 @@ class SellerPortal {
             });
         }
 
-        // Finance Provider "Other" Selector Handler
+        // Finance Provider "Other" & Search Filter Handler
         const financeSelect = document.getElementById('input-finance-provider');
+        const financeSearch = document.getElementById('input-finance-search');
         const financeOtherGroup = document.getElementById('group-finance-other');
         const financeOtherInput = document.getElementById('input-finance-other');
+
+        if (financeSearch && financeSelect) {
+            financeSearch.addEventListener('input', () => {
+                const query = financeSearch.value.toLowerCase().trim();
+                let foundMatch = false;
+                Array.from(financeSelect.options).forEach(opt => {
+                    const text = opt.text.toLowerCase();
+                    const val = opt.value.toLowerCase();
+                    const matches = query === '' || text.includes(query) || val.includes(query);
+                    opt.style.display = matches ? '' : 'none';
+                    if (matches && !foundMatch && query.length > 0) {
+                        financeSelect.value = opt.value;
+                        foundMatch = true;
+                    }
+                });
+                if (financeSelect.value === 'Other') {
+                    if (financeOtherGroup) financeOtherGroup.style.display = 'block';
+                } else {
+                    if (financeOtherGroup) financeOtherGroup.style.display = 'none';
+                }
+            });
+        }
 
         if (financeSelect && financeOtherGroup) {
             financeSelect.addEventListener('change', () => {
