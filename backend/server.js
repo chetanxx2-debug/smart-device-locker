@@ -1325,6 +1325,15 @@ app.post('/api/devices/:id/command', async (req, res) => {
         commandPayload.message = "Shopkeeper ne app uninstall karne ka command bheja hai.";
         device.pendingCommand = 'UNINSTALL_APP'; // poll fallback
         device.status = "uninstalled";
+    } else if (action === 'RELEASE_DEVICE' || action === 'RELEASE') {
+        // Release device on full EMI completion — restore factory reset & remove restrictions
+        device.paidEmis = device.tenureMonths || 12;
+        device.isLocked = false;
+        device.status = "released";
+        device.pendingCommand = 'RELEASE_DEVICE';
+        device.releasedAt = new Date().toISOString();
+        commandPayload.type = "RELEASE_DEVICE";
+        commandPayload.message = "Mubarak ho! EMI Complete ho chuki hai. Phone release & Factory Reset unlock.";
     }
 
     // Push via WebSocket (instant delivery if device is online)
@@ -1487,6 +1496,52 @@ app.post('/api/devices/:id/allow-uninstall', requireAuth, (req, res) => {
 
     saveDb(db);
     res.json({ success: true, message: "Uninstall permission sent to device." });
+});
+
+// Release Device (EMI Completed — Restore full phone access, allow factory reset, remove restrictions)
+app.post('/api/devices/:id/release', requireAuth, (req, res) => {
+    const db = loadDb();
+    const deviceId = req.params.id;
+    const device = db.devices.find(d => d.id === deviceId || d.imei === deviceId);
+
+    if (!device) {
+        return res.status(404).json({ success: false, message: "Device not found." });
+    }
+
+    // Retailer only for their own devices
+    if (req.user && req.user.role === 'retailer' && device.retailerId !== req.user.id) {
+        return res.status(403).json({ success: false, message: "Access denied. You do not own this device." });
+    }
+
+    // Complete all EMIs & unlock phone
+    device.paidEmis = device.tenureMonths || 12;
+    device.isLocked = false;
+    device.status = "released";
+    device.pendingCommand = "RELEASE_DEVICE";
+    device.releasedAt = new Date().toISOString();
+
+    // Push live command via WebSocket
+    sendCommandToDevice(device.id, { 
+        type: 'RELEASE_DEVICE', 
+        message: 'Mubarak ho! EMI Complete ho gayi hai. Phone release & Factory Reset allowed.' 
+    });
+
+    db.logs.unshift({
+        id: Date.now(),
+        timestamp: new Date().toISOString(),
+        deviceId: device.id,
+        retailerId: device.retailerId || "USR-SUPERADMIN",
+        action: "DEVICE_RELEASED",
+        details: `Device ${device.customerName} (${device.id}) RELEASED by ${req.user ? req.user.name : 'Admin'}. All EMIs paid. Factory Reset restored.`,
+        status: "SUCCESS"
+    });
+
+    saveDb(db);
+    res.json({
+        success: true,
+        message: `🎉 Device [${device.customerName || device.id}] RELEASED successfully! Factory Reset and full access restored.`,
+        device: device
+    });
 });
 
 // Update Device Live Location

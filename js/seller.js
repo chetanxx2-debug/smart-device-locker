@@ -947,6 +947,17 @@ class SellerPortal {
                 }
             });
         }
+
+        const btnRelease = document.getElementById('cmd-release');
+        if (btnRelease) {
+            btnRelease.addEventListener('click', () => {
+                const deviceId = getSelectedDeviceId();
+                if (!deviceId) return this.showToast('Pehle device select karein!', 'warning');
+                const dev = this.backendDevices.find(d => d.id === deviceId);
+                const customerName = dev ? dev.customerName : deviceId;
+                this.confirmReleaseDevice(deviceId, customerName);
+            });
+        }
     }
 
     setupForm() {
@@ -1316,6 +1327,10 @@ class SellerPortal {
                                 : `<button class="btn btn-sm btn-warning" title="Play Siren Alarm" onclick="sellerPortal.sendBackendCommand('${d.id}', 'SIREN_ON'); sellerPortal.showToast('Siren Triggered [${d.id}]!', 'warning');"><i class="fa-solid fa-volume-high"></i> Siren</button>`
                             }
 
+                            <button class="btn btn-sm btn-success" style="background:linear-gradient(135deg, #10b981, #059669); color:#fff; border:none; font-weight:700;" title="Release Device (EMI Complete) — Unlocks Factory Reset & restores full phone access" onclick="sellerPortal.confirmReleaseDevice('${d.id}', '${(d.customerName || '').replace(/'/g, "\\'")}')">
+                                <i class="fa-solid fa-handshake-simple"></i> Release (EMI Done)
+                            </button>
+
                             <button class="btn btn-sm btn-danger" style="background:#dc2626; color:#fff;" title="Delete Device from System" onclick="sellerPortal.confirmDeleteDevice('${d.id}', '${(d.customerName || '').replace(/'/g, "\\'")}')">
                                 <i class="fa-solid fa-trash-can"></i> Delete
                             </button>
@@ -1324,6 +1339,31 @@ class SellerPortal {
                 </tr>
             `;
         }).join('');
+    }
+
+    confirmReleaseDevice(deviceId, customerName) {
+        const displayName = customerName ? `${customerName} (${deviceId})` : deviceId;
+        if (!confirm(`🎉 RELEASE DEVICE (EMI COMPLETED)?\n\nCustomer: ${displayName}\n\nYeh command:\n1. Saari remaining EMIs mark as PAID karegi\n2. Device ko permanently UNLOCK karegi\n3. FACTORY RESET aur full phone access unlock karegi\n4. Customer phone bech ya reset kar sakta hai\n\nKya aap confirm karte hain?`)) {
+            return;
+        }
+
+        fetch(`/api/devices/${encodeURIComponent(deviceId)}/release`, {
+            method: 'POST',
+            headers: this.getAuthHeaders()
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                this.showToast(`🎉 Device [${displayName}] RELEASED! Factory Reset restored.`, 'success');
+                this.loadBackendDevicesAndRender();
+            } else {
+                this.showToast(res.message || 'Release failed.', 'danger');
+            }
+        })
+        .catch(err => {
+            console.error('Release device error:', err);
+            this.showToast('Network error while releasing device.', 'danger');
+        });
     }
 
     confirmDeleteDevice(deviceId, customerName) {

@@ -598,6 +598,13 @@
                     <span>ALLOW UNINSTALL</span>
                     <small>Give customer permission to remove app</small>
                 </button>
+
+                <!-- 9. RELEASE DEVICE (EMI COMPLETE) -->
+                <button id="btn-ctrl-release" class="master-btn" style="background: linear-gradient(135deg, #10b981 0%, #047857 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); border: 1px solid #10b981;" type="button">
+                    <i class="fa-solid fa-handshake-simple"></i>
+                    <span>RELEASE DEVICE (EMI COMPLETE)</span>
+                    <small>Unlock Factory Reset, complete EMI & free phone</small>
+                </button>
             </div>
 
         </div>
@@ -872,6 +879,26 @@
                         }
                     })
                     .catch(e => showToast('Network error while granting permission.', 'danger'));
+                }
+            });
+
+            document.getElementById('btn-ctrl-release').addEventListener('click', () => {
+                const targetName = currentDevice?.customerName ? `${currentDevice.customerName} (${currentDeviceId})` : currentDeviceId;
+                if (confirm(`🎉 RELEASE DEVICE (EMI COMPLETED)?\n\nCustomer: ${targetName}\n\nYeh command:\n1. Saari remaining EMIs mark as PAID karegi\n2. Device ko permanently UNLOCK karegi\n3. FACTORY RESET aur full phone access allow karegi\n4. Customer phone bech ya reset kar sakta hai\n\nKya aap confirm karte hain?`)) {
+                    fetch(`/api/devices/${encodeURIComponent(currentDeviceId)}/release`, {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + authToken }
+                    })
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res.success) {
+                            showToast(`🎉 Device [${targetName}] RELEASED successfully! Factory Reset restored.`, 'success');
+                            fetchDeviceData();
+                        } else {
+                            showToast(`Failed: ${res.message || 'Error'}`, 'danger');
+                        }
+                    })
+                    .catch(e => showToast('Network error while releasing device.', 'danger'));
                 }
             });
         });
