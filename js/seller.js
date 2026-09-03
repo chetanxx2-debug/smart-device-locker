@@ -915,13 +915,11 @@ class SellerPortal {
 
                 const loc = dev.location;
                 if (loc && loc.lat && loc.lng) {
-                    const timeStr = new Date(loc.updatedAt || dev.lastSeen).toLocaleString();
-                    const accStr = loc.accuracy ? ` (Accuracy: ±${Math.round(loc.accuracy)}m)` : '';
-                    if (confirm(`📍 DEVICE LIVE LOCATION FOUND!\n\nCustomer: ${dev.customerName}\nModel: ${dev.model}\nCoordinates: ${loc.lat.toFixed(6)}, ${loc.lng.toFixed(6)}${accStr}\nRecorded: ${timeStr}\n\n👉 Click 'OK' to view exact phone location on Google Maps!`)) {
-                        window.open(`https://www.google.com/maps?q=${loc.lat},${loc.lng}`, '_blank');
-                    }
+                    const accStr = loc.accuracy ? ` (±${Math.round(loc.accuracy)}m)` : '';
+                    window.open(`https://www.google.com/maps?q=${loc.lat},${loc.lng}`, '_blank');
+                    this.showToast(`📍 Opening Google Maps for ${dev.customerName || deviceId}! Coordinates: ${loc.lat.toFixed(5)}, ${loc.lng.toFixed(5)}${accStr}`, 'success');
                 } else {
-                    alert(`📍 Device GPS Location Tracker\n\nCustomer: ${dev.customerName}\nModel: ${dev.model}\nStatus: ${dev.isOnline ? '🟢 Online' : 'Standby'}\nBattery: ${dev.battery || 100}%\nLast Ping: ${dev.lastSeen ? new Date(dev.lastSeen).toLocaleTimeString() : 'N/A'}\n\nℹ️ GPS coordinates phone se sync ho rahe hain. Jaise hi phone location bhejega, yahan Google Maps ka exact link open ho jayega.`);
+                    this.showToast(`📍 GPS coordinates phone se sync ho rahe hain. Mobile par location service ON honi chahiye.`, 'info');
                 }
             });
         }
