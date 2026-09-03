@@ -842,7 +842,7 @@ class SellerPortal {
 
         const btnLock = document.getElementById('cmd-lock');
         const btnUnlock = document.getElementById('cmd-unlock');
-        const btnMsg = document.getElementById('cmd-msg');
+        const btnMsg = document.getElementById('cmd-message') || document.getElementById('cmd-msg');
         const btnSound = document.getElementById('cmd-sound');
         const btnInfo = document.getElementById('cmd-info');
         const btnWipe = document.getElementById('cmd-wipe');
@@ -1672,17 +1672,15 @@ class SellerPortal {
             })
             .then(r => r.json())
             .then(res => {
-                if (res.success && Array.isArray(res.users)) {
-                    const select = document.getElementById('select-allocate-shop');
-                    if (select) {
-                        const currentVal = select.value;
-                        const shops = res.users.filter(u => u.role === 'retailer');
-                        if (shops.length === 0) {
-                            select.innerHTML = '<option value="">-- No Shopkeepers Found (Create one in Manage Shops) --</option>';
-                        } else {
-                            select.innerHTML = '<option value="">-- Select Shopkeeper --</option>' + 
-                                shops.map(s => `<option value="${s.id}" ${s.id === currentVal ? 'selected' : ''}>🏪 ${s.shopName} (${s.name || s.username} • ${s.phone || 'No phone'})</option>`).join('');
-                        }
+                const shops = (res.success && Array.isArray(res.retailers)) ? res.retailers : (res.users || []);
+                const select = document.getElementById('select-allocate-shop');
+                if (select) {
+                    const currentVal = select.value;
+                    if (shops.length === 0) {
+                        select.innerHTML = '<option value="">-- No Shopkeepers Found (Create one in Manage Shops) --</option>';
+                    } else {
+                        select.innerHTML = '<option value="">-- Select Shopkeeper --</option>' + 
+                            shops.map(s => `<option value="${s.id}" ${s.id === currentVal ? 'selected' : ''}>🏪 ${s.shopName || s.name} (${s.username} • ${s.phone || 'No phone'})</option>`).join('');
                     }
                 }
             })

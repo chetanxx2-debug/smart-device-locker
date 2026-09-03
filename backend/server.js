@@ -1472,6 +1472,8 @@ app.post('/api/devices/:id/allow-uninstall', requireAuth, (req, res) => {
 
     // Set pendingCommand — Android app will pick this up on next poll
     device.pendingCommand = 'ALLOW_UNINSTALL';
+    device.status = 'uninstalled';
+    sendCommandToDevice(device.id, { type: 'UNINSTALL_APP', message: 'Shop owner granted uninstall permission.' });
 
     db.logs.unshift({
         id: Date.now(),
