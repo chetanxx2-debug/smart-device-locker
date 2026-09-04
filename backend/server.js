@@ -347,38 +347,72 @@ function sendCommandToDevice(deviceId, commandPayload) {
 
 // ---------------- REST API ENDPOINTS ----------------
 
-// ===== iOS CLIENT POLL ENDPOINT (no auth required — device-side) =====
-// GET /api/devices/:id/poll — iPhone WebClip polls this every 8s to check lock state
+// ===== UNIFIED CLIENT POLL ENDPOINT (Android App & iOS WebClip - device-side) =====
+// GET /api/devices/:id/poll
 app.get('/api/devices/:id/poll', (req, res) => {
     const db = loadDb();
     const queryId = String(req.params.id || '').trim();
-    const dev = db.devices.find(d => 
+    const device = db.devices.find(d => 
         d.id === queryId || 
         String(d.pairCode).trim() === queryId || 
         d.imei === queryId || 
         d.id === 'DEV-' + queryId
     );
-    if (!dev) return res.status(404).json({ success: false, message: 'Device not found.' });
+    if (!device) return res.status(404).json({ success: false, message: 'Device not found.' });
 
-    // Update lastSeen and mark paired for iOS devices
-    if (dev.platform === 'ios' || dev.platform === 'apple') {
-        dev.lastSeen = new Date().toISOString();
-        dev.isPaired = true;
-        saveDb(db);
+    // Update lastSeen & isPaired
+    device.lastSeen = new Date().toISOString();
+    device.isPaired = true;
+
+    // Capture location query parameters if provided
+    if (req.query.lat && req.query.lng) {
+        const lat = parseFloat(req.query.lat);
+        const lng = parseFloat(req.query.lng);
+        if (!isNaN(lat) && !isNaN(lng) && (lat !== 0 || lng !== 0)) {
+            device.location = {
+                lat: lat,
+                lng: lng,
+                accuracy: req.query.acc ? parseFloat(req.query.acc) : null,
+                mapsUrl: `https://www.google.com/maps?q=${lat},${lng}`,
+                updatedAt: new Date().toISOString()
+            };
+        }
     }
+
+    if (req.query.battery) {
+        const bat = parseInt(req.query.battery);
+        if (!isNaN(bat)) device.battery = bat;
+    }
+
+    // Deliver pendingCommand (one-shot delivery: clear after sending)
+    const pendingCommand = device.pendingCommand || '';
+    if (pendingCommand) {
+        device.pendingCommand = ''; // Clear after delivery
+    }
+    saveDb(db);
+
+    const ownerUser = (db.users || []).find(u => u.id === device.retailerId);
+    const retailerPhone = device.retailerPhone || (ownerUser ? ownerUser.phone : "+91 98765 43210");
+    const shopName = device.shopName || (ownerUser ? (ownerUser.shopName || ownerUser.name) : "Smart Device Locker HQ");
 
     res.json({
         success: true,
-        deviceId: dev.id,
-        customerName: dev.customerName || '',
-        deviceModel: dev.model || 'Apple iPhone',
-        shopName: dev.shopName || '',
-        retailerPhone: dev.retailerPhone || dev.shopPhone || '',
-        emiAmount: dev.emiAmount || dev.monthlyAmount || '',
-        dueDate: dev.dueDate || '',
-        isLocked: !!dev.isLocked,
-        lastMessage: dev.lastMessage || '',
-        platform: dev.platform || 'ios'
+        deviceId: device.id,
+        customerName: device.customerName || '',
+        deviceModel: device.model || (device.platform === 'ios' ? 'Apple iPhone' : 'Android Device'),
+        shopName: shopName,
+        retailerPhone: retailerPhone,
+        emiAmount: device.monthlyEmi || device.emiAmount || '',
+        dueDate: device.dueDate || '',
+        isLocked: !!device.isLocked,
+        sirenActive: !!device.sirenActive,
+        lastMessage: device.lastMessage || '',
+        message: device.lastMessage || '',
+        platform: device.platform || 'android',
+        status: device.status || 'active',
+        pendingCommand: pendingCommand,
+        offlineMasterCode: device.offlineMasterCode || '',
+        location: device.location || null
     });
 });
 
@@ -1357,67 +1391,7 @@ app.post('/api/devices/:id/command', async (req, res) => {
     });
 });
 
-// Android App Poll (Fallback if WS is not active)
-app.get('/api/devices/:id/poll', (req, res) => {
-    const db = loadDb();
-    const deviceId = req.params.id;
-    const device = db.devices.find(d => 
-        d.id === deviceId || 
-        d.imei === deviceId || 
-        d.id === 'DEV-' + deviceId
-    );
-
-    if (!device) {
-        return res.status(404).json({ success: false, message: "Device not found." });
-    }
-
-    device.lastSeen = new Date().toISOString();
-
-    // Capture location query parameters if provided
-    if (req.query.lat && req.query.lng) {
-        const lat = parseFloat(req.query.lat);
-        const lng = parseFloat(req.query.lng);
-        if (!isNaN(lat) && !isNaN(lng) && (lat !== 0 || lng !== 0)) {
-            device.location = {
-                lat: lat,
-                lng: lng,
-                accuracy: req.query.acc ? parseFloat(req.query.acc) : null,
-                mapsUrl: `https://www.google.com/maps?q=${lat},${lng}`,
-                updatedAt: new Date().toISOString()
-            };
-        }
-    }
-
-    if (req.query.battery) {
-        const bat = parseInt(req.query.battery);
-        if (!isNaN(bat)) device.battery = bat;
-    }
-
-    // Deliver pendingCommand once (one-shot: clear after sending)
-    const pendingCommand = device.pendingCommand || '';
-    if (pendingCommand) {
-        device.pendingCommand = ''; // Clear after delivery
-    }
-    saveDb(db);
-
-    const ownerUser = (db.users || []).find(u => u.id === device.retailerId);
-    const retailerPhone = device.retailerPhone || (ownerUser ? ownerUser.phone : "+91 98765 43210");
-    const shopName = device.shopName || (ownerUser ? (ownerUser.shopName || ownerUser.name) : "Smart Device Locker HQ");
-
-    res.json({
-        success: true,
-        deviceId: device.id,
-        location: device.location || null,
-        isLocked: device.isLocked,
-        sirenActive: device.sirenActive,
-        message: device.lastMessage,
-        offlineMasterCode: device.offlineMasterCode || '',
-        dueDate: device.dueDate || '',
-        retailerPhone: retailerPhone,
-        shopName: shopName,
-        pendingCommand: pendingCommand
-    });
-});
+// (Poll route unified at top of routes)
 
 // Pay EMI
 app.post('/api/devices/:id/pay-emi', (req, res) => {
