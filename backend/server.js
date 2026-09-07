@@ -13,6 +13,15 @@ try {
     dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
 } catch (e) {}
 
+// ── ZERO-CRASH PROCESS GUARDS (Catches all unexpected errors so Node.js NEVER exits) ──
+process.on('uncaughtException', (err) => {
+    console.error('[CRITICAL CRASH GUARD] Uncaught Exception:', err && err.stack ? err.stack : err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[CRITICAL CRASH GUARD] Unhandled Rejection:', reason);
+});
+
 const app = express();
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
@@ -1829,6 +1838,33 @@ app.all('/ios/mdm/server', (req, res) => {
     </dict>
 </dict>
 </plist>`);
+});
+
+// ── 24x7 SYSTEM HEALTH & UPTIME ENDPOINT ──
+app.get('/api/health', (req, res) => {
+    const mem = process.memoryUsage();
+    const db = loadDb();
+    res.json({
+        status: 'UP',
+        uptimeSeconds: Math.floor(process.uptime()),
+        timestamp: new Date().toISOString(),
+        memoryMb: {
+            rss: Math.round(mem.rss / 1024 / 1024),
+            heapUsed: Math.round(mem.heapUsed / 1024 / 1024)
+        },
+        devicesCount: (db.devices || []).length,
+        mongoConnected: !!mongoCollection
+    });
+});
+
+// ── GLOBAL EXPRESS ERROR HANDLER (Catches route errors gracefully without 500 crashes) ──
+app.use((err, req, res, next) => {
+    console.error('[ROUTE ERROR]', err);
+    res.status(500).json({
+        success: false,
+        message: 'Internal server error handled safely.',
+        error: process.env.NODE_ENV === 'production' ? 'Internal Error' : err.message
+    });
 });
 
 // Start Server — MongoDB first, then HTTP
