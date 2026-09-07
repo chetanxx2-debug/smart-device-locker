@@ -389,6 +389,17 @@ class SellerPortal {
                         <strong>${r.pairedCount || 0}</strong> Active <br>
                         <small style="color:var(--text-muted);">(${r.deviceCount || 0} Total)</small>
                     </td>
+                    <td>
+                        <span class="badge" style="background:rgba(56, 189, 248, 0.15); color:#38bdf8; font-weight:700; border:1px solid rgba(56, 189, 248, 0.4); padding:3px 7px;">
+                            📅 ${r.keysUsedThisMonth || 0} This Month
+                        </span>
+                        <div style="font-size:11px; color:var(--text-muted); margin-top:3px;">
+                            Used: <strong>${r.totalKeysUsed || 0}</strong> / Total: <strong>${r.totalKeys || 0}</strong>
+                        </div>
+                        <div style="font-size:11px; color:#10b981; font-weight:700; margin-top:1px;">
+                            Balance: ${r.keysRemaining || 0} Available
+                        </div>
+                    </td>
                     <td>${statusBadge}</td>
                     <td>
                         <div style="display:flex; gap:6px;">
@@ -1848,12 +1859,14 @@ class SellerPortal {
         // Update summary metrics
         const statUnused = document.getElementById('stat-unused-keys');
         const statUsed = document.getElementById('stat-used-keys');
+        const statUsedThisMonth = document.getElementById('stat-used-this-month');
         const statTotal = document.getElementById('stat-total-spent');
         const navCount = document.getElementById('nav-unused-keys-count');
         const availBadge = document.getElementById('available-keys-badge');
 
         if (statUnused) statUnused.textContent = summary.unusedCount || 0;
         if (statUsed) statUsed.textContent = summary.usedCount || 0;
+        if (statUsedThisMonth) statUsedThisMonth.textContent = summary.usedThisMonth || 0;
         if (statTotal) statTotal.textContent = `₹${(summary.totalRevenue || 0).toLocaleString('en-IN')}`;
 
         if (navCount) {
@@ -1866,11 +1879,11 @@ class SellerPortal {
         }
         if (availBadge) availBadge.textContent = `${summary.unusedCount} Available`;
 
-        // Render Unused Keys Grid
-        const unusedKeys = keys.filter(k => k.status === 'UNUSED');
+        // Render Unused / Available Keys Grid (including ASSIGNED keys pending pair)
+        const availableKeys = keys.filter(k => k.status === 'UNUSED' || k.status === 'ASSIGNED');
         const unusedGrid = document.getElementById('unused-keys-grid');
         if (unusedGrid) {
-            if (!unusedKeys.length) {
+            if (!availableKeys.length) {
                 unusedGrid.innerHTML = `
                     <div style="grid-column: 1 / -1; text-align:center; padding:30px; color:var(--text-muted);">
                         <i class="fa-solid fa-key" style="font-size:32px; color:#475569; margin-bottom:10px; display:block;"></i>
@@ -1879,25 +1892,37 @@ class SellerPortal {
                     </div>
                 `;
             } else {
-                unusedGrid.innerHTML = unusedKeys.map(k => `
-                    <div style="background:#0f172a; border:1px solid rgba(16,185,129,0.4); border-radius:12px; padding:16px; position:relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                unusedGrid.innerHTML = availableKeys.map(k => {
+                    const isAssigned = k.status === 'ASSIGNED';
+                    const badgeHtml = isAssigned
+                        ? `<span class="badge" style="background:#f59e0b; color:#0f172a; font-size:10px; padding:3px 8px; font-weight:700;">⏳ PENDING PAIRING</span>`
+                        : `<span class="badge badge-success" style="font-size:10px; padding:3px 8px;">🟢 UNUSED</span>`;
+
+                    const subInfo = isAssigned
+                        ? `<div style="font-size:11px; color:#fbbf24; text-align:center; margin-bottom:8px;">Waiting for phone to pair (${k.assignedToCustomerName || 'Customer'})</div>`
+                        : `<div style="font-size:11px; color:#94a3b8; text-align:center; margin-bottom:8px;">Ready to activate</div>`;
+
+                    return `
+                    <div style="background:#0f172a; border:1px solid ${isAssigned ? 'rgba(245,158,11,0.5)' : 'rgba(16,185,129,0.4)'}; border-radius:12px; padding:16px; position:relative; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                            <span class="badge badge-success" style="font-size:10px; padding:3px 8px;">🟢 UNUSED</span>
+                            ${badgeHtml}
                             <small style="color:var(--text-muted); font-size:11px;">₹100</small>
                         </div>
-                        <div style="font-family:var(--font-mono); font-size:22px; font-weight:800; color:#38bdf8; letter-spacing:3px; text-align:center; padding:8px 0; background:rgba(15,23,42,0.8); border-radius:8px; border:1px dashed #334155; margin-bottom:12px;">
+                        <div style="font-family:var(--font-mono); font-size:22px; font-weight:800; color:#38bdf8; letter-spacing:3px; text-align:center; padding:8px 0; background:rgba(15,23,42,0.8); border-radius:8px; border:1px dashed #334155; margin-bottom:6px;">
                             ${k.key}
                         </div>
+                        ${subInfo}
                         <div style="display:flex; gap:6px;">
                             <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="sellerPortal.copyKey('${k.key}')" title="Copy Key to Clipboard">
                                 <i class="fa-solid fa-copy"></i> Copy
                             </button>
-                            <button class="btn btn-primary btn-sm" style="flex:1.4; background:#10b981; border:none; font-weight:700;" onclick="sellerPortal.useKeyForDevice('${k.key}')">
-                                <i class="fa-solid fa-plus"></i> Use Key
+                            <button class="btn btn-primary btn-sm" style="flex:1.4; background:${isAssigned ? '#f59e0b' : '#10b981'}; border:none; font-weight:700;" onclick="sellerPortal.useKeyForDevice('${k.key}')">
+                                <i class="fa-solid fa-plus"></i> ${isAssigned ? 'View/Pair' : 'Use Key'}
                             </button>
                         </div>
                     </div>
-                `).join('');
+                `;
+                }).join('');
             }
         }
 

@@ -564,9 +564,17 @@
                     <div class="metric-card warning">
                         <div class="metric-icon"><i class="fa-solid fa-lock-open"></i></div>
                         <div class="metric-info">
-                            <span class="metric-label">Used / Activated Keys</span>
+                            <span class="metric-label">Total Keys Used</span>
                             <h3 id="stat-used-keys">0</h3>
-                            <span class="metric-sub">Registered devices</span>
+                            <span class="metric-sub">All time activations</span>
+                        </div>
+                    </div>
+                    <div class="metric-card" style="border-left: 4px solid #38bdf8; background: rgba(56, 189, 248, 0.05);">
+                        <div class="metric-icon" style="color: #38bdf8;"><i class="fa-solid fa-calendar-check"></i></div>
+                        <div class="metric-info">
+                            <span class="metric-label" style="color: #38bdf8; font-weight: 700;">Used This Month</span>
+                            <h3 id="stat-used-this-month" style="color: #38bdf8;">0</h3>
+                            <span class="metric-sub">Current month activations</span>
                         </div>
                     </div>
                     <div class="metric-card primary">
@@ -860,6 +868,7 @@
                                         <th>Login Username</th>
                                         <th>Password</th>
                                         <th>Devices</th>
+                                        <th>Keys (This Month / Balance)</th>
                                         <th>Status</th>
                                         <th>Actions</th>
                                     </tr>

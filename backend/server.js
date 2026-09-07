@@ -676,8 +676,24 @@ app.get('/api/admin/retailers', (req, res) => {
     }
 
     const db = loadDb();
+    if (!db.keys) db.keys = [];
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
     const retailers = (db.users || []).filter(u => u.role === 'retailer').map(r => {
-        const shopDevices = db.devices.filter(d => d.retailerId === r.id);
+        const shopDevices = (db.devices || []).filter(d => d.retailerId === r.id);
+        const shopKeys = (db.keys || []).filter(k => k.retailerId === r.id);
+
+        const keysUsedThisMonth = shopKeys.filter(k => {
+            if (k.status !== 'USED' || !k.usedAt) return false;
+            const d = new Date(k.usedAt);
+            return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+        }).length;
+
+        const totalKeysUsed = shopKeys.filter(k => k.status === 'USED').length;
+        const keysRemaining = shopKeys.filter(k => k.status === 'UNUSED' || k.status === 'ASSIGNED').length;
+
         return {
             id: r.id,
             username: r.username,
@@ -689,7 +705,11 @@ app.get('/api/admin/retailers', (req, res) => {
             createdAt: r.createdAt,
             deviceCount: shopDevices.length,
             pairedCount: shopDevices.filter(d => d.isPaired).length,
-            lockedCount: shopDevices.filter(d => d.isLocked).length
+            lockedCount: shopDevices.filter(d => d.isLocked).length,
+            totalKeys: shopKeys.length,
+            keysUsedThisMonth: keysUsedThisMonth,
+            totalKeysUsed: totalKeysUsed,
+            keysRemaining: keysRemaining
         };
     });
 
@@ -966,8 +986,17 @@ app.get('/api/keys/my-keys', requireAuth, (req, res) => {
         keys = keys.filter(k => k.retailerId === req.user.id);
     }
 
-    const unusedCount = keys.filter(k => k.status === 'UNUSED').length;
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const unusedCount = keys.filter(k => k.status === 'UNUSED' || k.status === 'ASSIGNED').length;
     const usedCount = keys.filter(k => k.status === 'USED').length;
+    const usedThisMonth = keys.filter(k => {
+        if (k.status !== 'USED' || !k.usedAt) return false;
+        const d = new Date(k.usedAt);
+        return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    }).length;
     const totalRevenue = keys.length * 100;
 
     res.json({
@@ -976,6 +1005,7 @@ app.get('/api/keys/my-keys', requireAuth, (req, res) => {
             totalKeys: keys.length,
             unusedCount: unusedCount,
             usedCount: usedCount,
+            usedThisMonth: usedThisMonth,
             totalRevenue: totalRevenue
         },
         keys: keys
@@ -1156,11 +1186,21 @@ app.post('/api/devices/register', (req, res) => {
             });
         }
 
-        if (usedKeyRecord.status !== 'UNUSED') {
+        if (usedKeyRecord.status === 'USED') {
             return res.status(400).json({
                 success: false,
                 message: `This Activation Key (${cleanKey}) was already used for device [${usedKeyRecord.usedForDeviceId || 'Previous'}] on ${new Date(usedKeyRecord.usedAt).toLocaleDateString()}. Each key can only be used once.`
             });
+        }
+
+        if (usedKeyRecord.status === 'ASSIGNED') {
+            const assignedDevice = (db.devices || []).find(d => d.id === usedKeyRecord.assignedToDeviceId && !d.isPaired);
+            if (assignedDevice) {
+                return res.status(400).json({
+                    success: false,
+                    message: `This key (${cleanKey}) is currently waiting for device [${assignedDevice.id} - ${assignedDevice.customerName}] to pair. Delete that un-paired registration or pair that phone before reusing this key.`
+                });
+            }
         }
     }
 
@@ -1169,12 +1209,12 @@ app.post('/api/devices/register', (req, res) => {
     const resolvedPlatform = platform || ((model && model.toLowerCase().includes('iphone')) ? 'ios' : 'android');
     const primaryImei = imei || imei1 || `86${Math.floor(1000000000000 + Math.random() * 9000000000000)}`;
 
-    // Mark key as USED if shopkeeper
+    // Reserve key as ASSIGNED (only consumed when phone is actually paired!)
     if (usedKeyRecord) {
-        usedKeyRecord.status = 'USED';
-        usedKeyRecord.usedAt = new Date().toISOString();
-        usedKeyRecord.usedForDeviceId = deviceId;
-        usedKeyRecord.usedForCustomerName = customerName || "Customer";
+        usedKeyRecord.status = 'ASSIGNED';
+        usedKeyRecord.assignedToDeviceId = deviceId;
+        usedKeyRecord.assignedToCustomerName = customerName || "Customer";
+        usedKeyRecord.assignedAt = new Date().toISOString();
     }
 
     const newDevice = {
@@ -1271,6 +1311,21 @@ app.post('/api/devices/pair', (req, res) => {
     if (imei) device.imei = imei;
     if (deviceModel) device.model = deviceModel;
     device.lastSeen = new Date().toISOString();
+
+    // ── ACTIVATE / CONSUME KEY NOW THAT DEVICE HAS ACTUALLY PAIRED ──
+    if (device.activationKey && device.activationKey !== 'SUPERADMIN_FREE') {
+        const keyObj = (db.keys || []).find(k => k.key.toUpperCase() === String(device.activationKey).toUpperCase().trim());
+        if (keyObj && keyObj.status !== 'USED') {
+            keyObj.status = 'USED';
+            keyObj.usedAt = new Date().toISOString();
+            keyObj.usedForDeviceId = device.id;
+            keyObj.usedForCustomerName = device.customerName || "Customer";
+            keyObj.usedForImei = device.imei || imei || "";
+            delete keyObj.assignedToDeviceId;
+            delete keyObj.assignedToCustomerName;
+            delete keyObj.assignedAt;
+        }
+    }
 
     // Attach retailer details
     const ownerUser = (db.users || []).find(u => u.id === device.retailerId);
@@ -1570,6 +1625,17 @@ app.delete('/api/devices/:id', (req, res) => {
     }
 
     const removedDevice = db.devices.splice(deviceIndex, 1)[0];
+
+    // If device was never paired, restore its key back to UNUSED so retailer doesn't lose it!
+    if (!removedDevice.isPaired && removedDevice.activationKey) {
+        const keyObj = (db.keys || []).find(k => k.key.toUpperCase() === String(removedDevice.activationKey).toUpperCase().trim());
+        if (keyObj && keyObj.status === 'ASSIGNED') {
+            keyObj.status = 'UNUSED';
+            delete keyObj.assignedToDeviceId;
+            delete keyObj.assignedToCustomerName;
+            delete keyObj.assignedAt;
+        }
+    }
 
     db.logs.unshift({
         id: Date.now(),
